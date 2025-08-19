@@ -10,3 +10,6 @@ Esta aplicación [tiene su espejo en gemini](https://gemini.google.com/share/cf9
 
 * [Finanzas personales](https://cy7t0ywmwzmg.space.minimax.io/). Probando enlaces a backend con aplicaciones administrativas. (SantiagoDeLaPunta)
 
+* Gas 
+  * [Alfa version](https://ix0wa4ox1wtj.space.minimax.io)
+  * [Beta version](https://rkfhblk2bzgb.space.minimax.io)
