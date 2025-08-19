@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WindyRec - Grabador de Interacciones Meteorológicas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Notificaciones Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Contenedor Principal -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">WindyRec</h1>
+            <p class="subtitle">Graba tus interacciones con mapas meteorológicos de Windy.com</p>
+        </header>
+
+        <!-- Panel de Control -->
+        <div class="control-panel" id="controlPanel">
+            <div class="control-section">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="status-text" id="statusText">Listo para grabar</span>
+                </div>
+                
+                <div class="timer-display" id="timerDisplay">
+                    <span class="timer-text">00:00</span>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="quality-selector">
+                    <label for="qualitySelect" class="control-label">Calidad de grabación:</label>
+                    <select id="qualitySelect" class="quality-select">
+                        <option value="high">Alta (2.5 Mbps)</option>
+                        <option value="medium">Media (1.5 Mbps)</option>
+                        <option value="low">Baja (800 Kbps)</option>
+                    </select>
+                </div>
+
+                <div class="audio-toggle">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="audioToggle" checked>
+                        <span class="checkmark"></span>
+                        Incluir audio del sistema
+                    </label>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="button-group">
+                    <button id="recordBtn" class="btn btn-primary">
+                        <svg class="btn-icon" id="recordIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span id="recordText">Iniciar Grabación</span>
+                    </button>
+
+                    <button id="stopBtn" class="btn btn-danger" disabled>
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                        </svg>
+                        Detener
+                    </button>
+
+                    <button id="downloadBtn" class="btn btn-success" disabled>
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar Video
+                    </button>
+                </div>
+            </div>
+
+            <!-- Información de ayuda -->
+            <div class="help-section">
+                <div class="help-item">
+                    <h4>Instrucciones:</h4>
+                    <ol>
+                        <li>Configura la calidad de grabación deseada</li>
+                        <li>Haz clic en "Iniciar Grabación" y selecciona la pantalla/ventana</li>
+                        <li>Interactúa con el mapa de Windy como desees</li>
+                        <li>Presiona "Detener" cuando hayas terminado</li>
+                        <li>Descarga tu video grabado</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Windy -->
+        <div class="map-container">
+            <div class="map-header">
+                <h3>Mapa Interactivo de Windy.com</h3>
+                <p>Interactúa con el mapa mientras grabas para crear tu video meteorológico</p>
+            </div>
+            
+            <!-- Loading state -->
+            <div class="map-loading" id="mapLoading">
+                <div class="loading-spinner"></div>
+                <p>Cargando mapa meteorológico...</p>
+            </div>
+
+            <!-- Iframe de Windy -->
+            <iframe 
+                id="windyMap"
+                src="https://embed.windy.com/embed2.html?lat=40.4&lon=-3.7&detailLat=40.4&detailLon=-3.7&width=100%&height=100%&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+                frameborder="0"
+                style="display: none;"
+                onload="handleMapLoad()">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Modal de procesamiento -->
+    <div class="modal" id="processingModal">
+        <div class="modal-content">
+            <div class="processing-animation">
+                <div class="processing-spinner"></div>
+            </div>
+            <h3>Procesando video...</h3>
+            <p>Por favor espera mientras generamos tu video grabado.</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/state.js"></script>
+    <script src="js/recorder.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

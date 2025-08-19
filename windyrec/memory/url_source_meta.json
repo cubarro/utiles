@@ -1,0 +1,158 @@
+{
+  "_source_id": 21,
+  "sources": {
+    "Análisis de Técnicas Modernas de Screen Recording en Frontend": {
+      "https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture": {
+        "id": 1,
+        "publisher": "Mozilla Developer Network",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture",
+        "title": "Using the Screen Capture API",
+        "info": "Documentación oficial sobre Screen Capture API, getDisplayMedia(), configuraciones, limitaciones de seguridad y ejemplos de implementación completos"
+      },
+      "https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder": {
+        "id": 2,
+        "publisher": "Mozilla Developer Network",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder",
+        "title": "MediaRecorder - Web APIs",
+        "info": "Especificaciones completas de MediaRecorder API, propiedades, métodos, eventos, formatos soportados y compatibilidad con navegadores"
+      },
+      "https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream": {
+        "id": 3,
+        "publisher": "Mozilla Developer Network",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream",
+        "title": "HTMLCanvasElement: captureStream() method",
+        "info": "Documentación del método captureStream() para grabación de canvas, parámetros de frameRate, excepciones y limitaciones de seguridad"
+      },
+      "https://jameshfisher.com/2020/03/13/how-to-record-a-canvas-to-video/": {
+        "id": 4,
+        "publisher": "Jim Fisher",
+        "url": "https://jameshfisher.com/2020/03/13/how-to-record-a-canvas-to-video/",
+        "title": "How to record a canvas to video",
+        "info": "Tutorial práctico sobre grabación de canvas a video usando captureStream() y MediaRecorder con ejemplos de código funcionales"
+      },
+      "https://dev.to/sebastianstamm/screen-recording-in-10-lines-of-vanilla-js-3bo8": {
+        "id": 5,
+        "publisher": "DEV Community",
+        "url": "https://dev.to/sebastianstamm/screen-recording-in-10-lines-of-vanilla-js-3bo8",
+        "title": "Screen Recording in 10 lines of Vanilla JS",
+        "info": "Implementación minimalista de screen recording usando getDisplayMedia() y MediaRecorder con código práctico y explicaciones paso a paso"
+      }
+    },
+    "Generación de Videos en Frontend con JavaScript": {
+      "https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API": {
+        "id": 6,
+        "publisher": "Mozilla Developer Network (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API",
+        "title": "WebCodecs API - MDN Web Docs",
+        "info": "Documentación oficial de WebCodecs API: características, interfaces, funcionalidades de bajo nivel para procesamiento de video y audio, modelo asíncrono, compatibilidad con Web Workers"
+      },
+      "https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder": {
+        "id": 7,
+        "publisher": "Mozilla Developer Network (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder",
+        "title": "MediaRecorder - Web APIs - MDN Web Docs",
+        "info": "Documentación completa de MediaRecorder API: grabación de medios, métodos de control, eventos, compatibilidad de navegadores, ejemplos de implementación"
+      },
+      "https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Manipulating_video_using_canvas": {
+        "id": 8,
+        "publisher": "Mozilla Developer Network (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Manipulating_video_using_canvas",
+        "title": "Manipulating video using canvas - Web APIs | MDN",
+        "info": "Tutorial detallado sobre manipulación de video con Canvas: técnicas de chroma-keying, composición de video, procesamiento de frames en tiempo real"
+      },
+      "https://github.com/spite/ccapture.js/": {
+        "id": 9,
+        "publisher": "GitHub - spite",
+        "url": "https://github.com/spite/ccapture.js/",
+        "title": "CCapture.js - Canvas capture library",
+        "info": "Biblioteca para captura de animaciones Canvas: CCapture.js permite grabar animaciones a framerate fijo, soporta múltiples formatos de exportación (WebM, GIF, PNG, JPG)"
+      },
+      "https://ffmpegwasm.netlify.app/": {
+        "id": 10,
+        "publisher": "FFmpeg.wasm Project",
+        "url": "https://ffmpegwasm.netlify.app/",
+        "title": "ffmpeg.wasm | ffmpeg.wasm",
+        "info": "Puerto de FFmpeg a WebAssembly/JavaScript: permite procesamiento de video y audio completo en navegadores, con soporte para múltiples códecs y operaciones de edición"
+      },
+      "https://developer.chrome.com/docs/web-platform/best-practices/webcodecs": {
+        "id": 11,
+        "publisher": "Google Chrome Developers",
+        "url": "https://developer.chrome.com/docs/web-platform/best-practices/webcodecs",
+        "title": "Video processing with WebCodecs | Web Platform",
+        "info": "Guía de mejores prácticas para WebCodecs: implementación profesional, uso de web workers, manejo de errores, integración con otras APIs"
+      },
+      "https://abhikhatri.com/blog/browser-video-editor-ffmpeg-wasm": {
+        "id": 12,
+        "publisher": "Abhik Hatri Blog",
+        "url": "https://abhikhatri.com/blog/browser-video-editor-ffmpeg-wasm",
+        "title": "Building a Browser-Based Video Editor with FFmpeg WASM",
+        "info": "Ejemplo práctico de construcción de editor de video en navegador: implementación con FFmpeg WASM, arquitectura, limitaciones y soluciones"
+      },
+      "https://dev.to/rendley/rendering-videos-in-the-browser-using-webcodecs-api-328n": {
+        "id": 13,
+        "publisher": "DEV Community - Rendley",
+        "url": "https://dev.to/rendley/rendering-videos-in-the-browser-using-webcodecs-api-328n",
+        "title": "Rendering Videos in the Browser Using WebCodecs API",
+        "info": "Artículo sobre renderizado de videos en navegador usando WebCodecs API: técnicas de rendering, casos de uso, ejemplos de implementación"
+      },
+      "https://transloadit.com/devtips/real-time-video-filters-in-browsers-with-ffmpeg-and-webcodecs/": {
+        "id": 14,
+        "publisher": "Transloadit",
+        "url": "https://transloadit.com/devtips/real-time-video-filters-in-browsers-with-ffmpeg-and-webcodecs/",
+        "title": "Real-time video filters in browsers with FFmpeg and WebCodecs",
+        "info": "Implementación de filtros de video en tiempo real: combinación de FFmpeg y WebCodecs para procesamiento avanzado de video"
+      },
+      "https://recordrtc.org/": {
+        "id": 15,
+        "publisher": "RecordRTC.org",
+        "url": "https://recordrtc.org/",
+        "title": "RecordRTC: Home",
+        "info": "Biblioteca para grabación de medios: RecordRTC proporciona funcionalidades extendidas para grabación de audio, video y pantalla"
+      }
+    },
+    "Investigación API de Windy.com para Desarrolladores": {
+      "https://api.windy.com/": {
+        "id": 16,
+        "publisher": "Windy.com",
+        "url": "https://api.windy.com/",
+        "title": "Windy API - Página Principal",
+        "info": "Información general sobre las APIs disponibles: Point Forecast API (20+ parámetros meteorológicos), Map Forecast API (personalización de mapas), Webcams API (repositorio global), y meteoblue API (100+ variables meteorológicas). Documenta características principales y capacidades de integración."
+      },
+      "https://api.windy.com/point-forecast/docs": {
+        "id": 17,
+        "publisher": "Windy.com",
+        "url": "https://api.windy.com/point-forecast/docs",
+        "title": "Documentación Point Forecast API",
+        "info": "Documentación técnica completa de la Point Forecast API: endpoint HTTPS, autenticación con API Key, parámetros de solicitud (lat, lon, model, parameters, levels), modelos disponibles (GFS, AROME, IconEU, etc.), 22 parámetros meteorológicos detallados, estructura de respuesta JSON, códigos de estado HTTP."
+      },
+      "https://api.windy.com/map-forecast/docs": {
+        "id": 18,
+        "publisher": "Windy.com",
+        "url": "https://api.windy.com/map-forecast/docs",
+        "title": "Documentación Map Forecast API",
+        "info": "Documentación completa de Map Forecast API basada en Leaflet 1.4.x: objeto windyAPI con componentes (store, map, picker, utils, broadcast, overlays, colors), métodos de control programático, eventos, personalización de capas, métricas, colores, y funcionalidades avanzadas de visualización."
+      },
+      "https://account.windy.com/agreements/windy-api-map-and-point-forecast-terms-of-use": {
+        "id": 19,
+        "publisher": "Windy.com",
+        "url": "https://account.windy.com/agreements/windy-api-map-and-point-forecast-terms-of-use",
+        "title": "Términos de Uso de APIs Map & Point Forecast",
+        "info": "Términos legales y técnicos: versión Trial (gratuita, 500 sesiones/día, solo desarrollo) vs versión Professional (pago, 10,000 sesiones/día, uso comercial), autenticación con API Key, restricciones geográficas para modelos ECMWF, proceso de suscripción anual, limitaciones y responsabilidades."
+      },
+      "https://community.windy.com/topic/10/how-to-embed-windy-to-your-website": {
+        "id": 20,
+        "publisher": "Windy Community",
+        "url": "https://community.windy.com/topic/10/how-to-embed-windy-to-your-website",
+        "title": "Cómo Embebir Windy en tu Sitio Web",
+        "info": "Tutorial paso a paso para embebir mapas de Windy: acceso a función 'Embed widget', configuración de 51 capas disponibles, parámetros configurables (tamaño, zoom, unidades, marcadores, isolíneas), generación de código HTML, implementación de diseño responsivo con CSS personalizado."
+      },
+      "https://api.windy.com/webcams": {
+        "id": 21,
+        "publisher": "Windy.com",
+        "url": "https://api.windy.com/webcams",
+        "title": "Webcams API - Precios y Características",
+        "info": "Planes de Webcams API: plan Free (enlaces obligatorios a windy.com, tamaño limitado, URLs válidas 15 min, offset máximo 1000) vs plan Professional (sin anuncios, tamaño completo, URLs válidas 24h, offset máximo 10,000, listado completo de webcams)."
+      }
+    }
+  }
+}

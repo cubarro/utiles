@@ -1,0 +1,20 @@
+{
+  "todos": {
+    "Coordinator": {
+      "1": {
+        "id": "1",
+        "content": "Investigar la integración con Windy.com y métodos de captura de interacciones",
+        "details": "1. Analizar la API de Windy.com y sus opciones de integración. 2. Investigar métodos para capturar interacciones del usuario (screen recording, canvas capture, etc.) en el frontend. 3. Evaluar opciones de generación de video desde JavaScript.",
+        "status": "completed",
+        "priority": "high"
+      },
+      "2": {
+        "id": "2",
+        "content": "Desarrollar la WebApp con HTML, CSS y JavaScript",
+        "details": "1. Crear la estructura HTML base con diseño moderno y sencillo. 2. Implementar estilos CSS responsivos y modernos. 3. Desarrollar la funcionalidad JavaScript para integración con Windy.com. 4. Implementar la captura de interacciones del usuario. 5. Integrar la generación de videos basada en las interacciones capturadas.",
+        "status": "completed",
+        "priority": "high"
+      }
+    }
+  }
+}
