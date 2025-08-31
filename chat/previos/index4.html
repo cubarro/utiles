@@ -284,7 +284,6 @@
         .invitation-title {
             font-weight: 500;
             font-size: 18px;
-            color: #8ab4f8;
         }
 
         .close-invitation {
@@ -354,7 +353,6 @@
         .caller-name {
             font-size: 20px;
             margin: 10px 0;
-            color: #8ab4f8;
         }
 
         .call-buttons {
@@ -461,6 +459,7 @@
             border-radius: 4px;
             font-size: 12px;
             background-color: #34a853;
+            display: none;
         }
 
         .connection-status.connecting {
@@ -469,16 +468,6 @@
 
         .connection-status.disconnected {
             background-color: #ea4335;
-        }
-
-        .webrtc-status {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            background-color: #3c4043;
         }
 
         @media (max-width: 768px) {
@@ -531,7 +520,6 @@
                 <video id="localVideo" autoplay muted></video>
                 <div class="participant-name">Tú</div>
                 <div class="connection-status" id="localConnectionStatus">Conectado</div>
-                <div class="webrtc-status">WebRTC Funcionando</div>
                 <div class="video-controls">
                     <button class="btn" id="toggleVideoSmall"><i class="fas fa-video"></i></button>
                     <button class="btn" id="toggleAudioSmall"><i class="fas fa-microphone"></i></button>
@@ -844,54 +832,24 @@
             
             // Simular conexión remota (en una aplicación real, esto se haría mediante señalización)
             async function simulateRemoteConnection() {
+                // Simular recepción de una oferta SDP
                 try {
-                    // Crear una oferta
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     
-                    // Crear una respuesta simulada que cumpla con los estándares WebRTC
-                    // En una aplicación real, esto se recibiría del otro peer
-                    const simulatedRemotePC = new RTCPeerConnection(configuration);
-                    
-                    // Agregar un stream simulado (en una app real sería el stream del peer remoto)
-                    try {
-                        const remoteStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                        remoteStream.getTracks().forEach(track => {
-                            simulatedRemotePC.addTrack(track, remoteStream);
-                        });
-                    } catch (error) {
-                        console.log('No se pudo obtener medios para simulación, continuando sin ellos');
-                    }
-                    
-                    // Configurar el canal de datos para el peer simulado
-                    simulatedRemotePC.ondatachannel = (event) => {
-                        const channel = event.channel;
-                        channel.onmessage = (event) => {
-                            // Simular respuesta automática
-                            setTimeout(() => {
-                                if (dataChannel && dataChannel.readyState === 'open') {
-                                    dataChannel.send('Respuesta automática: ' + event.data);
-                                }
-                            }, 1000);
-                        };
+                    // Simular recepción de respuesta
+                    const answer = {
+                        type: 'answer',
+                        sdp: offer.sdp // En realidad sería diferente, pero para simulación
                     };
                     
-                    // Establecer la descripción remota
-                    await simulatedRemotePC.setRemoteDescription(offer);
-                    
-                    // Crear respuesta
-                    const answer = await simulatedRemotePC.createAnswer();
-                    await simulatedRemotePC.setLocalDescription(answer);
-                    
-                    // Establecer la descripción local con la respuesta
                     await peerConnection.setRemoteDescription(answer);
                     
-                    console.log('Conexión WebRTC simulada establecida correctamente');
+                    // Simular recepción de ICE candidates
+                    // (en una aplicación real, se enviarían a través de un servidor de señalización)
                     
                 } catch (error) {
                     console.error('Error en la simulación de conexión:', error);
-                    // Fallback: simular conexión sin WebRTC completo
-                    addMessageToChat('Modo simulación: WebRTC no está completamente disponible', false);
                 }
             }
             
@@ -944,6 +902,7 @@
                 if (localConnectionStatus) {
                     localConnectionStatus.textContent = statusText;
                     localConnectionStatus.className = `connection-status ${statusClass}`;
+                    localConnectionStatus.style.display = 'block';
                 }
             }
             
