@@ -12,5 +12,7 @@ Esta aplicación [tiene su espejo en gemini](https://gemini.google.com/share/cf9
 
 * Gas 
   * [Alfa version](https://ix0wa4ox1wtj.space.minimax.io)
-  * [Beta version](https://rkfhblk2bzgb.space.minimax.io)
+  * [Beta version 1](https://rkfhblk2bzgb.space.minimax.io)
   * [Beta versión 2](https://cm5d6t2scv7f.space.minimax.io)
+  * [Beta versión 3](https://xj3c4amz4mq6.space.minimax.io)
+  * [Beta versión 4](https://zxxdrre7czno.space.minimax.io)
