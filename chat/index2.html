@@ -444,25 +444,6 @@
             text-align: center;
         }
 
-        .connection-status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            background-color: #34a853;
-            display: none;
-        }
-
-        .connection-status.connecting {
-            background-color: #fbbc04;
-        }
-
-        .connection-status.disconnected {
-            background-color: #ea4335;
-        }
-
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -507,7 +488,6 @@
             <div class="video-item">
                 <video id="localVideo" autoplay muted></video>
                 <div class="participant-name">Tú</div>
-                <div class="connection-status" id="localConnectionStatus">Conectado</div>
                 <div class="video-controls">
                     <button class="btn" id="toggleVideoSmall"><i class="fas fa-video"></i></button>
                     <button class="btn" id="toggleAudioSmall"><i class="fas fa-microphone"></i></button>
@@ -523,7 +503,7 @@
             </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="message own">
-                    ¡Hola! Bienvenido a VideoMeet con WebRTC
+                    ¡Hola! Bienvenido a VideoMeet
                     <div class="message-time" id="currentTime"></div>
                 </div>
                 <div class="message remote">
@@ -631,44 +611,9 @@
             const tabContents = document.querySelectorAll('.tab-content');
             const currentTime = document.getElementById('currentTime');
             const currentTime2 = document.getElementById('currentTime2');
-            const localConnectionStatus = document.getElementById('localConnectionStatus');
             
-            // Configuración de WebRTC con servidores STUN/TURN públicos
-            const configuration = {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' },
-                    { 
-                        urls: 'turn:numb.viagenie.ca',
-                        credential: 'muazkh',
-                        username: 'webrtc@live.com'
-                    },
-                    {
-                        urls: 'turn:openrelay.metered.ca:80',
-                        username: 'openrelayproject',
-                        credential: 'openrelayproject'
-                    },
-                    {
-                        urls: 'turn:openrelay.metered.ca:443',
-                        username: 'openrelayproject',
-                        credential: 'openrelayproject'
-                    },
-                    {
-                        urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-                        username: 'openrelayproject',
-                        credential: 'openrelayproject'
-                    }
-                ]
-            };
-            
-            // Variables de estado WebRTC
+            // Estados de la aplicación
             let localStream = null;
-            let peerConnection = null;
-            let dataChannel = null;
-            let isInitiator = false;
             let isChatCollapsed = false;
             let isVideoEnabled = true;
             let isAudioEnabled = true;
@@ -739,13 +684,8 @@
                     });
                     localVideo.srcObject = localStream;
                     
-                    // Inicializar conexión WebRTC
-                    createPeerConnection();
-                    
-                    // Simular la adición de participantes remotos después de un tiempo
-                    setTimeout(() => {
-                        simulateRemoteConnection();
-                    }, 2000);
+                    // Simular la adición de participantes remotos (en una app real, esto se conectaría mediante WebRTC)
+                    simulateRemoteParticipants();
                     
                 } catch (error) {
                     console.error('Error al acceder a los dispositivos multimedia:', error);
@@ -753,139 +693,19 @@
                 }
             }
             
-            // Crear conexión peer-to-peer
-            function createPeerConnection() {
-                peerConnection = new RTCPeerConnection(configuration);
-                
-                // Agregar stream local
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                });
-                
-                // Manejar stream remoto
-                peerConnection.ontrack = (event) => {
-                    const remoteStream = event.streams[0];
-                    addRemoteVideo(remoteStream);
-                };
-                
-                // Manejar canales de datos para chat
-                peerConnection.ondatachannel = (event) => {
-                    const channel = event.channel;
-                    setupDataChannel(channel);
-                };
-                
-                // Crear canal de datos si somos el iniciador
-                if (isInitiator) {
-                    dataChannel = peerConnection.createDataChannel('chat');
-                    setupDataChannel(dataChannel);
-                }
-                
-                // Manejar ICE candidates
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        // En una aplicación real, enviaríamos el candidato al peer remoto
-                        console.log('Nuevo ICE candidate:', event.candidate);
-                    }
-                };
-                
-                // Manejar cambios de estado de conexión
-                peerConnection.onconnectionstatechange = () => {
-                    updateConnectionStatus(peerConnection.connectionState);
-                };
-            }
-            
-            // Configurar canal de datos para chat
-            function setupDataChannel(channel) {
-                dataChannel = channel;
-                
-                dataChannel.onopen = () => {
-                    console.log('Canal de datos abierto');
-                    addMessageToChat('Conexión establecida. ¡Puedes chatear!', false);
-                };
-                
-                dataChannel.onmessage = (event) => {
-                    addMessageToChat(event.data, false);
-                };
-                
-                dataChannel.onclose = () => {
-                    console.log('Canal de datos cerrado');
-                };
-            }
-            
-            // Simular conexión remota (en una aplicación real, esto se haría mediante señalización)
-            async function simulateRemoteConnection() {
-                // Simular recepción de una oferta SDP
-                try {
-                    const offer = await peerConnection.createOffer();
-                    await peerConnection.setLocalDescription(offer);
-                    
-                    // Simular recepción de respuesta
-                    const answer = {
-                        type: 'answer',
-                        sdp: offer.sdp // En realidad sería diferente, pero para simulación
-                    };
-                    
-                    await peerConnection.setRemoteDescription(answer);
-                    
-                    // Simular recepción de ICE candidates
-                    // (en una aplicación real, se enviarían a través de un servidor de señalización)
-                    
-                } catch (error) {
-                    console.error('Error en la simulación de conexión:', error);
-                }
-            }
-            
-            // Añadir video remoto
-            function addRemoteVideo(stream) {
-                // Eliminar estado vacío si existe
-                const emptyState = document.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.remove();
-                }
-                
-                const videoElement = document.createElement('div');
-                videoElement.className = 'video-item';
-                videoElement.innerHTML = `
-                    <video autoplay></video>
-                    <div class="participant-name">Usuario Remoto</div>
-                    <div class="connection-status">Conectado</div>
+            // Simular participantes remotos (en una aplicación real, esto se conectaría mediante señalización)
+            function simulateRemoteParticipants() {
+                // En una aplicación real, aquí se establecerían las conexiones peer-to-peer
+                // Para esta demo, solo mostraremos un mensaje
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-users"></i>
+                    <h3>Conectando con otros participantes</h3>
+                    <p>En una aplicación real, aquí se mostrarían los videos de otras personas conectadas mediante WebRTC</p>
+                    <p>URL base: ${baseURL}</p>
                 `;
-                
-                videoElement.querySelector('video').srcObject = stream;
-                videoContainer.appendChild(videoElement);
-            }
-            
-            // Actualizar estado de conexión
-            function updateConnectionStatus(state) {
-                let statusText, statusClass;
-                
-                switch(state) {
-                    case 'connected':
-                        statusText = 'Conectado';
-                        statusClass = '';
-                        break;
-                    case 'connecting':
-                        statusText = 'Conectando...';
-                        statusClass = 'connecting';
-                        break;
-                    case 'disconnected':
-                        statusText = 'Desconectado';
-                        statusClass = 'disconnected';
-                        break;
-                    case 'failed':
-                        statusText = 'Error de conexión';
-                        statusClass = 'disconnected';
-                        break;
-                    default:
-                        statusText = state;
-                        statusClass = '';
-                }
-                
-                if (localConnectionStatus) {
-                    localConnectionStatus.textContent = statusText;
-                    localConnectionStatus.className = `connection-status ${statusClass}`;
-                    localConnectionStatus.style.display = 'block';
-                }
+                videoContainer.appendChild(emptyState);
             }
             
             // Alternar visibilidad del chat
@@ -907,15 +727,10 @@
                     // Agregar mensaje propio al chat
                     addMessageToChat(message, true);
                     
-                    // Enviar mensaje a través del canal de datos (si está disponible)
-                    if (dataChannel && dataChannel.readyState === 'open') {
-                        dataChannel.send(message);
-                    } else {
-                        // Simular respuesta si no hay conexión WebRTC
-                        setTimeout(() => {
-                            addMessageToChat("¡Hola! Recibí tu mensaje: " + message, false);
-                        }, 1000);
-                    }
+                    // Simular respuesta (en una app real, esto se enviaría mediante WebRTC DataChannel)
+                    setTimeout(() => {
+                        addMessageToChat("¡Hola! Recibí tu mensaje: " + message, false);
+                    }, 1000);
                     
                     // Limpiar input
                     messageInput.value = '';
@@ -974,13 +789,8 @@
                     localStream.getTracks().forEach(track => track.stop());
                 }
                 
-                if (peerConnection) {
-                    peerConnection.close();
-                    peerConnection = null;
-                }
-                
                 // Redirigir o mostrar mensaje de llamada finalizada
-                alert('Llamada finalizada. Todas las conexiones se han cerrado.');
+                alert('Llamada finalizada. En una aplicación real, aquí se cerrarían todas las conexiones.');
             }
             
             // Generar código de reunión aleatorio
@@ -1056,9 +866,6 @@
                     meetCode = room;
                     updateMeetCode();
                     addMessageToChat(`Te has unido a la sala: ${room}`, false);
-                    isInitiator = false;
-                } else {
-                    isInitiator = true;
                 }
             }
             
@@ -1102,11 +909,7 @@
             
             // Actualizar la hora cada minuto
             setInterval(updateTime, 60000);
-            
-            // Simular una llamada entrante después de 5 segundos (para demo)
-            setTimeout(showIncomingCall, 5000);
         });
     </script>
 </body>
-</html> 
- 
+</html>
