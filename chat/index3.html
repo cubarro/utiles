@@ -143,7 +143,6 @@
             background-color: #2f3033;
             border-left: 1px solid #3c4043;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .chat-header {
@@ -237,7 +236,7 @@
             display: none;
         }
 
-        .expand-chat-btn {
+        .chat-collapsed .toggle-chat {
             position: absolute;
             right: 10px;
             top: 10px;
@@ -251,12 +250,6 @@
             justify-content: center;
             z-index: 100;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            border: none;
-        }
-
-        .chat-expanded .expand-chat-btn {
-            display: none;
         }
 
         .invitation-panel {
@@ -491,11 +484,6 @@
                 width: 90%;
                 right: 5%;
             }
-            
-            .expand-chat-btn {
-                top: -45px;
-                right: 10px;
-            }
         }
     </style>
 </head>
@@ -529,10 +517,6 @@
         </div>
 
         <div class="chat-container" id="chatContainer">
-            <button class="expand-chat-btn" id="expandChatBtn">
-                <i class="fas fa-comments"></i>
-            </button>
-            
             <div class="chat-header">
                 <div class="chat-title">Chat</div>
                 <button class="toggle-chat" id="toggleChat"><i class="fas fa-chevron-right"></i></button>
@@ -619,7 +603,6 @@
             const localVideo = document.getElementById('localVideo');
             const videoContainer = document.getElementById('videoContainer');
             const toggleChatBtn = document.getElementById('toggleChat');
-            const expandChatBtn = document.getElementById('expandChatBtn');
             const chatContainer = document.getElementById('chatContainer');
             const messageInput = document.getElementById('messageInput');
             const sendMessageBtn = document.getElementById('sendMessage');
@@ -702,7 +685,6 @@
             function setupEventListeners() {
                 // Alternar visibilidad del chat
                 toggleChatBtn.addEventListener('click', toggleChat);
-                expandChatBtn.addEventListener('click', expandChat);
                 
                 // Enviar mensaje de chat
                 sendMessageBtn.addEventListener('click', sendMessage);
@@ -908,16 +890,14 @@
             
             // Alternar visibilidad del chat
             function toggleChat() {
-                isChatCollapsed = true;
-                chatContainer.classList.add('chat-collapsed');
-                chatContainer.classList.remove('chat-expanded');
-            }
-            
-            // Expandir el chat
-            function expandChat() {
-                isChatCollapsed = false;
-                chatContainer.classList.remove('chat-collapsed');
-                chatContainer.classList.add('chat-expanded');
+                isChatCollapsed = !isChatCollapsed;
+                chatContainer.classList.toggle('chat-collapsed', isChatCollapsed);
+                
+                if (isChatCollapsed) {
+                    toggleChatBtn.innerHTML = '<i class="fas fa-comments"></i>';
+                } else {
+                    toggleChatBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                }
             }
             
             // Enviar mensaje de chat
@@ -1129,3 +1109,4 @@
     </script>
 </body>
 </html> 
+ 
