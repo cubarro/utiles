@@ -417,33 +417,6 @@
             display: block;
         }
 
-        .share-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .share-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .share-option:hover {
-            background-color: #3c4043;
-        }
-
-        .share-option i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
-        }
-
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -503,12 +476,12 @@
             </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="message own">
-                    ¡Hola! Bienvenido a VideoMeet
-                    <div class="message-time" id="currentTime"></div>
+                    ¡Hola! ¿Cómo estás?
+                    <div class="message-time">10:05 AM</div>
                 </div>
                 <div class="message remote">
-                    Usa el botón <i class="fas fa-user-plus"></i> para invitar a otras personas
-                    <div class="message-time" id="currentTime2"></div>
+                    ¡Muy bien! Gracias por preguntar. ¿Listo para la reunión?
+                    <div class="message-time">10:06 AM</div>
                 </div>
             </div>
             <div class="chat-input">
@@ -534,22 +507,10 @@
                 <p>Comparte este código de reunión con otras personas:</p>
                 <input type="text" class="invitation-input" id="meetCodeInput" value="XXXX-XXXX-XXXX" readonly>
                 <p>O envía un enlace de invitación:</p>
-                <input type="text" class="invitation-input" id="meetLinkInput" value="https://cubarro.github.io/utiles/chat?room=XXXX-XXXX-XXXX" readonly>
-                
-                <div class="share-options">
-                    <div class="share-option" id="copyLinkOption">
-                        <i class="fas fa-copy"></i>
-                        <span>Copiar enlace</span>
-                    </div>
-                    <div class="share-option" id="shareWhatsApp">
-                        <i class="fab fa-whatsapp"></i>
-                        <span>Compartir por WhatsApp</span>
-                    </div>
-                    <div class="share-option" id="shareEmail">
-                        <i class="fas fa-envelope"></i>
-                        <span>Compartir por correo</span>
-                    </div>
-                </div>
+                <input type="text" class="invitation-input" id="meetLinkInput" value="https://cubarro.github.io/utiles/chat/join/XXXX-XXXX-XXXX" readonly>
+            </div>
+            <div class="invitation-buttons">
+                <button class="invite-btn btn-primary" id="copyLink"><i class="fas fa-copy"></i> Copiar enlace</button>
             </div>
         </div>
         
@@ -597,20 +558,13 @@
             const closeInvitationBtn = document.getElementById('closeInvitation');
             const meetCodeInput = document.getElementById('meetCodeInput');
             const meetLinkInput = document.getElementById('meetLinkInput');
-            const copyLinkOption = document.getElementById('copyLinkOption');
-            const shareWhatsApp = document.getElementById('shareWhatsApp');
-            const shareEmail = document.getElementById('shareEmail');
+            const copyLinkBtn = document.getElementById('copyLink');
             const incomingCall = document.getElementById('incomingCall');
             const acceptCallBtn = document.getElementById('acceptCall');
             const rejectCallBtn = document.getElementById('rejectCall');
             const meetCodeElement = document.getElementById('meetCode');
-            const joinCodeInput = document.getElementById('joinCodeInput');
-            const joinMeetingBtn = document.getElementById('joinMeeting');
-            const cancelJoinBtn = document.getElementById('cancelJoin');
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
-            const currentTime = document.getElementById('currentTime');
-            const currentTime2 = document.getElementById('currentTime2');
             
             // Estados de la aplicación
             let localStream = null;
@@ -618,13 +572,11 @@
             let isVideoEnabled = true;
             let isAudioEnabled = true;
             let meetCode = generateMeetCode();
-            const baseURL = "https://cubarro.github.io/utiles/chat";
             
             // Inicializar la aplicación
             initMedia();
             setupEventListeners();
             updateMeetCode();
-            updateTime();
             
             // Configuración de event listeners
             function setupEventListeners() {
@@ -651,13 +603,7 @@
                 // Invitaciones
                 inviteButton.addEventListener('click', showInvitationPanel);
                 closeInvitationBtn.addEventListener('click', hideInvitationPanel);
-                copyLinkOption.addEventListener('click', copyMeetingLink);
-                shareWhatsApp.addEventListener('click', shareViaWhatsApp);
-                shareEmail.addEventListener('click', shareViaEmail);
-                
-                // Unirse a reunión
-                joinMeetingBtn.addEventListener('click', joinMeeting);
-                cancelJoinBtn.addEventListener('click', hideInvitationPanel);
+                copyLinkBtn.addEventListener('click', copyMeetingLink);
                 
                 // Llamadas entrantes
                 acceptCallBtn.addEventListener('click', acceptCall);
@@ -671,8 +617,8 @@
                     });
                 });
                 
-                // Comprobar parámetros de URL para unirse a sala
-                checkURLParams();
+                // Simular una llamada entrante después de 3 segundos (para demo)
+                setTimeout(showIncomingCall, 3000);
             }
             
             // Inicializar la cámara y el micrófono
@@ -703,7 +649,6 @@
                     <i class="fas fa-users"></i>
                     <h3>Conectando con otros participantes</h3>
                     <p>En una aplicación real, aquí se mostrarían los videos de otras personas conectadas mediante WebRTC</p>
-                    <p>URL base: ${baseURL}</p>
                 `;
                 videoContainer.appendChild(emptyState);
             }
@@ -810,7 +755,7 @@
             function updateMeetCode() {
                 meetCodeElement.textContent = `Código: ${meetCode}`;
                 meetCodeInput.value = meetCode;
-                meetLinkInput.value = `${baseURL}?room=${meetCode}`;
+                meetLinkInput.value = `https://cubarro.github.io/utiles/chat/join/${meetCode}`;
             }
             
             // Mostrar panel de invitación
@@ -828,45 +773,10 @@
             function copyMeetingLink() {
                 meetLinkInput.select();
                 document.execCommand('copy');
-                copyLinkOption.innerHTML = '<i class="fas fa-check"></i> <span>Enlace copiado!</span>';
+                copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
                 setTimeout(() => {
-                    copyLinkOption.innerHTML = '<i class="fas fa-copy"></i> <span>Copiar enlace</span>';
+                    copyLinkBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar enlace';
                 }, 2000);
-            }
-            
-            // Compartir por WhatsApp
-            function shareViaWhatsApp() {
-                const message = encodeURIComponent(`¡Únete a mi videollamada! Usa este enlace: ${baseURL}?room=${meetCode}`);
-                window.open(`https://wa.me/?text=${message}`, '_blank');
-            }
-            
-            // Compartir por correo
-            function shareViaEmail() {
-                const subject = encodeURIComponent('Invitación a videollamada');
-                const body = encodeURIComponent(`Hola,\n\n¡Te invito a unirte a mi videollamada!\n\nUsa este enlace para unirte: ${baseURL}?room=${meetCode}\n\nCódigo de sala: ${meetCode}\n\n¡Te espero!`);
-                window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
-            }
-            
-            // Unirse a una reunión
-            function joinMeeting() {
-                const code = joinCodeInput.value.trim();
-                if (code && code.length === 14) { // XXXX-XXXX-XXXX
-                    window.location.href = `${baseURL}?room=${code}`;
-                } else {
-                    alert('Por favor, ingresa un código de reunión válido (formato: XXXX-XXXX-XXXX)');
-                }
-            }
-            
-            // Comprobar parámetros de URL
-            function checkURLParams() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const room = urlParams.get('room');
-                
-                if (room) {
-                    meetCode = room;
-                    updateMeetCode();
-                    addMessageToChat(`Te has unido a la sala: ${room}`, false);
-                }
             }
             
             // Mostrar llamada entrante (simulación)
@@ -898,17 +808,6 @@
                 document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
                 document.getElementById(`${tabId}Tab`).classList.add('active');
             }
-            
-            // Actualizar hora actual
-            function updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                if (currentTime) currentTime.textContent = timeString;
-                if (currentTime2) currentTime2.textContent = timeString;
-            }
-            
-            // Actualizar la hora cada minuto
-            setInterval(updateTime, 60000);
         });
     </script>
 </body>
