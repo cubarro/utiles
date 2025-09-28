@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tiempos Litúrgicos del Año</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    #chart {
+      position: relative;
+      width: 580px;
+    }
+
+    svg {
+      overflow: visible;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <h2>Tiempos Litúrgicos del Año</h2>
+  <div id="chart">
+    <svg id="litYear" width="580" height="70"></svg>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <script>
+    // Definición de tiempos con color y color de texto para contraste
+    const seasons = [
+      { name: "Adviento",            weeks: 4,  color: "#800080", textColor: "#fff" },
+      { name: "Navidad",             weeks: 2,  color: "#FFFFE0", textColor: "#000", stroke: "#000" },
+      { name: "Tiempo Ordinario I",  weeks: 6,  color: "#008000", textColor: "#fff" },
+      { name: "Cuaresma",            weeks: 6,  color: "#800080", textColor: "#fff" },
+      { name: "Pascua",              weeks: 7,  color: "#FFFFE0", textColor: "#000", stroke: "#000" },
+      { name: "Tiempo Ordinario II", weeks: 27, color: "#008000", textColor: "#fff" }
+    ];
+
+    const svg    = document.getElementById("litYear");
+    const width  = +svg.getAttribute("width") - 20;
+    const height = +svg.getAttribute("height") - 20;
+    let   x      = 10;
+
+    // Dibuja cada segmento y su etiqueta
+    seasons.forEach(s => {
+      const w = (s.weeks / seasons.reduce((sum, t) => sum + t.weeks, 0)) * width;
+      const segX = x;
+
+      // Rectángulo coloreado
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", segX);
+      rect.setAttribute("y", 10);
+      rect.setAttribute("width", w);
+      rect.setAttribute("height", height);
+      rect.setAttribute("fill", s.color);
+      if (s.stroke) rect.setAttribute("stroke", s.stroke);
+      svg.appendChild(rect);
+
+      // Texto centrado con el nombre del tiempo
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", segX + w / 2);
+      text.setAttribute("y", 10 + height / 2 + 5);
+      text.setAttribute("fill", s.textColor);
+      text.setAttribute("font-size", "12");
+      text.setAttribute("text-anchor", "middle");
+      text.textContent = s.name;
+      svg.appendChild(text);
+
+      // Tooltip solo con número de semanas
+      rect.addEventListener("mousemove", e => {
+        const tip = document.getElementById("tooltip");
+        tip.textContent = `${s.weeks} semanas`;
+        tip.style.left    = `${e.pageX + 10}px`;
+        tip.style.top     = `${e.pageY + 10}px`;
+        tip.style.opacity = 1;
+      });
+      rect.addEventListener("mouseout", () => {
+        document.getElementById("tooltip").style.opacity = 0;
+      });
+
+      x += w;
+    });
+
+    // Indicador azul de la fecha actual
+    const now   = new Date();
+    let start   = new Date(now.getFullYear(), 11, 1);
+    if (now < start) start = new Date(now.getFullYear() - 1, 11, 1);
+    const nextStart = new Date(start.getFullYear() + 1, 11, 1);
+    const pos = ((now - start) / (nextStart - start)) * width + 10;
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", pos);
+    line.setAttribute("y1", 5);
+    line.setAttribute("x2", pos);
+    line.setAttribute("y2", height + 15);
+    line.setAttribute("stroke", "#0000FF");
+    line.setAttribute("stroke-width", 2);
+    svg.appendChild(line);
+  </script>
+</body>
+</html>
