@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Litúrgico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .liturgical-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .liturgical-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .time-adviento { background-color: #6B46C1; }
+        .time-navidad { background-color: #FFFFFF; color: #1F2937; }
+        .time-cuaresma { background-color: #6B46C1; }
+        .time-pascua { background-color: #FFFFFF; color: #1F2937; }
+        .time-ordinario { background-color: #10B981; }
+        .time-pentecostes { background-color: #DC2626; }
+        
+        .cycle-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .saint-row:hover {
+            background-color: #F3F4F6;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .timeline-container {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .timeline-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .timeline-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            fill: #374151;
+        }
+        
+        .current-line {
+            stroke: #3B82F6;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6));
+        }
+        
+        .current-marker {
+            fill: #3B82F6;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+        }
+        
+        @keyframes pulse-svg {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .current-line {
+            animation: pulse-svg 2s infinite;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            pointer-events: none;
+            max-width: 350px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+            line-height: 1.5;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+        
+        .saint-cell {
+            cursor: help;
+            position: relative;
+            transition: color 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .saint-cell:hover {
+            color: #3B82F6;
+        }
+        
+        .time-segment {
+            transition: all 0.3s ease;
+        }
+        
+        .time-segment:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+        
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #f3f4f6;
+        }
+        
+        .tooltip-description {
+            color: #e5e7eb;
+            font-size: 13px;
+        }
+        
+        .celebration-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-solemnidad {
+            background-color: #8B5CF6;
+            color: white;
+        }
+        
+        .badge-fiesta {
+            background-color: #3B82F6;
+            color: white;
+        }
+        
+        .badge-memoria {
+            background-color: #10B981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8 px-4 shadow-lg">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-2">
+                <i class="fas fa-cross mr-3"></i>Calendario Litúrgico
+            </h1>
+            <p class="text-center text-purple-100 text-lg">Viviendo el tiempo de la Iglesia</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Fecha Actual y Ciclo -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Hoy es</h2>
+                        <div class="flex items-center justify-center md:justify-start">
+                            <i class="fas fa-calendar-alt text-3xl text-purple-600 mr-3"></i>
+                            <span id="currentDate" class="text-3xl font-bold text-gray-900"></span>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Ciclo Litúrgico</h2>
+                        <div class="cycle-badge inline-block bg-purple-600 text-white px-6 py-3 rounded-full text-xl font-bold">
+                            <i class="fas fa-book-open mr-2"></i>
+                            <span id="currentCycle"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tiempo Litúrgico Actual -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tiempo Litúrgico Actual</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div id="currentTimeCard" class="liturgical-card rounded-xl p-6 text-white text-center">
+                    <i id="currentTimeIcon" class="fas fa-church text-4xl mb-3"></i>
+                    <h3 id="currentTimeName" class="text-2xl font-bold mb-2"></h3>
+                    <p id="currentTimeDescription" class="text-sm opacity-90"></p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Duración</h3>
+                    <p id="durationInfo" class="text-gray-600"></p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Próximo Cambio</h3>
+                    <p id="nextChange" class="text-gray-600"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Línea de Tiempo de Tiempos Litúrgicos con SVG -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tiempos Litúrgicos del Año</h2>
+            <div class="timeline-container">
+                <svg id="timelineSvg" class="timeline-svg" viewBox="0 0 1000 180" preserveAspectRatio="xMidYMid meet">
+                    <!-- Fondo degradado -->
+                    <defs>
+                        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f9fafb;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f3f4f6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="1000" height="180" fill="url(#bgGradient)" />
+                    
+                    <!-- Línea base -->
+                    <line x1="50" y1="90" x2="950" y2="90" stroke="#e5e7eb" stroke-width="4" stroke-linecap="round" />
+                    
+                    <!-- Segmentos de tiempo -->
+                    <g id="timelineSegments"></g>
+                    
+                    <!-- Línea actual -->
+                    <line id="currentLine" class="current-line" x1="0" y1="40" x2="0" y2="140" />
+                    
+                    <!-- Marcador actual -->
+                    <circle id="currentMarker" class="current-marker" cx="0" cy="90" r="10" />
+                    
+                    <!-- Etiquetas -->
+                    <g id="timelineLabels"></g>
+                    
+                    <!-- Iconos -->
+                    <g id="timelineIcons"></g>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Santos del Día y Próximos 10 Días -->
+        <section class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-users mr-2"></i>Próximas Celebraciones
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Fecha</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Día</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Santo/Celebración</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saintsTable">
+                        <!-- Las filas se generarán dinámicamente con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-300">Calendario Litúrgico © <span id="year"></span> - Vivamos la fe en comunidad</p>
+        </div>
+    </footer>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip">
+        <div class="tooltip-title"></div>
+        <div class="tooltip-description"></div>
+    </div>
+
+    <script>
+        // Base de datos de santos y celebraciones (formato MM-DD)
+        const santosPorFecha = {
+            '01-01': { 
+                name: 'Santísima Virgen María, Madre de Dios', 
+                type: 'Solemnidad',
+                description: 'Celebración de María como Madre de Dios. Es la primera fiesta mariana del año civil y recuerda el Concilio de Éfeso del año 431.'
+            },
+            '01-02': { 
+                name: 'San Basilio Magno y San Gregorio Nacianceno', 
+                type: 'Fiesta',
+                description: 'Doctores de la Iglesia. San Basilio es conocido por su regla monástica y San Gregorio por sus escritos teológicos.'
+            },
+            '01-03': { 
+                name: 'Santísimo Nombre de Jesús', 
+                type: 'Fiesta',
+                description: 'Celebración del Santo Nombre de Jesús, que significa "Dios salva". Fiesta instituida para contrarrestar la herejía arriana.'
+            },
+            '01-04': { 
+                name: 'Santa Isabel Ana Seton', 
+                type: 'Memoria',
+                description: 'Primera santa nativa de Estados Unidos. Fundadora de las Hermanas de la Caridad de San José y de las escuelas católicas en EE.UU.'
+            },
+            '01-05': { 
+                name: 'San Juan Neumann', 
+                type: 'Memoria',
+                description: 'Obispo de Filadelfia. Primer obispo estadounidense canonizado. Fundó el sistema de escuelas parroquiales católicas.'
+            },
+            '01-06': { 
+                name: 'Epifanía del Señor', 
+                type: 'Solemnidad',
+                description: 'Manifestación de Jesucristo a los pueblos gentiles. Celebración de la visita de los Reyes Magos al Niño Jesús.'
+            },
+            '01-07': { 
+                name: 'San Raimundo de Peñafort', 
+                type: 'Memoria',
+                description: 'Dominico español. Maestro general de la Orden y canonista. Autor de la Summa de casibus conscientiae.'
+            },
+            '01-09': { 
+                name: 'San Antonio Abad', 
+                type: 'Memoria',
+                description: 'Padre del monacato cristiano. Vivió como ermitaño en el desierto de Egipto y es considerado el patrón de los animales.'
+            },
+            '01-11': { 
+                name: 'San Tomás de Aquino', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y teólogo medieval. Autor de la Summa Theologiae, una de las obras más importantes de la teología católica.'
+            },
+            '01-13': { 
+                name: 'San Hilario de Poitiers', 
+                type: 'Memoria',
+                description: 'Obispo y Doctor de la Iglesia. Defensor de la fe contra el arrianismo. Conocido como "Martín de los Herejes".'
+            },
+            '01-17': { 
+                name: 'San Antonio Abad', 
+                type: 'Memoria',
+                description: 'Padre del monacato cristiano. Vivió como ermitaño en el desierto de Egipto y es considerado el patrón de los animales.'
+            },
+            '01-20': { 
+                name: 'San Fabián y San Sebastián', 
+                type: 'Memoria',
+                description: 'San Fabián fue papa y mártir. San Sebastián fue soldado romano y mártir. Ambos son patronos contra la peste.'
+            },
+            '01-21': { 
+                name: 'Santa Inés', 
+                type: 'Memoria',
+                description: 'Virgen y mártir romana. Murió a los 12 años por defender su virginidad. Es una de las santas más veneradas de la Iglesia.'
+            },
+            '01-22': { 
+                name: 'San Vicente', 
+                type: 'Memoria',
+                description: 'Diácono y mártir español. Sufrió martirio bajo la persecución de Diocleciano. Es patrón de Valencia.'
+            },
+            '01-24': { 
+                name: 'San Francisco de Sales', 
+                type: 'Memoria',
+                description: 'Obispo de Ginebra y Doctor de la Iglesia. Fundador de la Orden de la Visitación. Patrono de los escritores y periodistas.'
+            },
+            '01-25': { 
+                name: 'Conversión de San Pablo', 
+                type: 'Fiesta',
+                description: 'Celebración de la conversión de Saulo al cristianismo en el camino a Damasco. Final de la Semana de Oración por la Unidad de los Cristianos.'
+            },
+            '01-26': { 
+                name: 'San Timoteo y San Tito', 
+                type: 'Memoria',
+                description: 'Discípulos de San Pablo. San Timoteo fue obispo de Éfeso y San Tito de Creta. Ambos son mencionados en las cartas paulinas.'
+            },
+            '01-27': { 
+                name: 'Santa Angela Merici', 
+                type: 'Memoria',
+                description: 'Fundadora de la Compañía de Santa Úrsula. Dedicó su vida a la educación de las jóvenes. Es patrona de los enfermos.'
+            },
+            '01-28': { 
+                name: 'Santo Tomás de Aquino', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y teólogo medieval. Autor de la Summa Theologiae, una de las obras más importantes de la teología católica.'
+            },
+            '01-31': { 
+                name: 'San Juan Bosco', 
+                type: 'Memoria',
+                description: 'Sacerdote italiano, fundador de la Sociedad de San Francisco de Sales (Salesianos). Patrono de la juventud y de los aprendices.'
+            },
+            '02-02': { 
+                name: 'Presentación del Señor', 
+                type: 'Fiesta',
+                description: 'Celebración de la presentación de Jesús en el templo. También conocida como la Candelaria, en la que se bendicen las velas.'
+            },
+            '02-03': { 
+                name: 'San Blas', 
+                type: 'Memoria',
+                description: 'Obispo y mártir armenio. Según la tradición, salvó a un niño que se atragantó con un hueso de pescado. Es patrón contra las enfermedades de la garganta.'
+            },
+            '02-05': { 
+                name: 'Santa Águeda', 
+                type: 'Memoria',
+                description: 'Virgen y mártir siciliana. Sufrió martirio durante la persecución de Decio. Es patrona de las nodrizas y contra las enfermedades del pecho.'
+            },
+            '02-06': { 
+                name: 'San Pablo Miki y compañeros', 
+                type: 'Memoria',
+                description: 'Mártires japoneses. San Pablo Miki fue un jesuita japonés crucificado en Nagasaki en 1597 junto con 25 compañeros.'
+            },
+            '02-08': { 
+                name: 'San Jerónimo Emiliani', 
+                type: 'Memoria',
+                description: 'Fundador de la Orden de los Clérigos Regulares de Somasca. Dedicó su vida a la educación de los huérfanos y los pobres.'
+            },
+            '02-10': { 
+                name: 'Santa Escolástica', 
+                type: 'Memoria',
+                description: 'Hermana gemela de San Benito. Fundó el monasterio de mujeres en Plombariola, siguiendo la regla de su hermano.'
+            },
+            '02-11': { 
+                name: 'Nuestra Señora de Lourdes', 
+                type: 'Memoria',
+                description: 'Celebración de las apariciones de la Virgen María a Santa Bernadette Soubirous en 1858. Es patrona de los enfermos.'
+            },
+            '02-14': { 
+                name: 'San Cirilo y San Metodio', 
+                type: 'Memoria',
+                description: 'Patrones de Europa. Hermanos que evangelizaron a los pueblos eslavos. Crearon el alfabeto glagolítico, precursor del cirílico.'
+            },
+            '02-17': { 
+                name: 'Siete Santos Fundadores', 
+                type: 'Memoria',
+                description: 'Fundadores de la Orden de los Siervos de María. Siete florentinos que dedicaron su vida a la penitencia y al servicio de María.'
+            },
+            '02-21': { 
+                name: 'San Pedro Damián', 
+                type: 'Memoria',
+                description: 'Cardenal y Doctor de la Iglesia. Reformador de la vida monástica. Luchó contra la simonía y el nicolaísmo.'
+            },
+            '02-22': { 
+                name: 'Cátedra de San Pedro', 
+                type: 'Fiesta',
+                description: 'Celebración del ministerio de San Pedro como primer Papa y fundamento de la Iglesia. Simboliza la unidad de la Iglesia.'
+            },
+            '02-23': { 
+                name: 'San Policarpo', 
+                type: 'Memoria',
+                description: 'Obispo de Esmirna y mártir. Discípulo del apóstol Juan. Fue quemado vivo a los 86 años por negarse a adorar al emperador.'
+            },
+            '02-27': { 
+                name: 'San Gabriel de la Dolorosa', 
+                type: 'Memoria',
+                description: 'Pasionista italiano. Conocido por su devoción a la Pasión de Cristo y por su vida de penitencia. Murió a los 18 años.'
+            },
+            '03-01': { 
+                name: 'San David', 
+                type: 'Memoria',
+                description: 'Obispo de Menevia, patrón de Gales. Conocido por su vida de oración y penitencia. Fundó doce monasterios.'
+            },
+            '03-07': { 
+                name: 'Santas Perpetua y Felicidad', 
+                type: 'Memoria',
+                description: 'Mártires cartaginesas. Perpetua era una noble madre y Felicidad su esclava embarazada. Murieron en el anfiteatro de Cartago.'
+            },
+            '03-17': { 
+                name: 'San Patricio', 
+                type: 'Fiesta',
+                description: 'Obispo y misionero en Irlanda. Conocido por haber expulsado las serpientes de Irlanda y por usar el trébol para explicar la Trinidad.'
+            },
+            '03-19': { 
+                name: 'San José', 
+                type: 'Solemnidad',
+                description: 'Esposo de la Virgen María y padre adoptivo de Jesús. Patrono de la Iglesia universal, de los trabajadores y de una muerte feliz.'
+            },
+            '03-25': { 
+                name: 'Anunciación del Señor', 
+                type: 'Solemnidad',
+                description: 'Celebración del anuncio del ángel Gabriel a María sobre la encarnación del Hijo de Dios. Inicio de la redención humana.'
+            },
+            '04-04': { 
+                name: 'San Isidoro de Sevilla', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia. Arzobispo de Sevilla, erudito y enciclopedista. Autor de las Etimologías, primera enciclopedia medieval.'
+            },
+            '04-11': { 
+                name: 'San Estanislao', 
+                type: 'Memoria',
+                description: 'Obispo de Cracovia y mártir. Defendió la independencia de Polonia contra el rey Boleslao. Es patrono de Polonia.'
+            },
+            '04-23': { 
+                name: 'San Jorge', 
+                type: 'Memoria',
+                description: 'Mártir y soldado romano. Famoso por la leyenda de matar al dragón. Patrono de Inglaterra, Portugal y Cataluña.'
+            },
+            '04-25': { 
+                name: 'San Marcos', 
+                type: 'Fiesta',
+                description: 'Evangelista y autor del segundo Evangelio. Compañero de San Pedro y San Pablo. Patrono de Venecia.'
+            },
+            '05-01': { 
+                name: 'San José Obrero', 
+                type: 'Fiesta',
+                description: 'Celebración de San José como trabajador. Instituida por el Papa Pío XII para destacar la dignidad del trabajo humano.'
+            },
+            '05-03': { 
+                name: 'Santos Felipe y Santiago', 
+                type: 'Fiesta',
+                description: 'Apóstoles. Felipe fue crucificado cabeza abajo y Santiago fue decapitado. Primer obispo de Jerusalén.'
+            },
+            '05-10': { 
+                name: 'San Juan de Ávila', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia. Sacerdote y místico español. Conocido como el "Apóstol de Andalucía" y maestro de Santa Teresa.'
+            },
+            '05-14': { 
+                name: 'San Matías', 
+                type: 'Fiesta',
+                description: 'Apóstol elegido para reemplazar a Judas. Predicó en Etiopía y sufrió martirio. Es patrono de los carpinteros.'
+            },
+            '05-31': { 
+                name: 'Visitación de la Virgen María', 
+                type: 'Fiesta',
+                description: 'Celebración de la visita de María a su prima Isabel. María proclama el Magnificat y Juan salta en el vientre de Isabel.'
+            },
+            '06-11': { 
+                name: 'San Bernabé', 
+                type: 'Memoria',
+                description: 'Apóstol y compañero de San Pablo. Levita de Chipre que presentó a Pablo a los apóstoles. Patrono de Chipre.'
+            },
+            '06-13': { 
+                name: 'San Antonio de Padua', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia. Franciscano portugués conocido por sus milagros y sermones. Patrono de los objetos perdidos.'
+            },
+            '06-24': { 
+                name: 'Nacimiento de San Juan Bautista', 
+                type: 'Solemnidad',
+                description: 'Celebración del nacimiento del precursor de Jesús. Único santo cuyo nacimiento se celebra además de su muerte.'
+            },
+            '06-29': { 
+                name: 'San Pedro y San Pablo', 
+                type: 'Solemnidad',
+                description: 'Príncipes de los apóstoles. Pedro primer Papa y Pablo apóstol de los gentiles. Columnas de la Iglesia.'
+            },
+            '07-03': { 
+                name: 'Santo Tomás', 
+                type: 'Fiesta',
+                description: 'Apóstol conocido como "Dídimo". Predicó en India y fue martirizado. Patrono de la India y de los arquitectos.'
+            },
+            '07-22': { 
+                name: 'Santa María Magdalena', 
+                type: 'Fiesta',
+                description: 'Discípula de Jesús y primera testigo de la resurrección. "Apóstol de los apóstoles". Patrona de la vida contemplativa.'
+            },
+            '07-25': { 
+                name: 'Santiago Apóstol', 
+                type: 'Fiesta',
+                description: 'Hijo del Zebedeo y hermano de Juan. Primer mártir entre los apóstoles. Patrono de España y Compostela.'
+            },
+            '07-26': { 
+                name: 'San Joaquín y Santa Ana', 
+                type: 'Memoria',
+                description: 'Padres de la Virgen María. Abuelos de Jesús según la tradición. Patronos de los abuelos y las familias.'
+            },
+            '08-01': { 
+                name: 'San Alfonso María de Ligorio', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia. Fundador de los Redentoristas. Obispo y teólogo moral. Patrono de los confesores y moralistas.'
+            },
+            '08-04': { 
+                name: 'San Juan María Vianney', 
+                type: 'Memoria',
+                description: 'Cura de Ars y patrono de los párrocos. Conocido por su vida de penitencia y su ministerio confesional.'
+            },
+            '08-06': { 
+                name: 'Transfiguración del Señor', 
+                type: 'Fiesta',
+                description: 'Celebración de la manifestación de la gloria de Cristo en el Tabor. Jesús aparece con Moisés y Elías.'
+            },
+            '08-08': { 
+                name: 'Santo Domingo de Guzmán', 
+                type: 'Memoria',
+                description: 'Fundador de la Orden de Predicadores (Dominicos). Luchó contra la herejía albigense. Patrono de los astrónomos.'
+            },
+            '08-10': { 
+                name: 'San Lorenzo', 
+                type: 'Fiesta',
+                description: 'Diácono y mártir romano. Fue asado en una parrilla. Patrono de los cocineros, bibliotecarios y pobres.'
+            },
+            '08-15': { 
+                name: 'Asunción de la Virgen María', 
+                type: 'Solemnidad',
+                description: 'Celebración de la entrada de María en cuerpo y alma al cielo. Dogma definido por Pío XII en 1950.'
+            },
+            '08-20': { 
+                name: 'San Bernardo', 
+                type: 'Memoria',
+                description: 'Abad cisterciense y Doctor de la Iglesia. Predicó la Segunda Cruzada y defendió la Inmaculada Concepción.'
+            },
+            '08-24': { 
+                name: 'San Bartolomé', 
+                type: 'Fiesta',
+                description: 'Apóstol que según la tradición fue desollado vivo. Patrono de los curtidores, carniceros y libreros.'
+            },
+            '08-27': { 
+                name: 'Santa Mónica', 
+                type: 'Memoria',
+                description: 'Madre de San Agustín. Por sus oraciones y lágrimas convirtió a su hijo. Patrona de las madres cristianas.'
+            },
+            '08-28': { 
+                name: 'San Agustín', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y obispo de Hipona. Autor de las Confesiones y La Ciudad de Dios. Patrono de los teólogos.'
+            },
+            '09-01': { 
+                name: 'San Gil', 
+                type: 'Memoria',
+                description: 'Eremita y abad. Vivió en el bosque y fue protegido por un ciervo. Patrono de los arqueros y fabricantes de agujas.'
+            },
+            '09-09': { 
+                name: 'San Pedro Claver', 
+                type: 'Memoria',
+                description: 'Jesuita español conocido como "Esclavo de los esclavos". Misionero en Cartagena de Indias. Patrono de los derechos humanos.'
+            },
+            '09-12': { 
+                name: 'Santísimo Nombre de María', 
+                type: 'Memoria',
+                description: 'Celebración del nombre de María y su poder en la Iglesia. Fiesta instituida para contrarrestar la herejía turca.'
+            },
+            '09-14': { 
+                name: 'Exaltación de la Santa Cruz', 
+                type: 'Fiesta',
+                description: 'Celebración del hallazgo de la verdadera cruz por Santa Elena. Símbolo de la redención y triunfo de Cristo.'
+            },
+            '09-15': { 
+                name: 'Nuestra Señora de los Dolores', 
+                type: 'Memoria',
+                description: 'Celebración de los siete dolores de María. Compañera de Cristo en su pasión. Patrona de los dolientes.'
+            },
+            '09-17': { 
+                name: 'San Roberto Belarmino', 
+                type: 'Memoria',
+                description: 'Cardenal y Doctor de la Iglesia. Defensor de la autoridad papada contra los protestantes. Gran teólogo y catequista.'
+            },
+            '09-20': { 
+                name: 'San Andrés Kim y compañeros', 
+                type: 'Memoria',
+                description: 'Mártires coreanos. Primeros santos canonizados de Corea. Persecución durante el siglo XIX.'
+            },
+            '09-21': { 
+                name: 'San Mateo', 
+                type: 'Fiesta',
+                description: 'Evangelista y autor del primer Evangelio. Publicano llamado por Jesús. Patrono de los banqueros y contadores.'
+            },
+            '09-27': { 
+                name: 'San Vicente de Paúl', 
+                type: 'Memoria',
+                description: 'Fundador de la Congregación de la Misión y las Hijas de la Caridad. Patrono de las obras de caridad.'
+            },
+            '09-28': { 
+                name: 'San Wenceslao', 
+                type: 'Memoria',
+                description: 'Duque de Bohemia y mártir. Conocido por su caridad con los pobres. Patrono de la República Checa.'
+            },
+            '09-29': { 
+                name: 'San Miguel, San Gabriel y San Rafael', 
+                type: 'Fiesta',
+                description: 'Arcángeles principales. Miguel defensor del pueblo de Israel, Gabriel mensajero de la Encarnación, Rafael guía de Tobías.'
+            },
+            '10-01': { 
+                name: 'Santa Teresa del Niño Jesús', 
+                type: 'Memoria',
+                description: 'Doctora de la Iglesia y carmelita descalza. Conocida por su "pequeña vía" de infancia espiritual. Patrona de las misiones.'
+            },
+            '10-02': { 
+                name: 'Santos Ángeles Custodios', 
+                type: 'Memoria',
+                description: 'Celebración de los ángeles que nos protegen y guían. Cada persona tiene un ángel de la guarda.'
+            },
+            '10-04': { 
+                name: 'San Francisco de Asís', 
+                type: 'Memoria',
+                description: 'Fundador de la Orden Franciscana. Vivió en pobreza absoluta y amor a la creación. Patrono de Italia y ecología.'
+            },
+            '10-06': { 
+                name: 'San Bruno', 
+                type: 'Memoria',
+                description: 'Fundador de la Orden Cartuja. Ermitaño y consejero del Papa Urbano II. Patrono de los posesos.'
+            },
+            '10-07': { 
+                name: 'Nuestra Señora del Rosario', 
+                type: 'Memoria',
+                description: 'Celebración establecida por Pío V tras la victoria de Lepanto. María como intercesora por la victoria del cristianismo.'
+            },
+            '10-09': { 
+                name: 'San Juan Leonardi', 
+                type: 'Memoria',
+                description: 'Fundador de la Orden de Clérigos Regulares de la Madre de Dios. Trabajó por la formación de jóvenes y sacerdotes.'
+            },
+            '10-11': { 
+                name: 'San Juan XXIII', 
+                type: 'Memoria',
+                description: 'Papa que convocó el Concilio Vaticano II. Conocido como "Papa Bueno". Autor de "Diario de un alma".'
+            },
+            '10-14': { 
+                name: 'San Calixto I', 
+                type: 'Memoria',
+                description: 'Papa y mártir. Enterrado en el cementerio de Calixto. Patrono de los cementerios católicos.'
+            },
+            '10-15': { 
+                name: 'Santa Teresa de Ávila', 
+                type: 'Fiesta',
+                description: 'Doctora de la Iglesia y reformadora del Carmelo. Mística y escritora. Primera mujer doctora de la Iglesia.'
+            },
+            '10-16': { 
+                name: 'Santa Margarita María Alacoque', 
+                type: 'Memoria',
+                description: 'Monja visitación a quien Jesús reveló la devoción al Sagrado Corazón. Promulgó la fiesta del Corazón de Jesús.'
+            },
+            '10-17': { 
+                name: 'San Ignacio de Antioquía', 
+                type: 'Memoria',
+                description: 'Obispo y mártir. Discípulo de San Juan. Llevado a Roma para ser devorado por las fieras. Escribió cartas a las iglesias.'
+            },
+            '10-18': { 
+                name: 'San Lucas', 
+                type: 'Fiesta',
+                description: 'Evangelista y médico. Autor del tercer Evangelio y Hechos de los Apóstoles. Compañero de San Pablo.'
+            },
+            '10-19': { 
+                name: 'San Pablo de la Cruz', 
+                type: 'Memoria',
+                description: 'Fundador de los Pasionistas. Predicó la devoción a la Pasión de Cristo. Experimentó éxtasis y visiones.'
+            },
+            '10-22': { 
+                name: 'San Juan Pablo II', 
+                type: 'Memoria',
+                description: 'Papa polaco y uno de los más longevos. Gran viajero y comunicador. Canonizó más santos que ningún otro papa.'
+            },
+            '10-23': { 
+                name: 'San Juan Capistrano', 
+                type: 'Memoria',
+                description: 'Franciscano y predicador. Luchó contra los turcos en Belgrado. Patrono de los capellanes militares.'
+            },
+            '10-24': { 
+                name: 'San Antonio María Claret', 
+                type: 'Memoria',
+                description: 'Fundador de los Misioneros Hijos del Inmaculado Corazón de María. Arzobispo de Cuba y confesor de la reina Isabel II.'
+            },
+            '10-28': { 
+                name: 'San Simón y San Judas', 
+                type: 'Fiesta',
+                description: 'Apóstoles. Simón el Zelote y Judas Tadeo. Predicaron en Persia y sufrieron martirio. Patronos de los casos difíciles.'
+            },
+            '11-01': { 
+                name: 'Todos los Santos', 
+                type: 'Solemnidad',
+                description: 'Celebración de todos los santos conocidos y desconocidos. Fiesta de la universal llamada a la santidad.'
+            },
+            '11-02': { 
+                name: 'Conmemoración de los Fieles Difuntos', 
+                type: 'Memoria',
+                description: 'Día de oración por las almas del purgatorio. La Iglesia recomienda misas, limosnas y sufragios por los difuntos.'
+            },
+            '11-03': { 
+                name: 'San Martín de Porres', 
+                type: 'Memoria',
+                description: 'Dominico peruano conocido por su caridad con los pobres. Mulato de madre negra y padre español. Patrono de la justicia social.'
+            },
+            '11-04': { 
+                name: 'San Carlos Borromeo', 
+                type: 'Memoria',
+                description: 'Cardenal y arzobispo de Milán. Reformador de la Iglesia según el Concilio de Trento. Patrono de los catequistas.'
+            },
+            '11-09': { 
+                name: 'Dedicación de la Basílica de Letrán', 
+                type: 'Fiesta',
+                description: 'Catedral de Roma como "madre y cabeza de todas las iglesias del mundo". Símbolo de la unidad católica.'
+            },
+            '11-10': { 
+                name: 'San León Magno', 
+                type: 'Memoria',
+                description: 'Papa y Doctor de la Iglesia. Detuvo a Atila con su persuasión. Defendió la unidad de la fe contra las herejías.'
+            },
+            '11-11': { 
+                name: 'San Martín de Tours', 
+                type: 'Memoria',
+                description: 'Obispo y soldado romano. Famoso por compartir su capa con un pobre. Patrono de Francia y los soldados.'
+            },
+            '11-12': { 
+                name: 'San Josafat', 
+                type: 'Memoria',
+                description: 'Arzobispo de Polotsk y mártir. Trabajó por la unión de la Iglesia ortodoxa con Roma. Patrono de la unidad cristiana.'
+            },
+            '11-15': { 
+                name: 'San Alberto Magno', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y maestro de Santo Tomás. Dominico y filósofo. Patrono de los científicos y estudiantes.'
+            },
+            '11-16': { 
+                name: 'Santa Margarita de Escocia', 
+                type: 'Memoria',
+                description: 'Reina de Escocia y esposa del rey Malcolm III. Madre de ocho hijos. Patrona de las grandes familias y de la muerte feliz.'
+            },
+            '11-17': { 
+                name: 'Santa Isabel de Hungría', 
+                type: 'Memoria',
+                description: 'Princesa de Hungría y esposa de Luis de Turingia. Construyó hospitales y cuidó enfermos. Patrona de la Tercera Orden Franciscana.'
+            },
+            '11-18': { 
+                name: 'Dedicación de las Basílicas de San Pedro y San Pablo', 
+                type: 'Memoria',
+                description: 'Celebración de las basílicas papales dedicadas a los príncipes de los apóstoles. Símbolos de la unidad de la fe.'
+            },
+            '11-21': { 
+                name: 'Presentación de la Virgen María', 
+                type: 'Memoria',
+                description: 'Celebración de la dedicación de María a Dios desde su infancia. Según la tradición, fue llevada al templo a los 3 años.'
+            },
+            '11-22': { 
+                name: 'Santa Cecilia', 
+                type: 'Memoria',
+                description: 'Virgen y mártir romana. Patrona de la música y los músicos. Según la leyenda, cantaba en su corazón durante su martirio.'
+            },
+            '11-23': { 
+                name: 'San Clemente I', 
+                type: 'Memoria',
+                description: 'Papa y mártir. Tercer sucesor de San Pedro. Escribió una carta a los corintios. Murió ahogado en el mar Negro.'
+            },
+            '11-24': { 
+                name: 'San Andrés Dung-Lac y compañeros', 
+                type: 'Memoria',
+                description: 'Mártires de Vietnam. Persecución del siglo XIX. San Andrés fue sacerdote y sus compañeros laicos.'
+            },
+            '11-25': { 
+                name: 'Santa Catalina de Alejandría', 
+                type: 'Memoria',
+                description: 'Virgen y mártir. Princesa sabia que defendió la fe. Patrona de los filósofos, estudiantes y doncellas.'
+            },
+            '11-30': { 
+                name: 'San Andrés', 
+                type: 'Fiesta',
+                description: 'Apóstol y hermano de Pedro. Pescador llamado por Jesús. Predicó en Grecia y fue crucificado en cruz en forma de X.'
+            },
+            '12-03': { 
+                name: 'San Francisco Javier', 
+                type: 'Memoria',
+                description: 'Misionero jesuita en Oriente. Bautizó a miles de personas en India y Japón. Patrono de las misiones extranjeras.'
+            },
+            '12-04': { 
+                name: 'San Juan Damasceno', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia. Monje y teólogo. Defendió el culto a las imágenes contra los iconoclastas.'
+            },
+            '12-06': { 
+                name: 'San Nicolás', 
+                type: 'Memoria',
+                description: 'Obispo de Mira. Conocido por su generosidad con los pobres. Origen de la figura de Santa Claus. Patrono de los niños.'
+            },
+            '12-07': { 
+                name: 'San Ambrosio', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y obispo de Milán. Bautizó a San Agustín. Defendió la fe contra los arrianos.'
+            },
+            '12-08': { 
+                name: 'Inmaculada Concepción de la Virgen María', 
+                type: 'Solemnidad',
+                description: 'Dogma que afirma que María fue preservada del pecado original desde su concepción. Patrona de Estados Unidos, España y Filipinas.'
+            },
+            '12-09': { 
+                name: 'San Juan Diego', 
+                type: 'Memoria',
+                description: 'Vidente de la Virgen de Guadalupe. Indio mexicano a quien se apareció María en el Tepeyac. Patrono de los indígenas.'
+            },
+            '12-10': { 
+                name: 'Santa Eulalia', 
+                type: 'Memoria',
+                description: 'Virgen y mártir de Barcelona. De 13 años, sufrió martirio por defender su fe. Patrona de Barcelona.'
+            },
+            '12-11': { 
+                name: 'San Dámaso I', 
+                type: 'Memoria',
+                description: 'Papa que combatió la herejía arriana. Encargó a San Jerónimo la traducción de la Biblia al latín (Vulgata).'
+            },
+            '12-12': { 
+                name: 'Nuestra Señora de Guadalupe', 
+                type: 'Memoria',
+                description: 'Aparición de la Virgen María a San Juan Diego en México. Patrona de América y emperatriz de Latinoamérica.'
+            },
+            '12-13': { 
+                name: 'Santa Lucía', 
+                type: 'Memoria',
+                description: 'Virgen y mártir de Siracusa. Protegía su virginidad hasta la muerte. Patrona de la vista y los oftalmólogos.'
+            },
+            '12-14': { 
+                name: 'San Juan de la Cruz', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y reformador del Carmelo. Místico y poeta. Autor de "Noche oscura del alma".'
+            },
+            '12-20': { 
+                name: 'San Pedro Canisio', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y jesuita. Luchó contra la reforma protestante en Alemania. Autor del Catecismo Mayor.'
+            },
+            '12-21': { 
+                name: 'San Pedro Canisio', 
+                type: 'Memoria',
+                description: 'Doctor de la Iglesia y jesuita. Luchó contra la reforma protestante en Alemania. Autor del Catecismo Mayor.'
+            },
+            '12-26': { 
+                name: 'San Esteban', 
+                type: 'Fiesta',
+                description: 'Primer mártir de la Iglesia. Diácono apedreado por predicar a Cristo. Patrono de los diáconos y canteros.'
+            },
+            '12-27': { 
+                name: 'San Juan', 
+                type: 'Fiesta',
+                description: 'Apóstol y evangelista. "El discípulo amado". Autor del cuarto Evangelio. Patrono de los teólogos y escritores.'
+            },
+            '12-28': { 
+                name: 'Santos Inocentes', 
+                type: 'Fiesta',
+                description: 'Niños martirizados por Herodes en Belén. Primera manifestación del odio del mundo contra Cristo y su Iglesia.'
+            },
+            '12-29': { 
+                name: 'Santo Tomás Becket', 
+                type: 'Memoria',
+                description: 'Arzobispo de Canterbury y mártir. Asesinado en la catedral por defender la libertad de la Iglesia contra el rey Enrique II.'
+            },
+            '12-30': { 
+                name: 'La Sagrada Familia', 
+                type: 'Fiesta',
+                description: 'Celebración de Jesús, María y José en Nazaret. Modelo para todas las familias cristianas.'
+            },
+            '12-31': { 
+                name: 'San Silvestre I', 
+                type: 'Memoria',
+                description: 'Papa durante la paz constantiniana. Presidió el Concilio de Nicea. Construyó las primeras basílicas cristianas.'
+            }
+        };
+
+        // Tiempos litúrgicos con sus fechas aproximadas
+        const liturgicalTimes = [
+            {
+                name: 'Adviento',
+                description: 'Tiempo de preparación para la venida del Señor',
+                icon: 'fa-star',
+                color: '#6B46C1',
+                duration: '4 semanas',
+                nextChange: 'Navidad - 25 de diciembre',
+                startDay: 335,
+                endDay: 359,
+                iconSymbol: '⭐'
+            },
+            {
+                name: 'Navidad',
+                description: 'Celebración del nacimiento de Jesucristo',
+                icon: 'fa-gift',
+                color: '#FFFFFF',
+                duration: 'Hasta el Bautismo del Señor',
+                nextChange: 'Tiempo Ordinario - Enero',
+                startDay: 359,
+                endDay: 14,
+                iconSymbol: '🎁'
+            },
+            {
+                name: 'Tiempo Ordinario I',
+                description: 'Tiempo de crecimiento en la fe',
+                icon: 'fa-leaf',
+                color: '#10B981',
+                duration: 'Hasta Miércoles de Ceniza',
+                nextChange: 'Cuaresma - Febrero',
+                startDay: 14,
+                endDay: 45,
+                iconSymbol: '🌿'
+            },
+            {
+                name: 'Cuaresma',
+                description: 'Tiempo de penitencia y preparación para la Pascua',
+                icon: 'fa-pray',
+                color: '#6B46C1',
+                duration: '40 días',
+                nextChange: 'Pascua - Marzo/Abril',
+                startDay: 45,
+                endDay: 85,
+                iconSymbol: '🙏'
+            },
+            {
+                name: 'Pascua',
+                description: 'Celebración de la Resurrección del Señor',
+                icon: 'fa-dove',
+                color: '#FFFFFF',
+                duration: '50 días',
+                nextChange: 'Pentecostés - Mayo',
+                startDay: 85,
+                endDay: 135,
+                iconSymbol: '🕊️'
+            },
+            {
+                name: 'Pentecostés',
+                description: 'Venida del Espíritu Santo',
+                icon: 'fa-fire',
+                color: '#DC2626',
+                duration: '1 día',
+                nextChange: 'Tiempo Ordinario - Mayo',
+                startDay: 135,
+                endDay: 136,
+                iconSymbol: '🔥'
+            },
+            {
+                name: 'Tiempo Ordinario II',
+                description: 'Tiempo de crecimiento en la fe',
+                icon: 'fa-leaf',
+                color: '#10B981',
+                duration: 'Hasta Adviento',
+                nextChange: 'Adviento - Diciembre',
+                startDay: 136,
+                endDay: 335,
+                iconSymbol: '🌿'
+            }
+        ];
+
+        // Función para obtener el tiempo litúrgico actual
+        function getCurrentLiturgicalTime() {
+            const dayOfYear = getDayOfYear(new Date());
+            
+            for (const time of liturgicalTimes) {
+                if (dayOfYear >= time.startDay && dayOfYear < time.endDay) {
+                    return time;
+                }
+            }
+            
+            // Si no coincide, retornar tiempo ordinario
+            return liturgicalTimes[6]; // Tiempo Ordinario II
+        }
+
+        // Función para obtener el día del año (1-365/366)
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        // Función para obtener el ciclo litúrgico
+        function getLiturgicalCycle() {
+            const year = new Date().getFullYear();
+            const cycle = ['A', 'B', 'C'][year % 3];
+            return `Ciclo ${cycle}`;
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('es-ES', options);
+        }
+
+        // Función para dibujar la línea de tiempo SVG
+        function drawTimeline() {
+            const svg = document.getElementById('timelineSvg');
+            const segmentsGroup = document.getElementById('timelineSegments');
+            const labelsGroup = document.getElementById('timelineLabels');
+            const iconsGroup = document.getElementById('timelineIcons');
+            const currentLine = document.getElementById('currentLine');
+            const currentMarker = document.getElementById('currentMarker');
+            
+            // Limpiar grupos
+            segmentsGroup.innerHTML = '';
+            labelsGroup.innerHTML = '';
+            iconsGroup.innerHTML = '';
+            
+            const svgWidth = 1000;
+            const svgHeight = 180;
+            const barHeight = 40;
+            const barY = 70;
+            const margin = 50;
+            const timelineWidth = svgWidth - 2 * margin;
+            
+            // Dibujar segmentos
+            let x = margin;
+            
+            liturgicalTimes.forEach((time, index) => {
+                // Calcular duración y posición
+                let duration;
+                if (time.startDay < time.endDay) {
+                    duration = time.endDay - time.startDay;
+                } else {
+                    // Caso especial para Navidad (cruza el año)
+                    if (time.name === 'Navidad') {
+                        duration = (365 - time.startDay) + time.endDay;
+                    } else {
+                        duration = time.endDay - time.startDay;
+                    }
+                }
+                
+                const width = (duration / 365) * timelineWidth;
+                
+                // Dibujar rectángulo
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', barY);
+                rect.setAttribute('width', width);
+                rect.setAttribute('height', barHeight);
+                rect.setAttribute('fill', time.color);
+                rect.setAttribute('stroke', '#E5E7EB');
+                rect.setAttribute('stroke-width', '2');
+                rect.setAttribute('rx', '8');
+                rect.setAttribute('class', 'time-segment');
+                segmentsGroup.appendChild(rect);
+                
+                // Añadir borde adicional para colores claros
+                if (time.color === '#FFFFFF') {
+                    const borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    borderRect.setAttribute('x', x);
+                    borderRect.setAttribute('y', barY);
+                    borderRect.setAttribute('width', width);
+                    borderRect.setAttribute('height', barHeight);
+                    borderRect.setAttribute('fill', 'none');
+                    borderRect.setAttribute('stroke', '#9CA3AF');
+                    borderRect.setAttribute('stroke-width', '2');
+                    borderRect.setAttribute('rx', '8');
+                    segmentsGroup.appendChild(borderRect);
+                }
+                
+                // Añadir icono
+                const iconText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                iconText.setAttribute('x', x + width / 2);
+                iconText.setAttribute('y', barY + barHeight / 2 + 5);
+                iconText.setAttribute('class', 'timeline-label');
+                iconText.setAttribute('text-anchor', 'middle');
+                iconText.setAttribute('font-size', '20');
+                iconText.textContent = time.iconSymbol;
+                iconsGroup.appendChild(iconText);
+                
+                // Añadir etiqueta
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x + width / 2);
+                text.setAttribute('y', barY + barHeight + 25);
+                text.setAttribute('class', 'timeline-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = time.name;
+                labelsGroup.appendChild(text);
+                
+                x += width;
+            });
+            
+            // Posicionar línea actual
+            const dayOfYear = getDayOfYear(new Date());
+            let currentX;
+            
+            // Calcular posición actual
+            if (dayOfYear >= 335) { // Adviento
+                currentX = margin + ((dayOfYear - 335) / 365) * timelineWidth;
+            } else if (dayOfYear <= 14) { // Navidad
+                const navidadDuration = (365 - 335) + 14;
+                const navidadPosition = (365 - 335) + dayOfYear;
+                currentX = margin + (navidadPosition / 365) * timelineWidth;
+            } else if (dayOfYear <= 45) { // Tiempo Ordinario I
+                const prevDuration = (365 - 335) + 14;
+                currentX = margin + ((prevDuration + (dayOfYear - 14)) / 365) * timelineWidth;
+            } else if (dayOfYear <= 85) { // Cuaresma
+                const prevDuration = (365 - 335) + 14 + (45 - 14);
+                currentX = margin + ((prevDuration + (dayOfYear - 45)) / 365) * timelineWidth;
+            } else if (dayOfYear <= 135) { // Pascua
+                const prevDuration = (365 - 335) + 14 + (45 - 14) + (85 - 45);
+                currentX = margin + ((prevDuration + (dayOfYear - 85)) / 365) * timelineWidth;
+            } else if (dayOfYear <= 136) { // Pentecostés
+                const prevDuration = (365 - 335) + 14 + (45 - 14) + (85 - 45) + (135 - 85);
+                currentX = margin + ((prevDuration + (dayOfYear - 135)) / 365) * timelineWidth;
+            } else { // Tiempo Ordinario II
+                const prevDuration = (365 - 335) + 14 + (45 - 14) + (85 - 45) + (135 - 85) + 1;
+                currentX = margin + ((prevDuration + (dayOfYear - 136)) / 365) * timelineWidth;
+            }
+            
+            currentLine.setAttribute('x1', currentX);
+            currentLine.setAttribute('x2', currentX);
+            
+            currentMarker.setAttribute('cx', currentX);
+            currentMarker.setAttribute('cy', barY + barHeight / 2);
+        }
+
+        // Función para mostrar el tooltip
+        function showTooltip(event, saint) {
+            const tooltip = document.getElementById('tooltip');
+            const titleElement = tooltip.querySelector('.tooltip-title');
+            const descriptionElement = tooltip.querySelector('.tooltip-description');
+            
+            titleElement.textContent = saint.name;
+            descriptionElement.textContent = saint.description;
+            
+            tooltip.classList.add('show');
+            
+            // Posicionar el tooltip
+            const x = event.pageX;
+            const y = event.pageY;
+            
+            // Ajustar posición si se sale de la pantalla
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            
+            if (x + tooltipRect.width + 20 > windowWidth) {
+                tooltip.style.left = (x - tooltipRect.width - 20) + 'px';
+            } else {
+                tooltip.style.left = (x + 20) + 'px';
+            }
+            
+            tooltip.style.top = (y - 10) + 'px';
+        }
+
+        // Función para ocultar el tooltip
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('show');
+        }
+
+        // Inicializar la página
+        function initializePage() {
+            // Fecha actual
+            const currentDate = new Date();
+            document.getElementById('currentDate').textContent = formatDate(currentDate);
+            
+            // Ciclo litúrgico
+            document.getElementById('currentCycle').textContent = getLiturgicalCycle();
+            
+            // Tiempo litúrgico actual
+            const currentTime = getCurrentLiturgicalTime();
+            const currentTimeCard = document.getElementById('currentTimeCard');
+            currentTimeCard.style.backgroundColor = currentTime.color;
+            currentTimeCard.style.color = currentTime.color === '#FFFFFF' ? '#1F2937' : 'white';
+            
+            document.getElementById('currentTimeIcon').className = `fas ${currentTime.icon} text-4xl mb-3`;
+            document.getElementById('currentTimeName').textContent = currentTime.name;
+            document.getElementById('currentTimeDescription').textContent = currentTime.description;
+            document.getElementById('durationInfo').textContent = currentTime.duration;
+            document.getElementById('nextChange').textContent = currentTime.nextChange;
+            
+            // Dibujar línea de tiempo
+            drawTimeline();
+            
+            // Generar tabla de santos
+            generateSaintsTable();
+            
+            // Año en el footer
+            document.getElementById('year').textContent = currentDate.getFullYear();
+        }
+
+        // Generar tabla de santos - Modificada para saltar días ordinarios
+        function generateSaintsTable() {
+            const tbody = document.getElementById('saintsTable');
+            tbody.innerHTML = ''; // Limpiar tabla
+            const today = new Date();
+            
+            let celebrationsFound = 0;
+            let daysToCheck = 0;
+            const maxCelebrations = 10;
+            const maxDaysToCheck = 100; // Límite para evitar bucle infinito
+            
+            while (celebrationsFound < maxCelebrations && daysToCheck < maxDaysToCheck) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + daysToCheck);
+                
+                // Formatear fecha como MM-DD
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const dateKey = `${month}-${day}`;
+                
+                // Obtener santo del día
+                let saint;
+                if (santosPorFecha[dateKey]) {
+                    saint = santosPorFecha[dateKey];
+                } else {
+                    // Si no está en la base de datos, crear un objeto genérico
+                    saint = { 
+                        name: 'Feria', 
+                        type: 'Feria', 
+                        description: 'Día ordinario del tiempo litúrgico sin celebración especial.' 
+                    };
+                }
+                
+                // Si no es feria, agregar a la tabla
+                if (saint.type !== 'Feria') {
+                    const row = document.createElement('tr');
+                    row.className = 'saint-row border-b border-gray-100 transition-colors duration-200';
+                    
+                    // Celda de fecha
+                    const dateCell = document.createElement('td');
+                    dateCell.className = 'py-3 px-4 font-medium';
+                    dateCell.textContent = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                    row.appendChild(dateCell);
+                    
+                    // Celda del día de la semana
+                    const dayCell = document.createElement('td');
+                    dayCell.className = 'py-3 px-4 capitalize';
+                    dayCell.textContent = date.toLocaleDateString('es-ES', { weekday: 'long' });
+                    row.appendChild(dayCell);
+                    
+                    // Celda del santo
+                    const saintCell = document.createElement('td');
+                    saintCell.className = 'py-3 px-4 saint-cell';
+                    
+                    // Crear un span para el nombre
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = saint.name;
+                    saintCell.appendChild(nameSpan);
+                    
+                    // Añadir badge del tipo
+                    const typeBadge = document.createElement('span');
+                    typeBadge.className = `celebration-badge ${
+                        saint.type === 'Solemnidad' ? 'badge-solemnidad' :
+                        saint.type === 'Fiesta' ? 'badge-fiesta' :
+                        'badge-memoria'
+                    }`;
+                    typeBadge.textContent = saint.type;
+                    saintCell.appendChild(typeBadge);
+                    
+                    // Crear una función que capture el santo correcto para el tooltip
+                    const tooltipHandler = function(currentSaint) {
+                        return function(event) {
+                            showTooltip(event, currentSaint);
+                        };
+                    };
+                    
+                    // Agregar evento para el tooltip
+                    saintCell.addEventListener('mouseover', tooltipHandler(saint));
+                    saintCell.addEventListener('mouseout', hideTooltip);
+                    
+                    row.appendChild(saintCell);
+                    
+                    tbody.appendChild(row);
+                    
+                    celebrationsFound++;
+                }
+                
+                daysToCheck++;
+            }
+            
+            // Si no se encontraron suficientes celebraciones, mostrar un mensaje
+            if (celebrationsFound === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="3" class="py-6 px-4 text-center text-gray-500">
+                        <i class="fas fa-calendar-times text-2xl mb-2"></i>
+                        <p>No se encontraron celebraciones en los próximos días</p>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
