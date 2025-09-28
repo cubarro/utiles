@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Santoral Diario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --color-fondo: #f4f4f4;
+      --color-dia: linear-gradient(135deg, #e0eafc, #cfdef3);
+      --color-hover: linear-gradient(135deg, #d4fc79, #96e6a1);
+      --color-tooltip: #333;
+      --color-texto-tooltip: #fff;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--color-fondo);
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .columna {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 100%;
+    }
+
+    .dia {
+      background: var(--color-dia);
+      border-radius: 8px;
+      padding: 0.75rem;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .dia:hover {
+      background: var(--color-hover);
+    }
+
+    .tooltip {
+      visibility: hidden;
+      background-color: var(--color-tooltip);
+      color: var(--color-texto-tooltip);
+      border-radius: 6px;
+      padding: 0.75rem;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      margin-top: 0.5rem;
+      z-index: 10;
+      width: 90vw;
+      max-width: 300px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .dia:hover .tooltip {
+      visibility: visible;
+    }
+
+    @media (min-width: 600px) {
+      .columna {
+        max-width: 400px;
+        margin: auto;
+      }
+      .tooltip {
+        left: 105%;
+        top: 0;
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Santoral: Hoy y próximos 6 días</h2>
+  <div class="columna" id="santoral"></div>
+
+  <script>
+    const santos = [
+      {
+        fecha: "27 Sep",
+        nombre: "San Vicente de Paúl",
+        resumen: "Presbítero francés que dedicó su vida al servicio de los pobres. Fundador de los Paúles y las Hijas de la Caridad."
+      },
+      {
+        fecha: "28 Sep",
+        nombre: "San Wenceslao",
+        resumen: "Duque de Bohemia, mártir por su fe. Ejemplo de justicia y caridad cristiana."
+      },
+      {
+        fecha: "29 Sep",
+        nombre: "Santos Miguel, Gabriel y Rafael",
+        resumen: "Arcángeles que representan la protección, la comunicación divina y la sanación espiritual."
+      },
+      {
+        fecha: "30 Sep",
+        nombre: "San Jerónimo",
+        resumen: "Doctor de la Iglesia, traductor de la Biblia al latín (Vulgata). Defensor del estudio bíblico."
+      },
+      {
+        fecha: "1 Oct",
+        nombre: "Santa Teresa del Niño Jesús",
+        resumen: "Carmelita francesa, conocida por su 'caminito' de humildad y amor. Doctora de la Iglesia."
+      },
+      {
+        fecha: "2 Oct",
+        nombre: "Santos Ángeles Custodios",
+        resumen: "Celebración de los ángeles que nos protegen y guían según la tradición cristiana."
+      },
+      {
+        fecha: "3 Oct",
+        nombre: "San Francisco de Borja",
+        resumen: "Duque convertido en jesuita, ejemplo de renuncia y servicio espiritual."
+      }
+    ];
+
+    const contenedor = document.getElementById("santoral");
+    santos.forEach(dia => {
+      const div = document.createElement("div");
+      div.className = "dia";
+      div.innerHTML = `
+        <strong>${dia.fecha}</strong>: ${dia.nombre}
+        <div class="tooltip"><strong>${dia.nombre}</strong><br>${dia.resumen}</div>
+      `;
+      contenedor.appendChild(div);
+    });
+  </script>
+</body>
+</html>
