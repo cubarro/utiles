@@ -1,0 +1,3485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santos de los Próximos Días</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Tema oscuro (predeterminado) */
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: white;
+            --bg-card: white;
+            --bg-header: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --bg-table-header: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            --bg-main-saint: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --bg-more-saints: #ecf0f1;
+            --bg-more-saints-hover: #d5dbdb;
+            --bg-tooltip: #2c3e50;
+            --text-primary: white;
+            --text-secondary: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #ecf0f1;
+            --shadow-color: rgba(0,0,0,0.1);
+            --hover-shadow: rgba(231, 76, 60, 0.3);
+            --tooltip-arrow: #2c3e50;
+            --saint-name: #e74c3c;
+            --saint-header: #3498db;
+            --button-bg: #3498db;
+            --button-hover: #2980b9;
+        }
+
+        /* Tema claro */
+        [data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: white;
+            --bg-card: #ffffff;
+            --bg-header: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            --bg-table-header: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            --bg-main-saint: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+            --bg-more-saints: #f8f9fa;
+            --bg-more-saints-hover: #e9ecef;
+            --bg-tooltip: #495057;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0,0,0,0.08);
+            --hover-shadow: rgba(253, 126, 20, 0.3);
+            --tooltip-arrow: #495057;
+            --saint-name: #fd7e14;
+            --saint-header: #6c757d;
+            --button-bg: #6c757d;
+            --button-hover: #495057;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: var(--bg-header);
+            color: var(--text-primary);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 15px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            padding: 20px 15px;
+        }
+
+        /* Tabla para pantallas grandes */
+        .saints-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .saints-table th {
+            background: var(--bg-table-header);
+            color: var(--text-primary);
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .saints-table td {
+            padding: 15px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        /* Diseño de tarjetas para móviles */
+        .cards-container {
+            display: none;
+        }
+
+        .day-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .day-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: var(--bg-table-header);
+            color: var(--text-primary);
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .card-content {
+            padding: 20px 15px;
+        }
+
+        .date-cell {
+            font-weight: bold;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .main-saint {
+            background: var(--bg-main-saint);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .main-saint:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--hover-shadow);
+        }
+
+        .main-saint h3 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .main-saint p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .more-saints {
+            background: var(--bg-more-saints);
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .more-saints:hover {
+            background: var(--bg-more-saints-hover);
+            color: var(--text-secondary);
+        }
+
+        .more-saints:active {
+            transform: scale(0.98);
+        }
+
+        .tooltip {
+            position: fixed;
+            background: var(--bg-tooltip);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .tooltip h4 {
+            margin-bottom: 15px;
+            color: var(--saint-header);
+            border-bottom: 2px solid var(--saint-header);
+            padding-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .saint-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .saint-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .saint-name {
+            font-weight: bold;
+            color: var(--saint-name);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .saint-summary {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        .tooltip-arrow {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--tooltip-arrow);
+        }
+
+        .close-tooltip {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .close-tooltip:hover {
+            opacity: 1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--button-bg);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Media queries para responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                padding: 8px 12px;
+                font-size: 1rem;
+            }
+
+            .table-container {
+                padding: 15px 10px;
+            }
+
+            /* Ocultar tabla y mostrar tarjetas */
+            .saints-table {
+                display: none;
+            }
+
+            .cards-container {
+                display: block;
+            }
+
+            .card-header {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+
+            .card-content {
+                padding: 15px;
+            }
+
+            .main-saint h3 {
+                font-size: 1rem;
+            }
+
+            .main-saint p {
+                font-size: 0.85rem;
+            }
+
+            .tooltip {
+                padding: 15px;
+                max-width: 95%;
+                border-radius: 10px;
+            }
+
+            .tooltip h4 {
+                font-size: 1rem;
+            }
+
+            .saint-name {
+                font-size: 0.95rem;
+            }
+
+            .saint-summary {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .table-container {
+                padding: 10px;
+            }
+
+            .card-header {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+
+            .card-content {
+                padding: 12px;
+            }
+
+            .main-saint {
+                padding: 12px;
+            }
+
+            .main-saint h3 {
+                font-size: 0.95rem;
+                margin-bottom: 6px;
+            }
+
+            .main-saint p {
+                font-size: 0.8rem;
+            }
+
+            .more-saints {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+
+            .tooltip {
+                padding: 12px;
+                max-height: 70vh;
+            }
+
+            .tooltip h4 {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+            }
+
+            .saint-item {
+                margin-bottom: 12px;
+                padding-bottom: 12px;
+            }
+
+            .saint-name {
+                font-size: 0.9rem;
+                margin-bottom: 6px;
+            }
+
+            .saint-summary {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+
+            .close-tooltip {
+                font-size: 1.2rem;
+                top: 8px;
+                right: 12px;
+            }
+        }
+
+        /* Animación para tarjetas */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .day-card {
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        .day-card:nth-child(1) { animation-delay: 0.1s; }
+        .day-card:nth-child(2) { animation-delay: 0.2s; }
+        .day-card:nth-child(3) { animation-delay: 0.3s; }
+        .day-card:nth-child(4) { animation-delay: 0.4s; }
+        .day-card:nth-child(5) { animation-delay: 0.5s; }
+        .day-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Indicador de scroll para tooltip en móviles */
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        /* Transiciones suaves para el cambio de tema */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <h1>🙏 Santos de los Próximos Días</h1>
+            <p>Conoce a los santos que celebramos en los próximos 6 días</p>
+        </div>
+        
+        <div class="table-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando información de los santos...</p>
+            </div>
+            
+            <!-- Tabla para pantallas grandes -->
+            <table class="saints-table" id="saintsTable" style="display: none;">
+                <thead>
+                    <tr id="tableHeader"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            
+            <!-- Contenedor de tarjetas para móviles -->
+            <div class="cards-container" id="cardsContainer"></div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <button class="close-tooltip" id="closeTooltip">&times;</button>
+        <div class="tooltip-arrow"></div>
+        <div id="tooltipContent"></div>
+    </div>
+
+    <script>
+        // Base de datos de santos (misma base de datos anterior)
+        const saintsDatabase = {
+            '1/1': [
+                {
+                    nombre: 'Santa María, Madre de Dios',
+                    resumen: 'María, la madre de Jesús, es honrada como la Theotokos (Madre de Dios). Es la santa más venerada en la Iglesia Católica.',
+                    añoCanonizacion: 'Primeros siglos'
+                },
+                {
+                    nombre: 'San Basilio Magno',
+                    resumen: 'Padre de la Iglesia Oriental, obispo de Cesarea y doctor de la Iglesia. Conocido por su sabiduría y defensa de la fe.',
+                    añoCanonizacion: '379 d.C.'
+                }
+            ],
+            '1/2': [
+                {
+                    nombre: 'San Basilio y San Gregorio Nacianceno',
+                    resumen: 'Dos grandes Padres de la Iglesia y amigos inseparables que defendieron la fe contra las herejías de su tiempo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/3': [
+                {
+                    nombre: 'Santísimo Nombre de Jesús',
+                    resumen: 'Festividad que honra el santo nombre de Jesús, reconocido por su poder salvador y su santificación.',
+                    añoCanonizacion: 'Siglo XV'
+                }
+            ],
+            '1/4': [
+                {
+                    nombre: 'Santa Ángela de Foligno',
+                    resumen: 'Mística italiana, terciaria franciscana, conocida por sus escritos espirituales y su profunda vida de oración.',
+                    añoCanonizacion: '2013'
+                }
+            ],
+            '1/5': [
+                {
+                    nombre: 'San Juan Nepomuceno Neumann',
+                    resumen: 'Obispo de Filadelfia, primer santo canonizado de Estados Unidos. Inmigrante checo que sirvió a los pobres.',
+                    añoCanonizacion: '1977'
+                }
+            ],
+            '1/6': [
+                {
+                    nombre: 'San Andrés Bessette',
+                    resumen: 'Hermano religioso de la Santa Cruz, conocido por su humildad y los milagros atribuidos a su intercesión.',
+                    añoCanonizacion: '2010'
+                }
+            ],
+            '1/7': [
+                {
+                    nombre: 'San Raimundo de Peñafort',
+                    resumen: 'Dominico español, canonista y patrono de los canonistas. Fundador de la Orden de la Merced.',
+                    añoCanonizacion: '1601'
+                }
+            ],
+            '1/8': [
+                {
+                    nombre: 'San Severino de Noricum',
+                    resumen: 'Monje y misionero que evangelizó la región de Noricum (actual Austria) durante las invasiones bárbaras.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '1/9': [
+                {
+                    nombre: 'San Adriano de Canterbury',
+                    resumen: 'Monje africano que se convirtió en abad de Canterbury y contribuyó a la educación en Inglaterra.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '1/10': [
+                {
+                    nombre: 'San Guillermo de Bourges',
+                    resumen: 'Arzobispo de Bourges, conocido por su caridad hacia los pobres y su vida de penitencia.',
+                    añoCanonizacion: '1218'
+                }
+            ],
+            '1/11': [
+                {
+                    nombre: 'San Teodosio el Cenobiarca',
+                    resumen: 'Padre del monacato cenobítico, fundador de monasterios en Palestina y modelo de vida monástica.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '1/12': [
+                {
+                    nombre: 'San Margarita de Hungría',
+                    resumen: 'Princesa húngara que se hizo monja dominica, conocida por su humildad y vida de oración.',
+                    añoCanonizacion: '1943'
+                }
+            ],
+            '1/13': [
+                {
+                    nombre: 'San Hilario de Poitiers',
+                    resumen: 'Obispo y doctor de la Iglesia, defensor de la fe contra el arrianismo y gran teólogo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/14': [
+                {
+                    nombre: 'San Félix de Nola',
+                    resumen: 'Presbítero español que sufrió persecución por su fe y es conocido por su caridad y milagros.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '1/15': [
+                {
+                    nombre: 'San Pablo el Ermitaño',
+                    resumen: 'Primer ermitaño conocido, vivió en el desierto egipcio y es considerado el padre del monacato.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/16': [
+                {
+                    nombre: 'San Marcelo I',
+                    resumen: 'Papa y mártir que sufrió persecución durante el reinado de Majencio por defender la fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/17': [
+                {
+                    nombre: 'San Antonio Abad',
+                    resumen: 'Padre del monacato cristiano, ermitaño egipcio que inspiró a miles a seguir la vida religiosa.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/18': [
+                {
+                    nombre: 'San Prisca',
+                    resumen: 'Joven mártir romana que sufrió persecución por su fe en Cristo durante los primeros siglos.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '1/19': [
+                {
+                    nombre: 'San Mario y compañeros',
+                    resumen: 'Mártires persas que sufrieron persecución en Roma y son venerados por su fidelidad hasta la muerte.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '1/20': [
+                {
+                    nombre: 'San Fabián',
+                    resumen: 'Papa y mártir que organizó la Iglesia de Roma y murió durante la persecución de Decio.',
+                    añoCanonizacion: 'Siglo III'
+                },
+                {
+                    nombre: 'San Sebastián',
+                    resumen: 'Mártir romano, soldado que defendió a los cristianos y es patrono de los atletas y militares.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '1/21': [
+                {
+                    nombre: 'Santa Inés',
+                    resumen: 'Joven mártir romana que prefirió morir antes que renunciar a su fe y castidad.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/22': [
+                {
+                    nombre: 'San Vicente',
+                    resumen: 'Diácono y mártir español que sufrió terrible persecución por defender la fe cristiana.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '1/23': [
+                {
+                    nombre: 'San Ildefonso de Toledo',
+                    resumen: 'Arzobispo de Toledo, doctor de la Iglesia y defensor de la virginidad de María.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '1/24': [
+                {
+                    nombre: 'San Francisco de Sales',
+                    resumen: 'Obispo de Ginebra, doctor de la Iglesia y patrono de los escritores y periodistas.',
+                    añoCanonizacion: '1665'
+                }
+            ],
+            '1/25': [
+                {
+                    nombre: 'Conversión de San Pablo',
+                    resumen: 'Celebración de la conversión de Saulo a Pablo en el camino a Damasco, evento fundamental para la Iglesia.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '1/26': [
+                {
+                    nombre: 'San Timoteo y San Tito',
+                    resumen: 'Discípulos de San Pablo, obispos y mártires que colaboraron en la expansión del cristianismo.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '1/27': [
+                {
+                    nombre: 'Santa Ángela Merici',
+                    resumen: 'Fundadora de la Compañía de Santa Úrsula, dedicada a la educación de las jóvenes.',
+                    añoCanonizacion: '1807'
+                }
+            ],
+            '1/28': [
+                {
+                    nombre: 'Santo Tomás de Aquino',
+                    resumen: 'Doctor de la Iglesia, filósofo y teólogo dominico, uno de los más grandes pensadores cristianos.',
+                    añoCanonizacion: '1323'
+                }
+            ],
+            '1/29': [
+                {
+                    nombre: 'San Francisco de Sales',
+                    resumen: 'Obispo de Ginebra, conocido por su dulzura y paciencia, patrono de los escritores.',
+                    añoCanonizacion: '1665'
+                }
+            ],
+            '1/30': [
+                {
+                    nombre: 'Santa Jacinta Mariscotti',
+                    resumen: 'Religiosa franciscana italiana, conocida por su conversión y vida de penitencia.',
+                    añoCanonizacion: '1807'
+                }
+            ],
+            '1/31': [
+                {
+                    nombre: 'San Juan Bosco',
+                    resumen: 'Fundador de la Sociedad Salesiana, dedicado a la educación de los jóvenes y los pobres.',
+                    añoCanonizacion: '1934'
+                }
+            ],
+            // Febrero
+            '2/1': [
+                {
+                    nombre: 'San Ignacio de Antioquía',
+                    resumen: 'Obispo y mártir, discípulo de San Juan, conocido por sus cartas sobre la estructura de la Iglesia.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '2/2': [
+                {
+                    nombre: 'La Presentación del Señor',
+                    resumen: 'Celebración de la presentación de Jesús en el templo, también conocida como la Candelaria.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '2/3': [
+                {
+                    nombre: 'San Blas',
+                    resumen: 'Obispo y mártir, patrono de los enfermos de garganta, conocido por sus milagros de curación.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '2/4': [
+                {
+                    nombre: 'San Juan de Britto',
+                    resumen: 'Misionero jesuita portugués, mártir en India por predicar el evangelio.',
+                    añoCanonizacion: '1947'
+                }
+            ],
+            '2/5': [
+                {
+                    nombre: 'Santa Águeda',
+                    resumen: 'Joven mártir siciliana, patrona de las enfermeras y protectora contra los incendios.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '2/6': [
+                {
+                    nombre: 'San Pablo Miki y compañeros',
+                    resumen: 'Mártires jesuitas en Japón, crucificados por su fe durante la persecución cristiana.',
+                    añoCanonizacion: '1862'
+                }
+            ],
+            '2/7': [
+                {
+                    nombre: 'San Ricardo el Rey',
+                    resumen: 'Rey de Inglaterra, conocido por su piedad y justicia, padre de San Willibaldo.',
+                    añoCanonizacion: 'Siglo VIII'
+                }
+            ],
+            '2/8': [
+                {
+                    nombre: 'San Jerónimo Emiliani',
+                    resumen: 'Fundador de los Somascos, dedicado a la educación de los huérfanos y jóvenes abandonados.',
+                    añoCanonizacion: '1767'
+                },
+                {
+                    nombre: 'Santa Josefina Bakhita',
+                    resumen: 'Ex-esclava sudanesa que se convirtió en religiosa canosiana, ejemplo de perdón y fe.',
+                    añoCanonizacion: '2000'
+                }
+            ],
+            '2/9': [
+                {
+                    nombre: 'San Miguel Febres Cordero',
+                    resumen: 'Hermano cristiano ecuatoriano, educador y primer santo canonizado de Ecuador.',
+                    añoCanonizacion: '1984'
+                }
+            ],
+            '2/10': [
+                {
+                    nombre: 'Santa Escolástica',
+                    resumen: 'Hermana gemela de San Benito, fundadora del monacato femenino y modelo de vida contemplativa.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '2/11': [
+                {
+                    nombre: 'Nuestra Señora de Lourdes',
+                    resumen: 'Aparición de la Virgen María a Santa Bernardita en Lourdes, Francia, lugar de numerosos milagros.',
+                    añoCanonizacion: '1858'
+                }
+            ],
+            '2/12': [
+                {
+                    nombre: 'Los Santos Siete Fundadores',
+                    resumen: 'Siete florentinos que fundaron la Orden de los Siervos de María, dedicados a la vida contemplativa.',
+                    añoCanonizacion: '1888'
+                }
+            ],
+            '2/13': [
+                {
+                    nombre: 'Santa Catalina de Ricci',
+                    resumen: 'Dominica italiana, mística y estigmatizada, conocida por sus éxtasis y vida de oración.',
+                    añoCanonizacion: '1746'
+                }
+            ],
+            '2/14': [
+                {
+                    nombre: 'San Cirilo y San Metodio',
+                    resumen: 'Hermanos apóstoles de los eslavos, creadores del alfabeto glagolítico y evangelizadores.',
+                    añoCanonizacion: '1880'
+                },
+                {
+                    nombre: 'San Valentín',
+                    resumen: 'Mártir romano, patrono de los enamorados, que murió por defender el matrimonio cristiano.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '2/15': [
+                {
+                    nombre: 'San Claudio de la Colombière',
+                    resumen: 'Jesuita francés, confesor de Santa Margarita María y promotor del Sagrado Corazón.',
+                    añoCanonizacion: '1992'
+                }
+            ],
+            '2/16': [
+                {
+                    nombre: 'San Onesimo',
+                    resumen: 'Esclavo convertido por San Pablo, que se convirtió en obispo y mártir.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '2/17': [
+                {
+                    nombre: 'Los Siete Santos Fundadores',
+                    resumen: 'Siete nobles florentinos que abandonaron sus riquezas para servir a Dios en pobreza.',
+                    añoCanonizacion: '1888'
+                }
+            ],
+            '2/18': [
+                {
+                    nombre: 'Santa Bernardita de Lourdes',
+                    resumen: 'Vidente de las apariciones de la Virgen en Lourdes, modelo de humildad y sencillez.',
+                    añoCanonizacion: '1933'
+                }
+            ],
+            '2/19': [
+                {
+                    nombre: 'San Barbato',
+                    resumen: 'Obispo de Benevento, que convirtió a los lombardos al cristianismo y luchó contra la herejía.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '2/20': [
+                {
+                    nombre: 'Santos Eusebio y compañeros',
+                    resumen: 'Mártires en Sicilia durante la persecución de Diocleciano, fieles hasta la muerte.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '2/21': [
+                {
+                    nombre: 'San Pedro Damián',
+                    resumen: 'Cardenal y doctor de la Iglesia, reformador monástico y defensor de la pureza en la Iglesia.',
+                    añoCanonizacion: '1828'
+                }
+            ],
+            '2/22': [
+                {
+                    nombre: 'Cátedra de San Pedro',
+                    resumen: 'Celebración de la autoridad de Pedro como primer Papa y fundamento de la Iglesia.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '2/23': [
+                {
+                    nombre: 'San Policarpo',
+                    resumen: 'Obispo y mártir de Esmirna, discípulo de San Juan y uno de los padres apostólicos.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '2/24': [
+                {
+                    nombre: 'San Mateo',
+                    resumen: 'Evangelista y apóstol, recaudador de impuestos llamado por Jesús para seguirle.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '2/25': [
+                {
+                    nombre: 'Santa Walburga',
+                    resumen: 'Abadesa inglesa que evangelizó Alemania, conocida por sus milagros y vida de oración.',
+                    añoCanonizacion: 'Siglo VIII'
+                }
+            ],
+            '2/26': [
+                {
+                    nombre: 'San Porfirio',
+                    resumen: 'Obispo de Gaza, que convirtió la ciudad del paganismo al cristianismo.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '2/27': [
+                {
+                    nombre: 'San Gabriel de la Dolorosa',
+                    resumen: 'Joven pasionista italiano, conocido por su devoción a la Pasión de Cristo y su vida angelical.',
+                    añoCanonizacion: '1920'
+                }
+            ],
+            '2/28': [
+                {
+                    nombre: 'San Román',
+                    resumen: 'Monje y mártir en Constanza, que sufrió persecución por defender la fe cristiana.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '2/29': [
+                {
+                    nombre: 'San Oswaldo',
+                    resumen: 'Rey de Northumbria, mártir que murió en batalla defendiendo su fe y su pueblo.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            // Marzo
+            '3/1': [
+                {
+                    nombre: 'San David',
+                    resumen: 'Obispo de Gales, patrono de Gales, conocido por su sabiduría y milagros.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '3/2': [
+                {
+                    nombre: 'San Chad',
+                    resumen: 'Obispo de Lichfield, humilde servidor de Dios que renunció a su cargo por la unidad de la Iglesia.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '3/3': [
+                {
+                    nombre: 'Santa Cunegunda',
+                    resumen: 'Emperatriz del Sacro Imperio Romano Germánico, esposa de San Enrique II, modelo de reina cristiana.',
+                    añoCanonizacion: '1200'
+                }
+            ],
+            '3/4': [
+                {
+                    nombre: 'San Casimiro',
+                    resumen: 'Príncipe polaco, conocido por su piedad, castidad y devoción a la Eucaristía.',
+                    añoCanonizacion: '1602'
+                }
+            ],
+            '3/5': [
+                {
+                    nombre: 'San Juan José de la Cruz',
+                    resumen: 'Franciscano italiano, místico y taumaturgo, conocido por su vida de penitencia.',
+                    añoCanonizacion: '1839'
+                }
+            ],
+            '3/6': [
+                {
+                    nombre: 'San Coleta',
+                    resumen: 'Fundadora de las Coletinas, reformadora de la Orden de Santa Clara, modelo de pobreza.',
+                    añoCanonizacion: '1807'
+                }
+            ],
+            '3/7': [
+                {
+                    nombre: 'Santos Perpetua y Felicidad',
+                    resumen: 'Mártires cartaginesas, madres que prefirieron morir antes que renunciar a su fe.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '3/8': [
+                {
+                    nombre: 'San Juan de Dios',
+                    resumen: 'Fundador de la Orden Hospitalaria, dedicado a cuidar a los enfermos y pobres.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '3/9': [
+                {
+                    nombre: 'Santa Francisca Romana',
+                    resumen: 'Matrona romana, fundadora de las Oblatas de Tor de Specchi, modelo de esposa y madre cristiana.',
+                    añoCanonizacion: '1608'
+                }
+            ],
+            '3/10': [
+                {
+                    nombre: 'Los Cuarenta Mártires',
+                    resumen: 'Soldados romanos que murieron en Sebaste por negarse a renunciar a su fe cristiana.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '3/11': [
+                {
+                    nombre: 'San Eulogio',
+                    resumen: 'Sacerdote y mártir en Córdoba, defensor de los cristianos durante la dominación musulmana.',
+                    añoCanonizacion: 'Siglo IX'
+                }
+            ],
+            '3/12': [
+                {
+                    nombre: 'San Gregorio Magno',
+                    resumen: 'Papa y doctor de la Iglesia, reformador litúrgico y padre de la misión en Inglaterra.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '3/13': [
+                {
+                    nombre: 'Santa Eufrasia',
+                    resumen: 'Monja egipcia, conocida por su humildad, obediencia y vida de oración.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '3/14': [
+                {
+                    nombre: 'Santa Matilde',
+                    resumen: 'Reina de Alemania y emperatriz del Sacro Imperio, madre de Otón I, modelo de reina cristiana.',
+                    añoCanonizacion: 'Siglo X'
+                }
+            ],
+            '3/15': [
+                {
+                    nombre: 'San Longinos',
+                    resumen: 'Centurión romano que traspasó el costado de Cristo y se convirtió al cristianismo.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '3/16': [
+                {
+                    nombre: 'San Heriberto',
+                    resumen: 'Arzobispo de Colonia, conocido por su caridad hacia los pobres y su sabiduría.',
+                    añoCanonizacion: '1021'
+                }
+            ],
+            '3/17': [
+                {
+                    nombre: 'San Patricio',
+                    resumen: 'Apóstol de Irlanda, que evangelizó el país y es su patrón nacional.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '3/18': [
+                {
+                    nombre: 'San Cirilo de Jerusalén',
+                    resumen: 'Obispo y doctor de la Iglesia, conocido por sus catequesis bautismales.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '3/19': [
+                {
+                    nombre: 'San José',
+                    resumen: 'Esposo de la Virgen María y padre adoptivo de Jesús, modelo de padre y trabajador.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '3/20': [
+                {
+                    nombre: 'San Martín de Dumio',
+                    resumen: 'Obispo de Braga, que combatió el priscilianismo y organizó la Iglesia en Galicia.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '3/21': [
+                {
+                    nombre: 'San Nicolás de Flüe',
+                    resumen: 'Eremita suizo, patrono de Suiza, conocido como "Hermano Klaus" por su vida de oración.',
+                    añoCanonizacion: '1947'
+                }
+            ],
+            '3/22': [
+                {
+                    nombre: 'San Darío y compañeros',
+                    resumen: 'Mártires en Nicea que sufrieron persecución durante el reinado de Licinio.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '3/23': [
+                {
+                    nombre: 'San Toribio de Mogrovejo',
+                    resumen: 'Arzobispo de Lima, defensor de los indígenas y organizador de la Iglesia en América.',
+                    añoCanonizacion: '1726'
+                }
+            ],
+            '3/24': [
+                {
+                    nombre: 'Santa Catalina de Suecia',
+                    resumen: 'Hija de Santa Brígida, que siguió los pasos de su madre como religiosa y mística.',
+                    añoCanonizacion: '1484'
+                }
+            ],
+            '3/25': [
+                {
+                    nombre: 'Anunciación del Señor',
+                    resumen: 'Celebración del anuncio del ángel Gabriel a María sobre el nacimiento de Jesús.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '3/26': [
+                {
+                    nombre: 'San Ludgero',
+                    resumen: 'Misionero en Frisia y primer obispo de Münster, evangelizador de los germanos.',
+                    añoCanonizacion: 'Siglo IX'
+                }
+            ],
+            '3/27': [
+                {
+                    nombre: 'San Juan Damasceno',
+                    resumen: 'Monje y doctor de la Iglesia, defensor de las imágenes sagradas y teólogo.',
+                    añoCanonizacion: 'Siglo VIII'
+                }
+            ],
+            '3/28': [
+                {
+                    nombre: 'San Gontrán',
+                    resumen: 'Rey de Borgoña, conocido por su justicia, caridad y defensa de la Iglesia.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '3/29': [
+                {
+                    nombre: 'San Jonás',
+                    resumen: 'Profeta del Antiguo Testamento, enviado a Nínive para predicar la conversión.',
+                    añoCanonizacion: 'Antiguo Testamento'
+                }
+            ],
+            '3/30': [
+                {
+                    nombre: 'San Juan Clímaco',
+                    resumen: 'Monje del Sinaí, autor de "La Escala del Paraíso", guía de la vida espiritual.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '3/31': [
+                {
+                    nombre: 'San Benjamín',
+                    resumen: 'Diácono y mártir en Persia, que sufrió terrible persecución por predicar el evangelio.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            // Abril
+            '4/1': [
+                {
+                    nombre: 'San Hugo de Grenoble',
+                    resumen: 'Obispo de Grenoble, reformador eclesiástico y fundador de la Cartuja.',
+                    añoCanonizacion: '1134'
+                }
+            ],
+            '4/2': [
+                {
+                    nombre: 'San Francisco de Paula',
+                    resumen: 'Fundador de los Mínimos, conocido por su humildad y los milagros de curación.',
+                    añoCanonizacion: '1519'
+                }
+            ],
+            '4/3': [
+                {
+                    nombre: 'San Sixto I',
+                    resumen: 'Papa y mártir, que organizó la liturgia y defendió la fe durante los primeros siglos.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '4/4': [
+                {
+                    nombre: 'San Isidoro de Sevilla',
+                    resumen: 'Arzobispo de Sevilla, doctor de la Iglesia y enciclopedista, patrón de Internet.',
+                    añoCanonizacion: '1598'
+                }
+            ],
+            '4/5': [
+                {
+                    nombre: 'San Vicente Ferrer',
+                    resumen: 'Dominico valenciano, predicador itinerante que convirtió a miles al cristianismo.',
+                    añoCanonizacion: '1455'
+                }
+            ],
+            '4/6': [
+                {
+                    nombre: 'San Celestino I',
+                    resumen: 'Papa que combatió las herejías nestorianas y pelagianas en el siglo V.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '4/7': [
+                {
+                    nombre: 'San Juan Bautista de la Salle',
+                    resumen: 'Fundador de los Hermanos de las Escuelas Cristianas, patrono de los maestros.',
+                    añoCanonizacion: '1900'
+                }
+            ],
+            '4/8': [
+                {
+                    nombre: 'San Julio I',
+                    resumen: 'Papa que construyó iglesias en Roma y defendió la fe contra el arrianismo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '4/9': [
+                {
+                    nombre: 'Santa María Cleofás',
+                    resumen: 'Una de las mujeres que estuvo al pie de la cruz y fue testigo de la resurrección.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '4/10': [
+                {
+                    nombre: 'San Miguel de los Santos',
+                    resumen: 'Trinitario descalzo español, conocido por su vida de oración y penitencia.',
+                    añoCanonizacion: '1862'
+                }
+            ],
+            '4/11': [
+                {
+                    nombre: 'San Estanislao',
+                    resumen: 'Obispo y mártir de Cracovia, que murió defendiendo la justicia y la fe.',
+                    añoCanonizacion: '1253'
+                }
+            ],
+            '4/12': [
+                {
+                    nombre: 'San Julio I',
+                    resumen: 'Papa que luchó contra el arrianismo y promovió la construcción de iglesias.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '4/13': [
+                {
+                    nombre: 'San Martín I',
+                    resumen: 'Papa y mártir que sufrió exilio por defender la fe contra los monotelitas.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '4/14': [
+                {
+                    nombre: 'San Liduina',
+                    resumen: 'Mística holandesa que sufrió terriblemente y ofreció sus dolores por la conversión de los pecadores.',
+                    añoCanonizacion: '1890'
+                }
+            ],
+            '4/15': [
+                {
+                    nombre: 'San Benito José Labre',
+                    resumen: 'Peregrino y mendigo francés, conocido como "el vagabundo de Dios" por su vida de pobreza.',
+                    añoCanonizacion: '1883'
+                }
+            ],
+            '4/16': [
+                {
+                    nombre: 'San Bernadeta Soubirous',
+                    resumen: 'Vidente de Lourdes, modelo de humildad y sencillez en su servicio a Dios.',
+                    añoCanonizacion: '1933'
+                }
+            ],
+            '4/17': [
+                {
+                    nombre: 'San Aniceto',
+                    resumen: 'Papa que combatió las herejías y organizó la liturgia romana.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '4/18': [
+                {
+                    nombre: 'San Perfecto',
+                    resumen: 'Diácono y mártir en Córdoba, que murió defendiendo su fe durante la dominación musulmana.',
+                    añoCanonizacion: 'Siglo IX'
+                }
+            ],
+            '4/19': [
+                {
+                    nombre: 'San León IX',
+                    resumen: 'Papa reformador que luchó por la unidad de la Iglesia y contra la simonía.',
+                    añoCanonizacion: '1087'
+                }
+            ],
+            '4/20': [
+                {
+                    nombre: 'San Marcelino',
+                    resumen: 'Papa y mártir que sufrió persecución durante el reinado de Diocleciano.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '4/21': [
+                {
+                    nombre: 'San Anselmo',
+                    resumen: 'Arzobispo de Canterbury y doctor de la Iglesia, filósofo y teólogo.',
+                    añoCanonizacion: '1494'
+                }
+            ],
+            '4/22': [
+                {
+                    nombre: 'San Sotero',
+                    resumen: 'Papa que cuidó de los pobres y los mártires durante las persecuciones.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '4/23': [
+                {
+                    nombre: 'San Jorge',
+                    resumen: 'Mártir y soldado romano, patrono de Inglaterra y numerosos países.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '4/24': [
+                {
+                    nombre: 'San Fidelis de Sigmaringa',
+                    resumen: 'Capuchino y mártir, que murió predicando el evangelio en Suiza.',
+                    añoCanonizacion: '1746'
+                }
+            ],
+            '4/25': [
+                {
+                    nombre: 'San Marcos',
+                    resumen: 'Evangelista y primer obispo de Alejandría, autor del segundo evangelio.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '4/26': [
+                {
+                    nombre: 'San Cletus',
+                    resumen: 'Papa que organizó la Iglesia romana y sufrió persecución por su fe.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '4/27': [
+                {
+                    nombre: 'Santa Zita',
+                    resumen: 'Sirvienta italiana, patrona de las empleadas domésticas, modelo de caridad.',
+                    añoCanonizacion: '1696'
+                }
+            ],
+            '4/28': [
+                {
+                    nombre: 'San Luis María Grignion de Montfort',
+                    resumen: 'Misionero y escritor, fundador de las Hijas de la Sabiduría y de los Misioneros Montfortianos.',
+                    añoCanonizacion: '1947'
+                }
+            ],
+            '4/29': [
+                {
+                    nombre: 'Santa Catalina de Siena',
+                    resumen: 'Mística dominica, doctora de la Iglesia y patrona de Europa.',
+                    añoCanonizacion: '1461'
+                }
+            ],
+            '4/30': [
+                {
+                    nombre: 'San Pío V',
+                    resumen: 'Papa dominico, que organizó la Liga Santa contra los turcos y promovió la reforma católica.',
+                    añoCanonizacion: '1712'
+                }
+            ],
+            // Mayo
+            '5/1': [
+                {
+                    nombre: 'San José Obrero',
+                    resumen: 'Celebración de San José como modelo de trabajador, instituida por Pío XII.',
+                    añoCanonizacion: '1955'
+                }
+            ],
+            '5/2': [
+                {
+                    nombre: 'San Atanasio',
+                    resumen: 'Obispo de Alejandría y doctor de la Iglesia, defensor de la divinidad de Cristo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '5/3': [
+                {
+                    nombre: 'Santos Felipe y Santiago',
+                    resumen: 'Apóstoles de Jesús, Felipe el evangelizador y Santiago el Menor, primer obispo de Jerusalén.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '5/4': [
+                {
+                    nombre: 'San Juan Nepomuceno',
+                    resumen: 'Mártir checo, patrono del secreto de confesión, que murió defendiendo el sacramento.',
+                    añoCanonizacion: '1729'
+                }
+            ],
+            '5/5': [
+                {
+                    nombre: 'San Hilario de Arles',
+                    resumen: 'Obispo de Arles, conocido por su elocuencia y defensa de la fe.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '5/6': [
+                {
+                    nombre: 'San Juan ante Portam Latinam',
+                    resumen: 'Mártir romano, que fue decapitado y es venerado en la basílica de San Juan ante la Puerta Latina.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '5/7': [
+                {
+                    nombre: 'San Agustín de Canterbury',
+                    resumen: 'Apóstol de Inglaterra, primer arzobispo de Canterbury que evangelizó a los anglosajones.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '5/8': [
+                {
+                    nombre: 'San Miguel Arcángel',
+                    resumen: 'Arcángel, defensor del pueblo de Dios y vencedor de Satanás.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '5/9': [
+                {
+                    nombre: 'San Pacomio',
+                    resumen: 'Fundador del monacato cenobítico, que organizó a los monjes en comunidades.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '5/10': [
+                {
+                    nombre: 'San Antonino de Florencia',
+                    resumen: 'Arzobispo de Florencia, dominico y moralista, conocido por su sabiduría y caridad.',
+                    añoCanonizacion: '1523'
+                }
+            ],
+            '5/11': [
+                {
+                    nombre: 'San Francisco de Girolamo',
+                    resumen: 'Jesuita italiano, predicador popular que convirtió a miles de pecadores.',
+                    añoCanonizacion: '1839'
+                }
+            ],
+            '5/12': [
+                {
+                    nombre: 'San Pancracio',
+                    resumen: 'Joven mártir romano, que murió a los 14 años defendiendo su fe en Cristo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '5/13': [
+                {
+                    nombre: 'Nuestra Señora de Fátima',
+                    resumen: 'Aparición de la Virgen María a tres pastorcillos en Fátima, Portugal, con mensaje de conversión.',
+                    añoCanonizacion: '1917'
+                }
+            ],
+            '5/14': [
+                {
+                    nombre: 'San Matías',
+                    resumen: 'Apóstol elegido para reemplazar a Judas, evangelizador y mártir.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '5/15': [
+                {
+                    nombre: 'San Isidro Labrador',
+                    resumen: 'Campesino español, patrono de Madrid y de los agricultores, modelo de trabajador.',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            '5/16': [
+                {
+                    nombre: 'San Juan Nepomuceno',
+                    resumen: 'Mártir checo, protector del secreto de confesión y patrono de Bohemia.',
+                    añoCanonizacion: '1729'
+                }
+            ],
+            '5/17': [
+                {
+                    nombre: 'San Pascual Bailón',
+                    resumen: 'Religioso franciscano, patrono de las asociaciones eucarísticas y de los cocineros.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '5/18': [
+                {
+                    nombre: 'San Juan I',
+                    resumen: 'Papa y mártir, que murió en prisión durante la persecución de los arrianos.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '5/19': [
+                {
+                    nombre: 'San Celestino V',
+                    resumen: 'Papa que renunció al pontificado, conocido como "el papa del gran rechazo".',
+                    añoCanonizacion: '1313'
+                }
+            ],
+            '5/20': [
+                {
+                    nombre: 'San Bernardino de Siena',
+                    resumen: 'Franciscano italiano, predicador popular y devoto del Santo Nombre de Jesús.',
+                    añoCanonizacion: '1450'
+                }
+            ],
+            '5/21': [
+                {
+                    nombre: 'San Cristóbal Magallanes',
+                    resumen: 'Sacerdote y mártir mexicano, uno de los mártires de la persecución cristera.',
+                    añoCanonizacion: '2000'
+                }
+            ],
+            '5/22': [
+                {
+                    nombre: 'Santa Rita de Casia',
+                    resumen: 'Agustina italiana, patrona de los casos imposibles y de las madres.',
+                    añoCanonizacion: '1900'
+                }
+            ],
+            '5/23': [
+                {
+                    nombre: 'San Juan Bautista de Rossi',
+                    resumen: 'Sacerdote romano, conocido por su caridad hacia los pobres y los enfermos.',
+                    añoCanonizacion: '1881'
+                }
+            ],
+            '5/24': [
+                {
+                    nombre: 'Nuestra Señora de la Paz',
+                    resumen: 'Advocación mariana que invoca la paz mundial y la reconciliación entre los pueblos.',
+                    añoCanonizacion: 'Siglo XVII'
+                }
+            ],
+            '5/25': [
+                {
+                    nombre: 'San Beda el Venerable',
+                    resumen: 'Monje y doctor de la Iglesia, padre de la historia inglesa y escritor.',
+                    añoCanonizacion: '735'
+                }
+            ],
+            '5/26': [
+                {
+                    nombre: 'San Felipe Neri',
+                    resumen: 'Fundador de la Congregación del Oratorio, conocido como "el santo de la alegría".',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            '5/27': [
+                {
+                    nombre: 'San Agustín de Canterbury',
+                    resumen: 'Misionero benedictino, apóstol de Inglaterra y primer arzobispo de Canterbury.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '5/28': [
+                {
+                    nombre: 'San Germán de París',
+                    resumen: 'Obispo de París, que combatió las herejías y cuidó de los pobres.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '5/29': [
+                {
+                    nombre: 'Santa Úrsula Ledóchowska',
+                    resumen: 'Fundadora de las Ursulinas del Sagrado Corazón de Jesús Agonizante, dedicada a la educación.',
+                    añoCanonizacion: '1975'
+                }
+            ],
+            '5/30': [
+                {
+                    nombre: 'San Fernando III',
+                    resumen: 'Rey de Castilla y León, conquistador de Andalucía y modelo de rey cristiano.',
+                    añoCanonizacion: '1671'
+                }
+            ],
+            '5/31': [
+                {
+                    nombre: 'La Visitación de la Virgen María',
+                    resumen: 'Celebración de la visita de María a su prima Isabel, momento del Magnificat.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            // Junio
+            '6/1': [
+                {
+                    nombre: 'San Justino',
+                    resumen: 'Filósofo y mártir, uno de los primeros apologistas del cristianismo.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '6/2': [
+                {
+                    nombre: 'Santos Marcelino y Pedro',
+                    resumen: 'Mártires romanos que sufrieron persecución durante el reinado de Diocleciano.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '6/3': [
+                {
+                    nombre: 'San Carlos Lwanga y compañeros',
+                    resumen: 'Mártires de Uganda, que murieron defendiendo su fe y su castidad.',
+                    añoCanonizacion: '1964'
+                }
+            ],
+            '6/4': [
+                {
+                    nombre: 'San Francisco Caracciolo',
+                    resumen: 'Fundador de los Clérigos Regulares Menores, dedicado a la adoración eucarística.',
+                    añoCanonizacion: '1807'
+                }
+            ],
+            '6/5': [
+                {
+                    nombre: 'San Bonifacio',
+                    resumen: 'Apóstol de Alemania, que evangelizó a los germanos y organizó la Iglesia.',
+                    añoCanonizacion: 'Siglo VIII'
+                }
+            ],
+            '6/6': [
+                {
+                    nombre: 'San Norberto',
+                    resumen: 'Fundador de los Premostratenses, obispo de Magdeburgo y reformador.',
+                    añoCanonizacion: '1582'
+                }
+            ],
+            '6/7': [
+                {
+                    nombre: 'San Antonio María Gianelli',
+                    resumen: 'Obispo de Bobbio, fundador de las Hijas de María Santísima del Huerto.',
+                    añoCanonizacion: '1951'
+                }
+            ],
+            '6/8': [
+                {
+                    nombre: 'San Medardo',
+                    resumen: 'Obispo de Noyon, conocido por su caridad hacia los pobres y los enfermos.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '6/9': [
+                {
+                    nombre: 'San Efrén',
+                    resumen: 'Diácono sirio y doctor de la Iglesia, conocido como "el arpa del Espíritu Santo".',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '6/10': [
+                {
+                    nombre: 'San Margarita de Escocia',
+                    resumen: 'Reina de Escocia, modelo de esposa y madre, fundadora de iglesias y monasterios.',
+                    añoCanonizacion: '1250'
+                }
+            ],
+            '6/11': [
+                {
+                    nombre: 'San Bernabé',
+                    resumen: 'Apóstol, compañero de San Pablo, que evangelizó en Chipre y Antioquía.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '6/12': [
+                {
+                    nombre: 'San Juan de Sahagún',
+                    resumen: 'Agustino español, predicador y reformador, conocido por su elocuencia.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '6/13': [
+                {
+                    nombre: 'San Antonio de Padua',
+                    resumen: 'Franciscano, doctor de la Iglesia, taumaturgo y predicador popular.',
+                    añoCanonizacion: '1232'
+                }
+            ],
+            '6/14': [
+                {
+                    nombre: 'San Eliseo',
+                    resumen: 'Profeta del Antiguo Testamento, sucesor de Elías, conocido por sus milagros.',
+                    añoCanonizacion: 'Antiguo Testamento'
+                }
+            ],
+            '6/15': [
+                {
+                    nombre: 'San Germán',
+                    resumen: 'Obispo de París, que convirtió a los francos y organizó la Iglesia galicana.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '6/16': [
+                {
+                    nombre: 'San Juan Francisco Régis',
+                    resumen: 'Jesuita francés, misionero entre los campesinos y hugonotes.',
+                    añoCanonizacion: '1737'
+                }
+            ],
+            '6/17': [
+                {
+                    nombre: 'San Adolfo',
+                    resumen: 'Obispo de Osnabrück, que defendió la fe contra los herejes.',
+                    añoCanonizacion: 'Siglo IX'
+                }
+            ],
+            '6/18': [
+                {
+                    nombre: 'Santos Marcos y Marceliano',
+                    resumen: 'Mártires romanos, hermanos gemelos que sufrieron persecución por su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '6/19': [
+                {
+                    nombre: 'San Romualdo',
+                    resumen: 'Fundador de los Camaldulenses, reformador del monacato benedictino.',
+                    añoCanonizacion: '1595'
+                }
+            ],
+            '6/20': [
+                {
+                    nombre: 'San Silverio',
+                    resumen: 'Papa y mártir, que fue exiliado y murió defendiendo la fe.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '6/21': [
+                {
+                    nombre: 'San Luis Gonzaga',
+                    resumen: 'Jesuita italiano, patrono de la juventud, modelo de pureza y caridad.',
+                    añoCanonizacion: '1726'
+                }
+            ],
+            '6/22': [
+                {
+                    nombre: 'San Paulino de Nola',
+                    resumen: 'Obispo y poeta, que renunció a su riqueza para servir a los pobres.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '6/23': [
+                {
+                    nombre: 'San José Cafasso',
+                    resumen: 'Sacerdote italiano, formador de sacerdotes y director de San Juan Bosco.',
+                    añoCanonizacion: '1947'
+                }
+            ],
+            '6/24': [
+                {
+                    nombre: 'Nacimiento de San Juan Bautista',
+                    resumen: 'Celebración del nacimiento del precursor de Jesús, que preparó el camino del Señor.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '6/25': [
+                {
+                    nombre: 'San Guillermo de Vercelli',
+                    resumen: 'Fundador de los monjes de Monte Vergine, conocido por sus milagros.',
+                    añoCanonizacion: 'Siglo XII'
+                }
+            ],
+            '6/26': [
+                {
+                    nombre: 'San José María Escrivá',
+                    resumen: 'Fundador del Opus Dei, que promovió la santificación del trabajo diario.',
+                    añoCanonizacion: '2002'
+                }
+            ],
+            '6/27': [
+                {
+                    nombre: 'San Cirilo de Alejandría',
+                    resumen: 'Obispo y doctor de la Iglesia, defensor de la maternidad divina de María.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '6/28': [
+                {
+                    nombre: 'San Ireneo de Lyon',
+                    resumen: 'Obispo y mártir, doctor de la Iglesia, que combatió las herejías gnósticas.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '6/29': [
+                {
+                    nombre: 'San Pedro y San Pablo',
+                    resumen: 'Apóstoles, pilares de la Iglesia: Pedro primer Papa y Pablo apóstol de los gentiles.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '6/30': [
+                {
+                    nombre: 'Primeros Mártires de la Iglesia de Roma',
+                    resumen: 'Mártires que sufrieron persecución bajo Nerón, incluyendo a San Pedro y San Pablo.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            // Julio
+            '7/1': [
+                {
+                    nombre: 'San Gal',
+                    resumen: 'Monje irlandés, evangelizador de Suiza, fundador de la abadía de San Gal.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '7/2': [
+                {
+                    nombre: 'San Bernabé',
+                    resumen: 'Apóstol, compañero de San Pablo, que evangelizó en Chipre y Antioquía.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/3': [
+                {
+                    nombre: 'Santo Tomás',
+                    resumen: 'Apóstol, conocido como "el incrédulo", que evangelizó en India.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/4': [
+                {
+                    nombre: 'Santa Isabel de Portugal',
+                    resumen: 'Reina de Portugal, conocida por su caridad hacia los pobres y los enfermos.',
+                    añoCanonizacion: '1625'
+                }
+            ],
+            '7/5': [
+                {
+                    nombre: 'San Antonio María Zaccaría',
+                    resumen: 'Fundador de los Barnabitas, médico y sacerdote, reformador de la Iglesia.',
+                    añoCanonizacion: '1897'
+                }
+            ],
+            '7/6': [
+                {
+                    nombre: 'Santa María Goretti',
+                    resumen: 'Joven mártir italiana, que prefirió morir antes que renunciar a su pureza.',
+                    añoCanonizacion: '1950'
+                }
+            ],
+            '7/7': [
+                {
+                    nombre: 'San Pío I',
+                    resumen: 'Papa que combatió las herejías y organizó la liturgia romana.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '7/8': [
+                {
+                    nombre: 'San Priscila y Aquila',
+                    resumen: 'Matrimonios cristianos, colaboradores de San Pablo en la evangelización.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/9': [
+                {
+                    nombre: 'San Juan de Dios',
+                    resumen: 'Fundador de la Orden Hospitalaria, dedicado al cuidado de los enfermos.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '7/10': [
+                {
+                    nombre: 'Santos Rufina y Secunda',
+                    resumen: 'Mártires romanas, hermanas que murieron defendiendo su fe cristiana.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '7/11': [
+                {
+                    nombre: 'San Benito',
+                    resumen: 'Padre del monacato occidental, fundador de la Orden Benedictina.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '7/12': [
+                {
+                    nombre: 'San Juan Gualberto',
+                    resumen: 'Fundador de los Vallumbrosanos, que promovió la reforma de la Iglesia.',
+                    añoCanonizacion: '1193'
+                }
+            ],
+            '7/13': [
+                {
+                    nombre: 'San Enrique',
+                    resumen: 'Emperador del Sacro Imperio Romano Germánico, modelo de gobernante cristiano.',
+                    añoCanonizacion: '1146'
+                }
+            ],
+            '7/14': [
+                {
+                    nombre: 'San Camilo de Lelis',
+                    resumen: 'Fundador de los Camilos, patrono de los enfermos y del personal sanitario.',
+                    añoCanonizacion: '1746'
+                }
+            ],
+            '7/15': [
+                {
+                    nombre: 'San Buenaventura',
+                    resumen: 'Doctor de la Iglesia, ministro general de los franciscanos y cardenal.',
+                    añoCanonizacion: '1482'
+                }
+            ],
+            '7/16': [
+                {
+                    nombre: 'Nuestra Señora del Carmen',
+                    resumen: 'Patrona del Carmelo, que entregó el escapulario a San Simón Stock.',
+                    añoCanonizacion: 'Siglo XIII'
+                }
+            ],
+            '7/17': [
+                {
+                    nombre: 'Santa Alejandrina',
+                    resumen: 'Mártir en Braga, Portugal, que sufrió persecución por su fe en Cristo.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '7/18': [
+                {
+                    nombre: 'San Arnulfo',
+                    resumen: 'Obispo de Metz, consejero de reyes y patrón de los cerveceros.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '7/19': [
+                {
+                    nombre: 'San Macario',
+                    resumen: 'Monje egipcio, uno de los Padres del desierto y modelo de vida ascética.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '7/20': [
+                {
+                    nombre: 'San Elías',
+                    resumen: 'Profeta del Antiguo Testamento, defensor de la fe verdadera contra Baal.',
+                    añoCanonizacion: 'Antiguo Testamento'
+                }
+            ],
+            '7/21': [
+                {
+                    nombre: 'San Lorenzo de Brindis',
+                    resumen: 'Capuchino y doctor de la Iglesia, predicador y diplomático.',
+                    añoCanonizacion: '1881'
+                }
+            ],
+            '7/22': [
+                {
+                    nombre: 'Santa María Magdalena',
+                    resumen: 'Discípula de Jesús, "apóstol de los apóstoles", testigo de la resurrección.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/23': [
+                {
+                    nombre: 'Santa Brígida',
+                    resumen: 'Mística sueca, fundadora de la Orden del Santísimo Salvador y patrona de Europa.',
+                    añoCanonizacion: '1391'
+                }
+            ],
+            '7/24': [
+                {
+                    nombre: 'Santa Cristina',
+                    resumen: 'Joven mártir que sufrió terrible persecución por negarse a renunciar a su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '7/25': [
+                {
+                    nombre: 'Santiago Apóstol',
+                    resumen: 'Apóstol, hermano de San Juan, primer mártir entre los apóstoles.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/26': [
+                {
+                    nombre: 'Santos Joaquín y Ana',
+                    resumen: 'Padres de la Virgen María, abuelos de Jesús, modelos de padres santos.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '7/27': [
+                {
+                    nombre: 'San Pantaleón',
+                    resumen: 'Médico y mártir, patrono de los médicos y enfermeras.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '7/28': [
+                {
+                    nombre: 'San Nazario y Celso',
+                    resumen: 'Mártires milaneses, que evangelizaron en la Galia y murieron por su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '7/29': [
+                {
+                    nombre: 'Santa Marta',
+                    resumen: 'Hermana de Lázaro y María, anfitriona de Jesús en Betania.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '7/30': [
+                {
+                    nombre: 'San Pedro Crisólogo',
+                    resumen: 'Obispo de Rávena y doctor de la Iglesia, conocido como "hombre de la palabra de oro".',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '7/31': [
+                {
+                    nombre: 'San Ignacio de Loyola',
+                    resumen: 'Fundador de la Compañía de Jesús, patrón de los ejercicios espirituales.',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            // Agosto
+            '8/1': [
+                {
+                    nombre: 'San Alfonso María de Ligorio',
+                    resumen: 'Fundador de los Redentoristas, doctor de la Iglesia y obispo.',
+                    añoCanonizacion: '1839'
+                }
+            ],
+            '8/2': [
+                {
+                    nombre: 'San Eusebio de Vercelli',
+                    resumen: 'Obispo que defendió la fe contra el arrianismo y fundó comunidades monásticas.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '8/3': [
+                {
+                    nombre: 'San Pedro Julián Eymard',
+                    resumen: 'Fundador de los Padres del Santísimo Sacramento, apóstol de la Eucaristía.',
+                    añoCanonizacion: '1962'
+                }
+            ],
+            '8/4': [
+                {
+                    nombre: 'San Juan María Vianney',
+                    resumen: 'Cura de Ars, patrón de los párrocos, modelo de confesor y pastor.',
+                    añoCanonizacion: '1925'
+                }
+            ],
+            '8/5': [
+                {
+                    nombre: 'Dedicación de Santa María Mayor',
+                    resumen: 'Celebración de la dedicación de la basílica de Santa María la Mayor en Roma.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '8/6': [
+                {
+                    nombre: 'La Transfiguración del Señor',
+                    resumen: 'Celebración de la manifestación de la gloria divina de Jesús en el Tabor.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '8/7': [
+                {
+                    nombre: 'San Cayetano',
+                    resumen: 'Fundador de los Teatinos, patrono del pan y del trabajo, defensor de los pobres.',
+                    añoCanonizacion: '1671'
+                }
+            ],
+            '8/8': [
+                {
+                    nombre: 'Santo Domingo de Guzmán',
+                    resumen: 'Fundador de los Dominicos, predicador y defensor de la fe contra las herejías.',
+                    añoCanonizacion: '1234'
+                }
+            ],
+            '8/9': [
+                {
+                    nombre: 'Santa Teresa Benedicta de la Cruz',
+                    resumen: 'Edith Stein, filósofa y carmelita, mártir en Auschwitz.',
+                    añoCanonizacion: '1998'
+                }
+            ],
+            '8/10': [
+                {
+                    nombre: 'San Lorenzo',
+                    resumen: 'Diácono y mártir, guardián de los tesoros de la Iglesia y patrón de los pobres.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '8/11': [
+                {
+                    nombre: 'Santa Clara de Asís',
+                    resumen: 'Fundadora de las Clarisas, compañera de San Francisco y modelo de pobreza.',
+                    añoCanonizacion: '1255'
+                }
+            ],
+            '8/12': [
+                {
+                    nombre: 'Santa Juana Francisca de Chantal',
+                    resumen: 'Fundadora de la Visitación, modelo de viuda y madre cristiana.',
+                    añoCanonizacion: '1767'
+                }
+            ],
+            '8/13': [
+                {
+                    nombre: 'San Ponciano',
+                    resumen: 'Papa y mártir, que fue deportado a Cerdeña y murió por su fe.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '8/14': [
+                {
+                    nombre: 'San Maximiliano María Kolbe',
+                    resumen: 'Franciscano conventual, mártir en Auschwitz que ofreció su vida por otro prisionero.',
+                    añoCanonizacion: '1982'
+                }
+            ],
+            '8/15': [
+                {
+                    nombre: 'La Asunción de la Virgen María',
+                    resumen: 'Celebración de la asunción de María en cuerpo y alma al cielo.',
+                    añoCanonizacion: '1950'
+                }
+            ],
+            '8/16': [
+                {
+                    nombre: 'San Esteban de Hungría',
+                    resumen: 'Rey de Hungría, que evangelizó su país y organizó la Iglesia.',
+                    añoCanonizacion: '1083'
+                }
+            ],
+            '8/17': [
+                {
+                    nombre: 'San Jacinto',
+                    resumen: 'Dominico polaco, misionero y taumaturgo, patrón de Polonia.',
+                    añoCanonizacion: '1594'
+                }
+            ],
+            '8/18': [
+                {
+                    nombre: 'Santa Elena',
+                    resumen: 'Emperatriz, madre de Constantino, que encontró la verdadera cruz.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '8/19': [
+                {
+                    nombre: 'San Juan Eudes',
+                    resumen: 'Fundador de los Eudistas, promotor del culto a los Sagrados Corazones.',
+                    añoCanonizacion: '1925'
+                }
+            ],
+            '8/20': [
+                {
+                    nombre: 'San Bernardo',
+                    resumen: 'Abad cisterciense, doctor de la Iglesia y predicador de las cruzadas.',
+                    añoCanonizacion: '1174'
+                }
+            ],
+            '8/21': [
+                {
+                    nombre: 'San Pío X',
+                    resumen: 'Papa que promovió la comunión frecuente y la reforma litúrgica.',
+                    añoCanonizacion: '1954'
+                }
+            ],
+            '8/22': [
+                {
+                    nombre: 'La Reina de los Mártires',
+                    resumen: 'Celebración de María como Reina de los mártires y Madre de la Iglesia.',
+                    añoCanonizacion: '1954'
+                }
+            ],
+            '8/23': [
+                {
+                    nombre: 'Santa Rosa de Lima',
+                    resumen: 'Primera santa de América, terciaria dominica, modelo de penitencia.',
+                    añoCanonizacion: '1671'
+                }
+            ],
+            '8/24': [
+                {
+                    nombre: 'San Bartolomé',
+                    resumen: 'Apóstol, que evangelizó en la India y fue martirizado despellejado vivo.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '8/25': [
+                {
+                    nombre: 'San Luis',
+                    resumen: 'Rey de Francia, modelo de monarca cristiano y cruzado.',
+                    añoCanonizacion: '1297'
+                }
+            ],
+            '8/26': [
+                {
+                    nombre: 'Nuestra Señora de Czestochowa',
+                    resumen: 'Patrona de Polonia, cuya imagen es venerada en el monasterio de Jasna Góra.',
+                    añoCanonizacion: 'Siglo XIV'
+                }
+            ],
+            '8/27': [
+                {
+                    nombre: 'Santa Mónica',
+                    resumen: 'Madre de San Agustín, modelo de madre cristiana y mujer de oración.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '8/28': [
+                {
+                    nombre: 'San Agustín',
+                    resumen: 'Obispo de Hipona y doctor de la Iglesia, uno de los más grandes teólogos.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '8/29': [
+                {
+                    nombre: 'Martirio de San Juan Bautista',
+                    resumen: 'Celebración de la decapitación de Juan Bautista por orden de Herodías.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '8/30': [
+                {
+                    nombre: 'Santa Rosa de Viterbo',
+                    resumen: 'Joven terciaria franciscana, predicadora y taumaturga.',
+                    añoCanonizacion: '1457'
+                }
+            ],
+            '8/31': [
+                {
+                    nombre: 'San Ramón Nonnato',
+                    resumen: 'Mercedario, redentor de cautivos y patrón de las parturientas.',
+                    añoCanonizacion: '1657'
+                }
+            ],
+            // Septiembre
+            '9/1': [
+                {
+                    nombre: 'San Gil',
+                    resumen: 'Eremita francés, fundador de monasterios y patrón de los leprosos.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '9/2': [
+                {
+                    nombre: 'San Inés de Bohemia',
+                    resumen: 'Princesa bohemia, fundadora de hospitales y modelo de caridad.',
+                    añoCanonizacion: '1989'
+                }
+            ],
+            '9/3': [
+                {
+                    nombre: 'San Gregorio Magno',
+                    resumen: 'Papa y doctor de la Iglesia, reformador y misionero.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '9/4': [
+                {
+                    nombre: 'Santa Rosalía',
+                    resumen: 'Eremita siciliana, patrona de Palermo y protectora contra las pestes.',
+                    añoCanonizacion: 'Siglo XII'
+                }
+            ],
+            '9/5': [
+                {
+                    nombre: 'Santa Teresa de Calcuta',
+                    resumen: 'Fundadora de las Misioneras de la Caridad, "santa de los pobres".',
+                    añoCanonizacion: '2016'
+                }
+            ],
+            '9/6': [
+                {
+                    nombre: 'San Eleuterio',
+                    resumen: 'Obispo y mártir, que sufrió persecución durante el reinado de Adriano.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '9/7': [
+                {
+                    nombre: 'San Claudio',
+                    resumen: 'Obispo de Besançon, que evangelizó la región y murió mártir.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '9/8': [
+                {
+                    nombre: 'Natividad de la Virgen María',
+                    resumen: 'Celebración del nacimiento de María, madre de Jesús.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '9/9': [
+                {
+                    nombre: 'San Pedro Claver',
+                    resumen: 'Jesuita español, "esclavo de los esclavos", misionero en América.',
+                    añoCanonizacion: '1888'
+                }
+            ],
+            '9/10': [
+                {
+                    nombre: 'San Nicolás de Tolentino',
+                    resumen: 'Agustino italiano, predicador y taumaturgo, patrón de las almas del purgatorio.',
+                    añoCanonizacion: '1446'
+                }
+            ],
+            '9/11': [
+                {
+                    nombre: 'San Juan Gabriel Perboyre',
+                    resumen: 'Misionero vicentino, mártir en China por predicar el evangelio.',
+                    añoCanonizacion: '1996'
+                }
+            ],
+            '9/12': [
+                {
+                    nombre: 'Santísimo Nombre de María',
+                    resumen: 'Celebración del nombre santo de María y su poder de intercesión.',
+                    añoCanonizacion: 'Siglo XVII'
+                }
+            ],
+            '9/13': [
+                {
+                    nombre: 'San Juan Crisóstomo',
+                    resumen: 'Obispo de Constantinopla y doctor de la Iglesia, "boca de oro".',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '9/14': [
+                {
+                    nombre: 'La Exaltación de la Santa Cruz',
+                    resumen: 'Celebración del hallazgo de la verdadera cruz por Santa Elena.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '9/15': [
+                {
+                    nombre: 'Nuestra Señora de los Dolores',
+                    resumen: 'Celebración de los siete dolores de María al pie de la cruz.',
+                    añoCanonizacion: 'Siglo XIII'
+                }
+            ],
+            '9/16': [
+                {
+                    nombre: 'San Cornelio y San Cipriano',
+                    resumen: 'Papa y obispo, mártires que defendieron la unidad de la Iglesia.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '9/17': [
+                {
+                    nombre: 'San Roberto Belarmino',
+                    resumen: 'Cardenal jesuita y doctor de la Iglesia, teólogo y santo.',
+                    añoCanonizacion: '1930'
+                }
+            ],
+            '9/18': [
+                {
+                    nombre: 'San José de Cupertino',
+                    resumen: 'Franciscano, conocido por sus levitaciones y vida mística.',
+                    añoCanonizacion: '1767'
+                }
+            ],
+            '9/19': [
+                {
+                    nombre: 'San Januario',
+                    resumen: 'Obispo y mártir de Benevento, patrón de Nápoles, famoso por la licuación de su sangre.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '9/20': [
+                {
+                    nombre: 'San Andrés Kim Taegon y compañeros',
+                    resumen: 'Mártires coreanos, primeros santos de Corea que murieron por su fe.',
+                    añoCanonizacion: '1984'
+                }
+            ],
+            '9/21': [
+                {
+                    nombre: 'San Mateo',
+                    resumen: 'Apóstol y evangelista, recaudador de impuestos llamado por Jesús.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '9/22': [
+                {
+                    nombre: 'Santo Tomás de Villanueva',
+                    resumen: 'Arzobispo de Valencia, agustino, conocido por su caridad con los pobres.',
+                    añoCanonizacion: '1658'
+                }
+            ],
+            '9/23': [
+                {
+                    nombre: 'San Pío de Pietrelcina',
+                    resumen: 'Capuchino estigmatizado, confesor y taumaturgo del siglo XX.',
+                    añoCanonizacion: '2002'
+                }
+            ],
+            '9/24': [
+                {
+                    nombre: 'Nuestra Señora de la Merced',
+                    resumen: 'Patrona de los cautivos, que inspiró la fundación de la Orden de la Merced.',
+                    añoCanonizacion: 'Siglo XIII'
+                }
+            ],
+            '9/25': [
+                {
+                    nombre: 'Santa Teresa de Jesús',
+                    resumen: 'Doctora de la Iglesia, reformadora del Carmelo y mística.',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            '9/26': [
+                {
+                    nombre: 'San Cosme y San Damián',
+                    resumen: 'Médicos y mártires, patronos de los médicos y farmacéuticos.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '9/27': [
+                {
+                    nombre: 'San Vicente de Paúl',
+                    resumen: 'Fundador de los Vicentinos y las Hijas de la Caridad, patrono de la caridad.',
+                    añoCanonizacion: '1737'
+                }
+            ],
+            '9/28': [
+                {
+                    nombre: 'San Wenceslao',
+                    resumen: 'Duque de Bohemia, mártir y patrón de la República Checa.',
+                    añoCanonizacion: 'Siglo X'
+                }
+            ],
+            '9/29': [
+                {
+                    nombre: 'San Miguel, San Gabriel y San Rafael',
+                    resumen: 'Arcángeles, mensajeros de Dios y protectores de la humanidad.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '9/30': [
+                {
+                    nombre: 'San Jerónimo',
+                    resumen: 'Doctor de la Iglesia, traductor de la Biblia al latín (Vulgata).',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            // Octubre
+            '10/1': [
+                {
+                    nombre: 'Santa Teresa del Niño Jesús',
+                    resumen: 'Carmelita francesa, doctora de la Iglesia, patrona de las misiones.',
+                    añoCanonizacion: '1925'
+                }
+            ],
+            '10/2': [
+                {
+                    nombre: 'Los Santos Ángeles Custodios',
+                    resumen: 'Celebración de los ángeles que Dios asigna como protectores a cada persona.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '10/3': [
+                {
+                    nombre: 'San Francisco de Borja',
+                    resumen: 'Jesuita español, general de la Compañía, duque de Gandía.',
+                    añoCanonizacion: '1671'
+                }
+            ],
+            '10/4': [
+                {
+                    nombre: 'San Francisco de Asís',
+                    resumen: 'Fundador de los franciscanos, patrono de la ecología y de los pobres.',
+                    añoCanonizacion: '1228'
+                }
+            ],
+            '10/5': [
+                {
+                    nombre: 'Santa María Faustina Kowalska',
+                    resumen: 'Mística polaca, apóstol de la Divina Misericordia.',
+                    añoCanonizacion: '2000'
+                }
+            ],
+            '10/6': [
+                {
+                    nombre: 'San Bruno',
+                    resumen: 'Fundador de la Cartuja, ermitaño y teólogo del siglo XI.',
+                    añoCanonizacion: '1623'
+                }
+            ],
+            '10/7': [
+                {
+                    nombre: 'Nuestra Señora del Rosario',
+                    resumen: 'Patrona del rosario, que pidió su rezo en Lepanto para la victoria cristiana.',
+                    añoCanonizacion: '1571'
+                }
+            ],
+            '10/8': [
+                {
+                    nombre: 'San Serafín de Montegranaro',
+                    resumen: 'Capuchino italiano, conocido por su humildad y vida de oración.',
+                    añoCanonizacion: '1769'
+                }
+            ],
+            '10/9': [
+                {
+                    nombre: 'San Dionisio',
+                    resumen: 'Obispo de París y mártir, primer obispo de Francia.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '10/10': [
+                {
+                    nombre: 'San Francisco de Borgia',
+                    resumen: 'Jesuita, general de la Compañía, duque de Gandía y santo.',
+                    añoCanonizacion: '1671'
+                }
+            ],
+            '10/11': [
+                {
+                    nombre: 'San Juan XXIII',
+                    resumen: 'Papa que convocó el Concilio Vaticano II, "el papa bueno".',
+                    añoCanonizacion: '2014'
+                }
+            ],
+            '10/12': [
+                {
+                    nombre: 'Nuestra Señora del Pilar',
+                    resumen: 'Patrona de España e Hispanoamérica, que se apareció a Santiago en Zaragoza.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '10/13': [
+                {
+                    nombre: 'San Eduardo',
+                    resumen: 'Rey de Inglaterra, conocido por su justicia y piedad.',
+                    añoCanonizacion: '1161'
+                }
+            ],
+            '10/14': [
+                {
+                    nombre: 'San Calixto I',
+                    resumen: 'Papa y mártir, que organizó los cementerios cristianos en Roma.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '10/15': [
+                {
+                    nombre: 'Santa Teresa de Jesús',
+                    resumen: 'Doctora de la Iglesia, reformadora del Carmelo y mística española.',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            '10/16': [
+                {
+                    nombre: 'Santa Margarita María Alacoque',
+                    resumen: 'Visitandina francesa, apóstol del Sagrado Corazón de Jesús.',
+                    añoCanonizacion: '1920'
+                }
+            ],
+            '10/17': [
+                {
+                    nombre: 'San Ignacio de Antioquía',
+                    resumen: 'Obispo y mártir, discípulo de San Juan, padre de la Iglesia.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '10/18': [
+                {
+                    nombre: 'San Lucas',
+                    resumen: 'Evangelista y médico, autor del tercer evangelio y de los Hechos.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '10/19': [
+                {
+                    nombre: 'San Juan de Brébeuf y compañeros',
+                    resumen: 'Mártires jesuitas en América del Norte, que evangelizaron a los hurones.',
+                    añoCanonizacion: '1930'
+                }
+            ],
+            '10/20': [
+                {
+                    nombre: 'San Juan de Capistrano',
+                    resumen: 'Franciscano, predicador y defensor de la cristiandad contra los turcos.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '10/21': [
+                {
+                    nombre: 'Santa Úrsula y compañeras',
+                    resumen: 'Mártires legendarias, vírgenes que murieron defendiendo su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '10/22': [
+                {
+                    nombre: 'San Juan Pablo II',
+                    resumen: 'Papa polaco, gran viajero y evangelizador del siglo XX.',
+                    añoCanonizacion: '2014'
+                }
+            ],
+            '10/23': [
+                {
+                    nombre: 'San Juan de Capistrano',
+                    resumen: 'Franciscano italiano, predicador y líder militar cristiano.',
+                    añoCanonizacion: '1690'
+                }
+            ],
+            '10/24': [
+                {
+                    nombre: 'San Antonio María Claret',
+                    resumen: 'Fundador de los Claretianos, arzobispo de Cuba y misionero.',
+                    añoCanonizacion: '1950'
+                }
+            ],
+            '10/25': [
+                {
+                    nombre: 'Santos Crispín y Crispiniano',
+                    resumen: 'Mártires y zapateros, que murieron por su fe en Roma.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '10/26': [
+                {
+                    nombre: 'San Evaristo',
+                    resumen: 'Papa que organizó la Iglesia romana y sufrió martirio.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '10/27': [
+                {
+                    nombre: 'San Frumencio',
+                    resumen: 'Obispo de Etiopía, "apóstol de Etiopía", evangelizador de África.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '10/28': [
+                {
+                    nombre: 'San Simón y San Judas',
+                    resumen: 'Apóstoles, Simón el Zelote y Judas Tadeo, evangelizadores.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '10/29': [
+                {
+                    nombre: 'San Narciso',
+                    resumen: 'Obispo de Jerusalén, que sufrió persecución por defender la fe.',
+                    añoCanonizacion: 'Siglo II'
+                }
+            ],
+            '10/30': [
+                {
+                    nombre: 'San Marcelo',
+                    resumen: 'Centurión romano convertido, mártir en León por su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '10/31': [
+                {
+                    nombre: 'San Quintín',
+                    resumen: 'Mártir romano, que predicó en Galia y murió decapitado.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            // Noviembre
+            '11/1': [
+                {
+                    nombre: 'Todos los Santos',
+                    resumen: 'Celebración de todos los santos conocidos y desconocidos que gozan de la visión de Dios.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '11/2': [
+                {
+                    nombre: 'Conmemoración de los Fieles Difuntos',
+                    resumen: 'Día dedicado a rezar por las almas del purgatorio.',
+                    añoCanonizacion: 'Siglo X'
+                }
+            ],
+            '11/3': [
+                {
+                    nombre: 'San Martín de Porres',
+                    resumen: 'Dominico peruano, patrono de la justicia social y de los peluqueros.',
+                    añoCanonizacion: '1962'
+                }
+            ],
+            '11/4': [
+                {
+                    nombre: 'San Carlos Borromeo',
+                    resumen: 'Cardenal y arzobispo de Milán, reformador de la Iglesia.',
+                    añoCanonizacion: '1610'
+                }
+            ],
+            '11/5': [
+                {
+                    nombre: 'San Zacarías',
+                    resumen: 'Profeta del Antiguo Testamento, que anunció la venida del Mesías.',
+                    añoCanonizacion: 'Antiguo Testamento'
+                }
+            ],
+            '11/6': [
+                {
+                    nombre: 'San Leonardo de Porto Maurizio',
+                    resumen: 'Franciscano italiano, predicador popular y promotor del Vía Crucis.',
+                    añoCanonizacion: '1867'
+                }
+            ],
+            '11/7': [
+                {
+                    nombre: 'San Willibrordo',
+                    resumen: 'Apóstol de Frisia, obispo y misionero anglosajón.',
+                    añoCanonizacion: 'Siglo VIII'
+                }
+            ],
+            '11/8': [
+                {
+                    nombre: 'Los Cuatro Santos Coronados',
+                    resumen: 'Mártires romanos, escultores que murieron por negarse a hacer ídolos.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '11/9': [
+                {
+                    nombre: 'Dedicación de la Basílica de San Juan de Letrán',
+                    resumen: 'Celebración de la dedicación de la catedral de Roma, "madre de todas las iglesias".',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '11/10': [
+                {
+                    nombre: 'San León Magno',
+                    resumen: 'Papa y doctor de la Iglesia, que detuvo a Atila en Roma.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '11/11': [
+                {
+                    nombre: 'San Martín de Tours',
+                    resumen: 'Obispo de Tours, soldado convertido, modelo de caridad.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '11/12': [
+                {
+                    nombre: 'San Josafat',
+                    resumen: 'Arzobispo de Polotsk, mártir por la unidad de la Iglesia.',
+                    añoCanonizacion: '1867'
+                }
+            ],
+            '11/13': [
+                {
+                    nombre: 'San Francisco Javier Cabrini',
+                    resumen: 'Fundadora de las Misioneras del Sagrado Corazón, patrona de los inmigrantes.',
+                    añoCanonizacion: '1946'
+                }
+            ],
+            '11/14': [
+                {
+                    nombre: 'San José Pignatelli',
+                    resumen: 'Jesuita español, restaurador de la Compañía de Jesús.',
+                    añoCanonizacion: '1954'
+                }
+            ],
+            '11/15': [
+                {
+                    nombre: 'San Alberto Magno',
+                    resumen: 'Obispo y doctor de la Iglesia, maestro de Santo Tomás de Aquino.',
+                    añoCanonizacion: '1931'
+                }
+            ],
+            '11/16': [
+                {
+                    nombre: 'Santa Margarita de Escocia',
+                    resumen: 'Reina de Escocia, modelo de esposa y madre, fundadora.',
+                    añoCanonizacion: '1250'
+                }
+            ],
+            '11/17': [
+                {
+                    nombre: 'Santa Isabel de Hungría',
+                    resumen: 'Princesa húngara, terciaria franciscana, patrona de la caridad.',
+                    añoCanonizacion: '1235'
+                }
+            ],
+            '11/18': [
+                {
+                    nombre: 'Dedicación de las Basílicas de San Pedro y San Pablo',
+                    resumen: 'Celebración de las basílicas de los apóstoles Pedro y Pablo en Roma.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '11/19': [
+                {
+                    nombre: 'Santa Matilde',
+                    resumen: 'Reina alemana, esposa de Enrique I, modelo de reina cristiana.',
+                    añoCanonizacion: 'Siglo X'
+                }
+            ],
+            '11/20': [
+                {
+                    nombre: 'San Félix de Valois',
+                    resumen: 'Fundador de la Orden de la Trinidad, redentor de cautivos.',
+                    añoCanonizacion: '1679'
+                }
+            ],
+            '11/21': [
+                {
+                    nombre: 'Presentación de la Virgen María',
+                    resumen: 'Celebración de la presentación de María en el templo por sus padres.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '11/22': [
+                {
+                    nombre: 'Santa Cecilia',
+                    resumen: 'Mártir romana, patrona de la música y los músicos.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '11/23': [
+                {
+                    nombre: 'San Clemente I',
+                    resumen: 'Papa y mártir, tercer sucesor de San Pedro.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '11/24': [
+                {
+                    nombre: 'San Andrés Dung-Lac y compañeros',
+                    resumen: 'Mártires de Vietnam, que murieron defendiendo su fe cristiana.',
+                    añoCanonizacion: '1988'
+                }
+            ],
+            '11/25': [
+                {
+                    nombre: 'Santa Catalina de Alejandría',
+                    resumen: 'Mártir y doctora de la Iglesia, patrona de los filósofos.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '11/26': [
+                {
+                    nombre: 'San Silvestre',
+                    resumen: 'Abad y confesor, que vivió en la Galia y fundó monasterios.',
+                    añoCanonizacion: 'Siglo VII'
+                }
+            ],
+            '11/27': [
+                {
+                    nombre: 'Nuestra Señora de la Medalla Milagrosa',
+                    resumen: 'Aparición de la Virgen a Santa Catalina Labouré en París.',
+                    añoCanonizacion: '1830'
+                }
+            ],
+            '11/28': [
+                {
+                    nombre: 'Santos Pedro y Pablo',
+                    resumen: 'Apóstoles, pilares de la Iglesia, mártires en Roma.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '11/29': [
+                {
+                    nombre: 'San Saturnino',
+                    resumen: 'Obispo y mártir de Toulouse, primer obispo de la ciudad.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '11/30': [
+                {
+                    nombre: 'San Andrés',
+                    resumen: 'Apóstol, hermano de Pedro, mártir en cruz en forma de X.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            // Diciembre
+            '12/1': [
+                {
+                    nombre: 'San Natalán',
+                    resumen: 'Obispo irlandés, que evangelizó Escocia y fundó monasterios.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '12/2': [
+                {
+                    nombre: 'San Bibiana',
+                    resumen: 'Mártir romana, que sufrió persecución durante el reinado de Juliano.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/3': [
+                {
+                    nombre: 'San Francisco Javier',
+                    resumen: 'Jesuita, apóstol de Oriente, patrono de las misiones.',
+                    añoCanonizacion: '1622'
+                }
+            ],
+            '12/4': [
+                {
+                    nombre: 'Santa Bárbara',
+                    resumen: 'Mártir y virgen, patrona de los artilleros y mineros.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/5': [
+                {
+                    nombre: 'San Sabas',
+                    resumen: 'Monje y abad, fundador de monasterios en Palestina.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '12/6': [
+                {
+                    nombre: 'San Nicolás de Bari',
+                    resumen: 'Obispo de Mira, patrono de los niños y modelo de generosidad.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/7': [
+                {
+                    nombre: 'San Ambrosio',
+                    resumen: 'Obispo de Milán y doctor de la Iglesia, defensor de la fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/8': [
+                {
+                    nombre: 'La Inmaculada Concepción',
+                    resumen: 'Dogma que proclama que María fue concebida sin pecado original.',
+                    añoCanonizacion: '1854'
+                }
+            ],
+            '12/9': [
+                {
+                    nombre: 'San Juan Diego',
+                    resumen: 'Vidente de la Virgen de Guadalupe, primer santo indígena de América.',
+                    añoCanonizacion: '2002'
+                }
+            ],
+            '12/10': [
+                {
+                    nombre: 'San Eulalia',
+                    resumen: 'Mártir española, que murió a los 13 años defendiendo su fe.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/11': [
+                {
+                    nombre: 'San Dámaso I',
+                    resumen: 'Papa que promovió la Vulgata y defendió la fe contra las herejías.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/12': [
+                {
+                    nombre: 'Nuestra Señora de Guadalupe',
+                    resumen: 'Patrona de América, que se apareció a San Juan Diego en México.',
+                    añoCanonizacion: '1531'
+                }
+            ],
+            '12/13': [
+                {
+                    nombre: 'Santa Lucía',
+                    resumen: 'Mártir virgen, patrona de la vista y de los ciegos.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ],
+            '12/14': [
+                {
+                    nombre: 'San Juan de la Cruz',
+                    resumen: 'Carmelita, doctor de la Iglesia, místico y poeta.',
+                    añoCanonizacion: '1726'
+                }
+            ],
+            '12/15': [
+                {
+                    nombre: 'San Nicasio',
+                    resumen: 'Obispo de Reims, mártir durante la invasión de los vándalos.',
+                    añoCanonizacion: 'Siglo V'
+                }
+            ],
+            '12/16': [
+                {
+                    nombre: 'Santa Adela',
+                    resumen: 'Abadesa francesa, hija de Guillermo el Conquistador.',
+                    añoCanonizacion: 'Siglo XII'
+                }
+            ],
+            '12/17': [
+                {
+                    nombre: 'San Juan de Mata',
+                    resumen: 'Fundador de los Trinitarios, redentor de cautivos.',
+                    añoCanonizacion: '1666'
+                }
+            ],
+            '12/18': [
+                {
+                    nombre: 'San Gastón',
+                    resumen: 'Obispo de Dijon, que evangelizó la región de Borgoña.',
+                    añoCanonizacion: 'Siglo VI'
+                }
+            ],
+            '12/19': [
+                {
+                    nombre: 'San Urbano V',
+                    resumen: 'Papa benedictino, que intentó restaurar la sede papal en Roma.',
+                    añoCanonizacion: '1870'
+                }
+            ],
+            '12/20': [
+                {
+                    nombre: 'San Domingo de Silos',
+                    resumen: 'Abad benedictino, patrón de los parturientes y de los prisioneros.',
+                    añoCanonizacion: '1073'
+                }
+            ],
+            '12/21': [
+                {
+                    nombre: 'San Pedro Canisio',
+                    resumen: 'Jesuita y doctor de la Iglesia, apóstol de Alemania.',
+                    añoCanonizacion: '1925'
+                }
+            ],
+            '12/22': [
+                {
+                    nombre: 'Santa Francisca Javier Cabrini',
+                    resumen: 'Fundadora de las Misioneras del Sagrado Corazón, patrona de los inmigrantes.',
+                    añoCanonizacion: '1946'
+                }
+            ],
+            '12/23': [
+                {
+                    nombre: 'San Juan de Kety',
+                    resumen: 'Sacerdote polaco, profesor y predicador, modelo de sacerdote.',
+                    añoCanonizacion: '1767'
+                }
+            ],
+            '12/24': [
+                {
+                    nombre: 'Nochebuena',
+                    resumen: 'Vigilia de la Natividad del Señor, preparación para la Navidad.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '12/25': [
+                {
+                    nombre: 'Natividad del Señor',
+                    resumen: 'Celebración del nacimiento de Jesucristo en Belén.',
+                    añoCanonizacion: 'Primeros siglos'
+                }
+            ],
+            '12/26': [
+                {
+                    nombre: 'San Esteban',
+                    resumen: 'Primer mártir de la Iglesia, diácono que murió apedreado.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '12/27': [
+                {
+                    nombre: 'San Juan Evangelista',
+                    resumen: 'Apóstol y evangelista, "el discípulo amado", autor del cuarto evangelio.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '12/28': [
+                {
+                    nombre: 'Santos Inocentes',
+                    resumen: 'Niños mártires de Belén, muertos por orden de Herodes.',
+                    añoCanonizacion: 'Siglo I'
+                }
+            ],
+            '12/29': [
+                {
+                    nombre: 'Santo Tomás Becket',
+                    resumen: 'Arzobispo de Canterbury, mártir por defender la libertad de la Iglesia.',
+                    añoCanonizacion: '1173'
+                }
+            ],
+            '12/30': [
+                {
+                    nombre: 'San Sabiniano',
+                    resumen: 'Mártir en Troyes, que sufrió persecución durante el reinado de Aureliano.',
+                    añoCanonizacion: 'Siglo III'
+                }
+            ],
+            '12/31': [
+                {
+                    nombre: 'San Silvestre',
+                    resumen: 'Papa que gobernó durante la paz constantiniana, organizó la Iglesia.',
+                    añoCanonizacion: 'Siglo IV'
+                }
+            ]
+        };
+
+        // Función para obtener los próximos 6 días
+        function getNextSixDays() {
+            const days = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 6; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                days.push(date);
+            }
+            
+            return days;
+        }
+
+        // Función para formatear la fecha
+        function formatDate(date) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('es-ES', options);
+        }
+
+        // Función para obtener la clave de la base de datos (mes/día)
+        function getDateKey(date) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${month}/${day}`;
+        }
+
+        // Función para obtener los santos de un día específico
+        function getSaintsForDate(date) {
+            const key = getDateKey(date);
+            return saintsDatabase[key] || [];
+        }
+
+        // Función para crear el tooltip
+        function createTooltip(saints, element, isMobile = false) {
+            const tooltip = document.getElementById('tooltip');
+            const tooltipContent = document.getElementById('tooltipContent');
+            
+            let content = '<h4>Santos del día</h4>';
+            
+            saints.forEach(saint => {
+                content += `
+                    <div class="saint-item">
+                        <div class="saint-name">${saint.nombre}</div>
+                        <div class="saint-summary">${saint.resumen}</div>
+                        <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">
+                            Canonizado: ${saint.añoCanonizacion}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            tooltipContent.innerHTML = content;
+            
+            if (isMobile) {
+                // En móviles, mostrar el tooltip en el centro de la pantalla
+                tooltip.style.left = '50%';
+                tooltip.style.top = '50%';
+                tooltip.style.transform = 'translate(-50%, -50%)';
+                tooltip.style.maxWidth = '90%';
+                tooltip.style.maxHeight = '80vh';
+            } else {
+                // En escritorio, posicionar cerca del elemento
+                const rect = element.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                let top = rect.bottom + 10;
+                
+                // Ajustar si se sale de la pantalla
+                if (left < 10) left = 10;
+                if (left + tooltipRect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - tooltipRect.width - 10;
+                }
+                if (top + tooltipRect.height > window.innerHeight - 10) {
+                    top = rect.top - tooltipRect.height - 10;
+                }
+                
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+                tooltip.style.transform = 'none';
+            }
+            
+            tooltip.classList.add('show');
+        }
+
+        // Función para ocultar el tooltip
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('show');
+        }
+
+        // Función para generar la tabla (pantallas grandes)
+        function generateTable() {
+            const days = getNextSixDays();
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+            
+            // Limpiar tabla
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+            
+            // Crear encabezados
+            days.forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = formatDate(day);
+                tableHeader.appendChild(th);
+            });
+            
+            // Crear fila de contenido
+            const row = document.createElement('tr');
+            
+            days.forEach(day => {
+                const td = document.createElement('td');
+                const saints = getSaintsForDate(day);
+                
+                if (saints.length > 0) {
+                    // Crear el elemento del santo principal
+                    const mainSaintDiv = document.createElement('div');
+                    mainSaintDiv.className = 'main-saint';
+                    mainSaintDiv.innerHTML = `
+                        <h3>${saints[0].nombre}</h3>
+                        <p>${saints[0].resumen.substring(0, 100)}...</p>
+                    `;
+                    
+                    // Añadir evento para mostrar tooltip
+                    mainSaintDiv.addEventListener('mouseenter', (e) => {
+                        createTooltip(saints, e.currentTarget, false);
+                    });
+                    
+                    mainSaintDiv.addEventListener('mouseleave', hideTooltip);
+                    
+                    td.appendChild(mainSaintDiv);
+                    
+                    // Si hay más santos, añadir botón
+                    if (saints.length > 1) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'more-saints';
+                        moreDiv.textContent = `+${saints.length - 1} santos más`;
+                        
+                        moreDiv.addEventListener('mouseenter', (e) => {
+                            createTooltip(saints, e.currentTarget, false);
+                        });
+                        
+                        moreDiv.addEventListener('mouseleave', hideTooltip);
+                        
+                        td.appendChild(moreDiv);
+                    }
+                } else {
+                    td.innerHTML = '<p style="color: var(--text-muted); font-style: italic;">No hay santos registrados para este día</p>';
+                }
+                
+                row.appendChild(td);
+            });
+            
+            tableBody.appendChild(row);
+        }
+
+        // Función para generar las tarjetas (pantallas pequeñas)
+        function generateCards() {
+            const days = getNextSixDays();
+            const cardsContainer = document.getElementById('cardsContainer');
+            
+            // Limpiar contenedor
+            cardsContainer.innerHTML = '';
+            
+            days.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                
+                const saints = getSaintsForDate(day);
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        ${formatDate(day)}
+                    </div>
+                    <div class="card-content">
+                        <div class="date-cell">${day.getDate()} de ${day.toLocaleDateString('es-ES', { month: 'long' })}</div>
+                `;
+                
+                if (saints.length > 0) {
+                    // Crear el elemento del santo principal
+                    const mainSaintDiv = document.createElement('div');
+                    mainSaintDiv.className = 'main-saint';
+                    mainSaintDiv.innerHTML = `
+                        <h3>${saints[0].nombre}</h3>
+                        <p>${saints[0].resumen.substring(0, 120)}...</p>
+                    `;
+                    
+                    // Añadir evento para mostrar tooltip (táctil)
+                    mainSaintDiv.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        createTooltip(saints, e.currentTarget, true);
+                    });
+                    
+                    card.querySelector('.card-content').appendChild(mainSaintDiv);
+                    
+                    // Si hay más santos, añadir botón
+                    if (saints.length > 1) {
+                        const moreButton = document.createElement('button');
+                        moreButton.className = 'more-saints';
+                        moreButton.textContent = `Ver ${saints.length} santos`;
+                        
+                        moreButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            createTooltip(saints, e.currentTarget, true);
+                        });
+                        
+                        card.querySelector('.card-content').appendChild(moreButton);
+                    }
+                } else {
+                    card.querySelector('.card-content').innerHTML += '<p style="color: var(--text-muted); font-style: italic;">No hay santos registrados para este día</p>';
+                }
+                
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            const currentTheme = html.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                html.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Función para cargar el tema guardado
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '☀️';
+            } else {
+                themeIcon.textContent = '🌙';
+            }
+        }
+
+        // Función principal para generar el contenido
+        function generateContent() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                generateCards();
+                document.getElementById('saintsTable').style.display = 'none';
+                document.getElementById('cardsContainer').style.display = 'block';
+            } else {
+                generateTable();
+                document.getElementById('saintsTable').style.display = 'table';
+                document.getElementById('cardsContainer').style.display = 'none';
+            }
+            
+            // Ocultar loading
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            generateContent();
+        });
+        
+        // Event listener para el botón de tema
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        
+        // Manejar cambio de orientación y resize
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(() => {
+                generateContent();
+            }, 250);
+        });
+        
+        // Cerrar tooltip con el botón X
+        document.getElementById('closeTooltip').addEventListener('click', hideTooltip);
+        
+        // Cerrar tooltip al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            if (!tooltip.contains(e.target) && !e.target.closest('.main-saint') && !e.target.closest('.more-saints')) {
+                hideTooltip();
+            }
+        });
+        
+        // Cerrar tooltip con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideTooltip();
+            }
+        });
+        
+        // Actualizar tooltip al hacer scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerWidth > 768) {
+                hideTooltip();
+            }
+        });
+    </script>
+</body>
+</html> 

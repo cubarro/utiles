@@ -1,0 +1,10 @@
+Crea una tabla en html, css y js que muestre para los próximos 6 días:
+1- La fecha actual.
+2- Santos del día (nombres).
+3- Resumen da la vida.
+El nombre del primer santo de la lista del día puede aparecer en la columna del día. 
+Con un tooltip mostrar cuáles son los santos canonizados en cada día y un resumen de sus vidas.
+El código debe ser capaz de funcionar cualquier fecha del año.
+La Base de datos debe incluir todos los santos según su canonización.
+Arregla la experiencia del usuario para que se depliegue mejor en pantallas pequeñas.
+Adapta el diseño para que mantenga su experiencia del usuario en pantallas pequeñas
