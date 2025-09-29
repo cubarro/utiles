@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evangelio del Día</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a6ea5;
+            --secondary-color: #6b8cae;
+            --light-gray: #f5f7fa;
+            --medium-gray: #e0e6ed;
+            --dark-gray: #2c3e50;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-bottom: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-right: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .tab:hover {
+            background-color: var(--light-gray);
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--medium-gray);
+            padding-bottom: 15px;
+        }
+
+        .card-header i {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .card-header h2 {
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .date-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-date {
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .date-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .date-controls input {
+            padding: 8px 12px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+
+        .date-controls button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .date-controls button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .file-upload {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload label {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .file-upload label:hover {
+            background-color: var(--primary-color);
+        }
+
+        .gospel-citation {
+            font-size: 20px;
+            color: var(--secondary-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .gospel-text {
+            text-align: justify;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .loading i {
+            font-size: 36px;
+            color: var(--primary-color);
+            animation: spin 1.5s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 15px;
+            background-color: #fdeaea;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+        }
+
+        .success-message {
+            color: #27ae60;
+            text-align: center;
+            padding: 15px;
+            background-color: #eafaf1;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+        }
+
+        .info-message {
+            color: #3498db;
+            text-align: center;
+            padding: 15px;
+            background-color: #ebf5fb;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+        }
+
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: var(--border-radius);
+        }
+
+        .instructions h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Evangelio del Día</h1>
+            <p>Encuentra la lectura evangélica para cada día</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" id="evangelio-tab">
+                <i class="fas fa-book-open"></i> Evangelio
+            </div>
+            <div class="tab" id="instrucciones-tab">
+                <i class="fas fa-info-circle"></i> Instrucciones
+            </div>
+        </div>
+
+        <div class="tab-content active" id="evangelio-content">
+            <div class="dashboard">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h2>Fecha</h2>
+                    </div>
+                    <div class="date-container">
+                        <div class="current-date" id="current-date">Cargando...</div>
+                        <div class="date-controls">
+                            <input type="date" id="date-input" disabled>
+                            <button id="today-button" disabled>Hoy</button>
+                        </div>
+                        <div class="file-upload">
+                            <input type="file" id="csv-file" accept=".csv">
+                            <label for="csv-file">
+                                <i class="fas fa-upload"></i> Cargar archivo evangelio.csv
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-book-open"></i>
+                        <h2>Evangelio del Día</h2>
+                    </div>
+                    <div id="gospel-content">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="instrucciones-content">
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> Instrucciones para cargar el archivo CSV</h3>
+                <p>Para que la aplicación funcione correctamente, necesitas cargar el archivo <strong>evangelio.csv</strong>. Puedes hacerlo de dos maneras:</p>
+                <ol>
+                    <li><strong>Usar un servidor web local (recomendado):</strong>
+                        <ul>
+                            <li>Si usas VS Code, instala la extensión "Live Server" y haz clic en "Go Live"</li>
+                            <li>Con Python: abre una terminal en la carpeta y ejecuta <code>python -m http.server</code></li>
+                            <li>Con Node.js: instala http-server con <code>npm install -g http-server</code> y ejecuta <code>http-server</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Cargar manualmente el archivo:</strong>
+                        <ul>
+                            <li>Haz clic en el botón "Cargar archivo evangelio.csv" y selecciona el archivo desde tu computadora</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>El archivo CSV debe tener el siguiente formato:</p>
+                <pre>fecha,cita,resumen
+2025-10-01,"Lc 9,57-62","Resumen del evangelio..."
+2025-10-02,"Lc 10,1-12","Resumen del evangelio..."</pre>
+            </div>
+        </div>
+
+        <footer>
+            <p>Datos proporcionados por <a href="https://evangeli.net/evangelio" target="_blank">evangeli.net</a> | © 2023 Evangelio del Día</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const evangelioTab = document.getElementById('evangelio-tab');
+            const instruccionesTab = document.getElementById('instrucciones-tab');
+            const evangelioContent = document.getElementById('evangelio-content');
+            const instruccionesContent = document.getElementById('instrucciones-content');
+            
+            const dateInput = document.getElementById('date-input');
+            const todayButton = document.getElementById('today-button');
+            const currentDateElement = document.getElementById('current-date');
+            const gospelContentElement = document.getElementById('gospel-content');
+            const csvFileInput = document.getElementById('csv-file');
+            
+            // Variable para almacenar los datos del evangelio
+            let evangelioData = [];
+            
+            // Funcionalidad de las pestañas
+            evangelioTab.addEventListener('click', function() {
+                evangelioTab.classList.add('active');
+                instruccionesTab.classList.remove('active');
+                evangelioContent.classList.add('active');
+                instruccionesContent.classList.remove('active');
+            });
+            
+            instruccionesTab.addEventListener('click', function() {
+                instruccionesTab.classList.add('active');
+                evangelioTab.classList.remove('active');
+                instruccionesContent.classList.add('active');
+                evangelioContent.classList.remove('active');
+            });
+            
+            // Establecer la fecha de hoy inicialmente
+            const today = new Date();
+            const formattedToday = formatDate(today);
+            dateInput.value = formattedToday;
+            updateCurrentDate(today);
+            
+            // Intentar cargar el archivo CSV automáticamente
+            tryLoadCSV();
+
+            // Función para intentar cargar el CSV automáticamente
+            function tryLoadCSV() {
+                // Mostrar indicador de carga
+                gospelContentElement.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                `;
+                
+                // Verificar si estamos en un entorno con protocolo file://
+                if (window.location.protocol === 'file:') {
+                    // Si estamos en file://, no intentamos cargar automáticamente y mostramos instrucciones
+                    gospelContentElement.innerHTML = `
+                        <div class="info-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Estás abriendo el archivo directamente desde el sistema de archivos. Por favor, carga el archivo CSV manualmente o usa un servidor web local.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Intentar cargar el archivo CSV desde el mismo directorio
+                fetch('evangelio.csv')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('No se pudo cargar el archivo CSV');
+                        }
+                        return response.text();
+                    })
+                    .then(csvData => {
+                        // Procesar el contenido del archivo CSV
+                        evangelioData = parseCSV(csvData);
+                        
+                        if (evangelioData.length > 0) {
+                            // Extraer las fechas disponibles para el calendario
+                            const availableDates = evangelioData.map(item => item.fecha);
+                            
+                            // Configurar el input de fecha para que solo permita seleccionar fechas disponibles
+                            configureDateInput(availableDates);
+                            
+                            // Habilitar los controles
+                            dateInput.disabled = false;
+                            todayButton.disabled = false;
+                            
+                            // Verificar si hoy está disponible
+                            const todayInData = evangelioData.some(item => item.fecha === formattedToday);
+                            
+                            if (todayInData) {
+                                // Si hoy está disponible, cargar el evangelio de hoy
+                                loadGospel(formattedToday);
+                            } else {
+                                // Si hoy no está disponible, buscar la fecha más cercana
+                                const closestDate = getClosestDate(availableDates);
+                                dateInput.value = closestDate;
+                                updateCurrentDate(new Date(closestDate));
+                                loadGospel(closestDate);
+                                
+                                // Mostrar mensaje informando que no hay evangelio para hoy
+                                showMessage('No hay evangelio disponible para hoy. Se muestra la fecha más cercana.', 'info');
+                            }
+                            
+                            // Mostrar mensaje de éxito
+                            showMessage(`Se cargaron ${evangelioData.length} días del evangelio correctamente.`, 'success');
+                        } else {
+                            throw new Error('No se encontraron datos válidos en el archivo CSV.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar automáticamente el archivo CSV:', error);
+                        
+                        // Mostrar mensaje de error y opción de carga manual
+                        gospelContentElement.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>No se pudo cargar automáticamente el archivo evangelio.csv. Por favor, cárgalo manualmente usando el botón.</p>
+                            </div>
+                        `;
+                    });
+            }
+
+            // Event listener para cargar el archivo CSV manualmente
+            csvFileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            // Procesar el contenido del archivo CSV
+                            const csvData = e.target.result;
+                            evangelioData = parseCSV(csvData);
+                            
+                            if (evangelioData.length > 0) {
+                                // Extraer las fechas disponibles para el calendario
+                                const availableDates = evangelioData.map(item => item.fecha);
+                                
+                                // Configurar el input de fecha para que solo permita seleccionar fechas disponibles
+                                configureDateInput(availableDates);
+                                
+                                // Habilitar los controles
+                                dateInput.disabled = false;
+                                todayButton.disabled = false;
+                                
+                                // Verificar si hoy está disponible
+                                const todayInData = evangelioData.some(item => item.fecha === formattedToday);
+                                
+                                if (todayInData) {
+                                    // Si hoy está disponible, cargar el evangelio de hoy
+                                    loadGospel(formattedToday);
+                                } else {
+                                    // Si hoy no está disponible, buscar la fecha más cercana
+                                    const closestDate = getClosestDate(availableDates);
+                                    dateInput.value = closestDate;
+                                    updateCurrentDate(new Date(closestDate));
+                                    loadGospel(closestDate);
+                                    
+                                    // Mostrar mensaje informando que no hay evangelio para hoy
+                                    showMessage('No hay evangelio disponible para hoy. Se muestra la fecha más cercana.', 'info');
+                                }
+                                
+                                // Mostrar mensaje de éxito
+                                showMessage(`Se cargaron ${evangelioData.length} días del evangelio correctamente.`, 'success');
+                            } else {
+                                showMessage('No se encontraron datos válidos en el archivo CSV.', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error al procesar el archivo CSV:', error);
+                            showMessage('Error al procesar el archivo CSV. Por favor, verifica el formato.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            // Event listeners
+            dateInput.addEventListener('change', function() {
+                const selectedDate = this.value;
+                updateCurrentDate(new Date(selectedDate));
+                loadGospel(selectedDate);
+            });
+
+            todayButton.addEventListener('click', function() {
+                const today = new Date();
+                const formattedToday = formatDate(today);
+                
+                // Verificar si hoy está en la lista de fechas disponibles
+                const todayInData = evangelioData.some(item => item.fecha === formattedToday);
+                
+                if (todayInData) {
+                    // Si hoy está disponible, seleccionar hoy
+                    dateInput.value = formattedToday;
+                    updateCurrentDate(today);
+                    loadGospel(formattedToday);
+                } else {
+                    // Si hoy no está disponible, mostrar un mensaje
+                    showMessage('No hay evangelio disponible para hoy. Por favor, selecciona otra fecha.', 'error');
+                }
+            });
+
+            // Función para parsear el CSV
+            function parseCSV(csvData) {
+                const lines = csvData.split('\n');
+                const result = [];
+                
+                // Ignorar la primera línea (encabezados)
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        // Usar una expresión regular para manejar campos entre comillas
+                        const regex = /(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^,]*))/g;
+                        const row = [];
+                        let match;
+                        
+                        while ((match = regex.exec(line)) !== null) {
+                            row.push(match[1] ? match[1].replace(/""/g, '"') : match[2]);
+                        }
+                        
+                        if (row.length >= 3) {
+                            result.push({
+                                fecha: row[0].trim(),
+                                cita: row[1].trim(),
+                                resumen: row[2].trim()
+                            });
+                        }
+                    }
+                }
+                
+                return result;
+            }
+
+            // Función para configurar el input de fecha con las fechas disponibles
+            function configureDateInput(dates) {
+                // Crear un objeto para almacenar las fechas disponibles
+                const availableDates = {};
+                
+                // Marcar todas las fechas disponibles
+                dates.forEach(date => {
+                    availableDates[date] = true;
+                });
+                
+                // Configurar el input de fecha
+                dateInput.addEventListener('input', function() {
+                    const selectedDate = this.value;
+                    if (!availableDates[selectedDate]) {
+                        // Si la fecha seleccionada no está disponible, mostrar un mensaje
+                        this.setCustomValidity('Por favor selecciona una fecha disponible');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+
+            // Función para obtener la fecha más cercana a hoy
+            function getClosestDate(dates) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Convertir las fechas a objetos Date
+                const dateObjects = dates.map(date => new Date(date));
+                
+                // Ordenar las fechas
+                dateObjects.sort((a, b) => a - b);
+                
+                // Encontrar la fecha más cercana
+                let closestDate = dateObjects[0];
+                let minDiff = Math.abs(today - closestDate);
+                
+                for (let i = 1; i < dateObjects.length; i++) {
+                    const diff = Math.abs(today - dateObjects[i]);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestDate = dateObjects[i];
+                    }
+                }
+                
+                // Formatear la fecha como YYYY-MM-DD
+                return formatDate(closestDate);
+            }
+
+            // Función para formatear fecha como YYYY-MM-DD
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            // Función para actualizar la visualización de la fecha actual
+            function updateCurrentDate(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = date.toLocaleDateString('es-ES', options);
+            }
+
+            // Función para cargar el evangelio
+            function loadGospel(date) {
+                // Mostrar indicador de carga
+                gospelContentElement.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                `;
+
+                // Buscar el evangelio en los datos
+                setTimeout(() => {
+                    const gospel = evangelioData.find(item => item.fecha === date);
+                    
+                    if (gospel) {
+                        displayGospel(gospel);
+                    } else {
+                        gospelContentElement.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>No se encontró el evangelio para la fecha seleccionada.</p>
+                            </div>
+                        `;
+                    }
+                }, 500);
+            }
+
+            // Función para mostrar el evangelio en la página
+            function displayGospel(gospel) {
+                gospelContentElement.innerHTML = `
+                    <div class="gospel-citation">${gospel.cita}</div>
+                    <div class="gospel-text">${gospel.resumen}</div>
+                `;
+            }
+
+            // Función para mostrar mensajes
+            function showMessage(message, type) {
+                let messageClass, icon;
+                
+                switch(type) {
+                    case 'success':
+                        messageClass = 'success-message';
+                        icon = 'fa-check-circle';
+                        break;
+                    case 'error':
+                        messageClass = 'error-message';
+                        icon = 'fa-exclamation-triangle';
+                        break;
+                    case 'info':
+                        messageClass = 'info-message';
+                        icon = 'fa-info-circle';
+                        break;
+                    default:
+                        messageClass = 'info-message';
+                        icon = 'fa-info-circle';
+                }
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = messageClass;
+                messageElement.innerHTML = `
+                    <i class="fas ${icon}"></i>
+                    <p>${message}</p>
+                `;
+                
+                // Insertar el mensaje después del header
+                const header = document.querySelector('header');
+                header.insertAdjacentElement('afterend', messageElement);
+                
+                // Eliminar el mensaje después de 5 segundos
+                setTimeout(() => {
+                    messageElement.remove();
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
