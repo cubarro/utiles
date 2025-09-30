@@ -174,7 +174,7 @@
         }
 
         .file-upload {
-            margin-top: 20px;
+            margin-top: 30px;
             text-align: center;
         }
 
@@ -184,9 +184,9 @@
 
         .file-upload label {
             display: inline-block;
-            background-color: var(--secondary-color);
+            background-color: var(--primary-color);
             color: var(--white);
-            padding: 8px 15px;
+            padding: 12px 20px;
             border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
@@ -194,7 +194,7 @@
         }
 
         .file-upload label:hover {
-            background-color: var(--primary-color);
+            background-color: var(--secondary-color);
         }
 
         .gospel-citation {
@@ -327,14 +327,8 @@
                     <div class="date-container">
                         <div class="current-date" id="current-date">Cargando...</div>
                         <div class="date-controls">
-                            <input type="date" id="date-input" disabled>
-                            <button id="today-button" disabled>Hoy</button>
-                        </div>
-                        <div class="file-upload">
-                            <input type="file" id="csv-file" accept=".csv">
-                            <label for="csv-file">
-                                <i class="fas fa-upload"></i> Cargar archivo evangelio.csv
-                            </label>
+                            <input type="date" id="date-input" disabled="">
+                            <button id="today-button" disabled="">Hoy</button>
                         </div>
                     </div>
                 </div>
@@ -367,7 +361,7 @@
                     </li>
                     <li><strong>Cargar manualmente el archivo:</strong>
                         <ul>
-                            <li>Haz clic en el botón "Cargar archivo evangelio.csv" y selecciona el archivo desde tu computadora</li>
+                            <li>Haz clic en el botón "Cargar csv" y selecciona el archivo desde tu computadora</li>
                         </ul>
                     </li>
                 </ol>
@@ -375,6 +369,13 @@
                 <pre>fecha,cita,resumen
 2025-10-01,"Lc 9,57-62","Resumen del evangelio..."
 2025-10-02,"Lc 10,1-12","Resumen del evangelio..."</pre>
+                
+                <div class="file-upload">
+                    <input type="file" id="csv-file" accept=".csv">
+                    <label for="csv-file">
+                        <i class="fas fa-upload"></i> Cargar csv
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -439,7 +440,7 @@
                     gospelContentElement.innerHTML = `
                         <div class="info-message">
                             <i class="fas fa-info-circle"></i>
-                            <p>Estás abriendo el archivo directamente desde el sistema de archivos. Por favor, carga el archivo CSV manualmente o usa un servidor web local.</p>
+                            <p>Estás abriendo el archivo directamente desde el sistema de archivos. Por favor, carga el archivo CSV manualmente usando la pestaña de instrucciones.</p>
                         </div>
                     `;
                     return;
@@ -498,7 +499,7 @@
                         gospelContentElement.innerHTML = `
                             <div class="error-message">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <p>No se pudo cargar automáticamente el archivo evangelio.csv. Por favor, cárgalo manualmente usando el botón.</p>
+                                <p>No se pudo cargar automáticamente el archivo evangelio.csv. Por favor, cárgalo manualmente usando la pestaña de instrucciones.</p>
                             </div>
                         `;
                     });
@@ -542,6 +543,9 @@
                                     // Mostrar mensaje informando que no hay evangelio para hoy
                                     showMessage('No hay evangelio disponible para hoy. Se muestra la fecha más cercana.', 'info');
                                 }
+                                
+                                // Cambiar a la pestaña de evangelio después de cargar el archivo
+                                evangelioTab.click();
                                 
                                 // Mostrar mensaje de éxito
                                 showMessage(`Se cargaron ${evangelioData.length} días del evangelio correctamente.`, 'success');
@@ -750,5 +754,5 @@
             }
         });
     </script>
-</body>
-</html>
+
+</body></html>
