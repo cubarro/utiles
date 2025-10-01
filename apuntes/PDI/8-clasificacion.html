@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><head>
+      <title>8-clasificacion</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////home/cubarro/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.19/crossnote/dependencies/katex/katex.min.css">
+      
+      
+      <script type="text/javascript" src="file:////home/cubarro/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.19/crossnote/dependencies/mermaid/mermaid.min.js" charset="UTF-8"></script>
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<h2 id="clasificación-de-imágenes-digitales">Clasificación de Imágenes Digitales </h2>
+<p>La Clasificación de Imágenes Digitales es un componente fundamental en la teledetección (o percepción remota) y las ciencias geomáticas, cuyo objetivo primordial es reemplazar la interpretación visual de datos con técnicas cuantitativas para <strong>automatizar la identificación de características en una escena</strong> (Gomarasca 2009). Este proceso analítico categoriza sistemáticamente cada píxel en una imagen digital en una de varias clases temáticas, como uso o cobertura del suelo (Gomarasca 2009; Richards and Jia 2006).</p>
+<p>La clasificación se basa en el <strong>reconocimiento de patrones espectrales</strong>. Cada píxel se describe mediante un vector en un espacio multispectral cuyas coordenadas están dadas por su valor de brillo (Número Digital o DN) en cada banda espectral (Gomarasca 2009). Se espera que los píxeles que representan el mismo material terrestre (clase de información) formen agrupaciones o cúmulos (clases espectrales) en este espacio multidimensional.</p>
+<p>A continuación, se examinan las metodologías clave de clasificación y la evaluación de sus resultados bajo un estándar formal.</p>
+<h3 id="1-clasificación-supervisada">1. Clasificación Supervisada </h3>
+<p>La Clasificación Supervisada es un enfoque cuantitativo en el que el analista guía el proceso de categorización, empleando su conocimiento <em>a priori</em> de la zona de estudio para definir clases de interés (Richards and Jia 2006, 193).</p>
+<h4 id="11-metodología-y-conceptos-clave">1.1. Metodología y Conceptos Clave </h4>
+<p>El proceso consta de tres etapas fundamentales: entrenamiento, clasificación y salida (Richards and Jia 2006, 193).</p>
+<ol>
+<li><strong>Etapa de Entrenamiento (Training Stage):</strong> El analista identifica <strong>áreas de entrenamiento</strong> representativas y homogéneas para cada clase temática (e.g., bosque, agua). A partir de estas áreas, se genera una descripción numérica de las <strong>clases espectrales</strong>. Los parámetros estadísticos calculados (vectores de medias, matrices de covarianza, desviaciones estándar) conforman la "firma" de interpretación numérica para cada clase (Richards and Jia 2006, 193).</li>
+<li><strong>Etapa de Clasificación (Classification Stage):</strong> El algoritmo compara el vector de medición de cada píxel desconocido con las firmas de las clases de entrenamiento. El píxel se etiqueta con la categoría a la que más se asemeja numéricamente.</li>
+<li><strong>Etapa de Salida (Output Stage):</strong> Se presentan los resultados, típicamente como mapas temáticos o archivos de datos digitales.</li>
+</ol>
+<p>El éxito de la clasificación supervisada depende de la calidad de las áreas de entrenamiento. El <strong>refinamiento del conjunto de entrenamiento</strong> incluye el análisis de la distribución de respuesta espectral y el uso de medidas de distancia estadística, como la <strong>Divergencia Transformada</strong>, que cuantifican la separación entre clases (Gomarasca 2009).</p>
+<p>Los algoritmos supervisados más utilizados incluyen:</p>
+<ul>
+<li><strong>Máxima Verosimilitud (Maximum Likelihood Classifier, MLL):</strong> Este es un clasificador paramétrico que minimiza el error de clasificación, asumiendo que las clases están distribuidas normalmente (Richards and Jia 2006, 194). Utiliza el vector de media y la matriz de covarianza de la clase para calcular la probabilidad de pertenencia de un píxel (Richards and Jia 2006, 194).</li>
+<li><strong>Clasificador de Paralelepípedos (Parallelepiped Classifier):</strong> Define los límites de una clase mediante umbrales (típicamente <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\pm 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">±</span><span class="mord">1</span></span></span></span> desviación estándar) para cada banda espectral (Gomarasca 2009).</li>
+<li><strong>Distancia Mínima a la Media (Minimum Distance to Means Classifier):</strong> Asigna un píxel a la clase con la distancia euclidiana más corta a su vector de media (Richards and Jia 2006).</li>
+</ul>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 15px 0;">
+    **Figura Ilustrativa 1: Paralelepípedos de Clases en el Espacio Espectral**
+<pre class="language-text">Esta figura ilustra cómo los límites superior e inferior de las áreas de entrenamiento (generalmente definidos por desviaciones estándar) establecen paralelepípedos en el espacio multispectral. Es una herramienta clave en la clasificación supervisada para visualizar la superposición espectral entre clases.
+
+(Adaptado de Gomarasca 2009, Plate 30c)
+</pre>
+</div>
+<h3 id="2-clasificación-no-supervisada">2. Clasificación No Supervisada </h3>
+<p>La Clasificación No Supervisada (<em>clustering</em>) es un método para <strong>extraer información de la cobertura terrestre sin conocimiento <em>a priori</em></strong> de las clases (Richards and Jia 2006).</p>
+<h4 id="21-metodología-y-conceptos-clave">2.1. Metodología y Conceptos Clave </h4>
+<p>Este método busca agrupaciones naturales (<em>clusters</em>) de píxeles en el espacio multispectral. El resultado inicial es un mapa de <strong>clases espectrales</strong>. Posteriormente, el analista debe examinar estos clusters y asociarlos con las <strong>clases de información</strong> (cobertura terrestre, como bosque o agua).</p>
+<p>El algoritmo de <em>clustering</em> más común es <strong>ISODATA</strong> (Iterative Self-Organizing Data Analysis Technique), que utiliza una distancia mínima entre centros de <em>clusters</em> para fusionarlos (Jensen 2015, 362).</p>
+<h4 id="22-clasificación-híbrida">2.2. Clasificación Híbrida </h4>
+<p>Los enfoques híbridos combinan la supervisión del analista con la eficiencia del <em>clustering</em>. Un método común es el <strong>clustering guiado</strong>, donde el analista delimita áreas de entrenamiento, aplica un algoritmo no supervisado (como ISODATA) a esas áreas para identificar subclases espectrales (resolviendo la multimodalidad de la clase de información), y luego usa estas subclases en un clasificador supervisado (Gomarasca 2009).</p>
+<h3 id="3-evaluación-de-resultados-de-una-clasificación">3. Evaluación de Resultados de una Clasificación </h3>
+<p>Una clasificación debe ser evaluada para documentar su precisión y determinar el grado de confianza del mapa resultante (Jensen 2015, 443).</p>
+<h4 id="31-matriz-de-error-confusion-matrix">3.1. Matriz de Error (Confusion Matrix) </h4>
+<p>La <strong>Matriz de Error</strong> es la herramienta fundamental, que compara las etiquetas de clase asignadas por el clasificador (filas) con las clases determinadas por los <strong>datos de referencia</strong> (<em>ground truth</em> o verdad de campo) (columnas), obtenidos a través de muestreo independiente (Jensen 2015, 444). Los píxeles clasificados correctamente se encuentran en la diagonal principal (Jensen 2015, 448).</p>
+<h4 id="32-métricas-de-precisión-descriptivas">3.2. Métricas de Precisión Descriptivas </h4>
+<p>La matriz de error se utiliza para calcular métricas clave (Jensen 2015, 448):</p>
+<ol>
+<li><strong>Exactitud Global (Overall Accuracy):</strong> El porcentaje total de píxeles clasificados correctamente (Jensen 2015, 448).</li>
+<li><strong>Exactitud del Productor (Producer’s Accuracy):</strong> Mide la probabilidad de que un píxel de referencia de una clase sea clasificado correctamente. Está relacionada con los <strong>errores de omisión</strong> (Jensen 2015, 449).</li>
+<li><strong>Exactitud del Usuario (User’s Accuracy):</strong> Mide la fiabilidad del mapa desde la perspectiva del usuario (probabilidad de que un píxel clasificado pertenezca realmente a esa clase). Está relacionada con los <strong>errores de comisión</strong> (Jensen 2015, 449).</li>
+</ol>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 15px 0;">
+    **Tabla Ilustrativa 1: Matriz de Error y Métricas Descriptivas**
+<pre class="language-text">Matriz conceptual que muestra la relación entre la clasificación obtenida y los datos de referencia (Ground Truth) para derivar métricas de precisión.
+
+(Adaptado de Richards and Jia, Table 7.3)
+</pre>
+</div>
+<h4 id="33-métricas-de-precisión-estadísticas">3.3. Métricas de Precisión Estadísticas </h4>
+<p>El <strong>Coeficiente Kappa (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>K</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{K}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9468em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span>) de Acuerdo</strong> es una medida estadística que evalúa cuánto mejor es la clasificación obtenida en comparación con una asignación puramente aleatoria (Jensen 2015, 451). Incorpora los errores fuera de la diagonal (Congalton 1991, citado en Jensen 2015, 452).</p>
+<h4 id="34-clasificación-blanda-fuzzy-y-evaluación">3.4. Clasificación "Blanda" (Fuzzy) y Evaluación </h4>
+<p>La clasificación tradicional utiliza una lógica "dura" (<em>hard</em> o <em>crisp</em>), asignando cada píxel a una sola clase. Sin embargo, la clasificación "blanda" (<em>soft</em> o <em>fuzzy</em>), basada en la teoría de conjuntos difusos (Zadeh 1973), asigna a cada píxel un <strong>grado de pertenencia</strong> (entre 0 y 1) para múltiples clases, reconociendo la existencia de <strong>píxeles mixtos</strong> (Gomarasca 2009, Jensen 2015).</p>
+<p>La <strong>Evaluación de Precisión Difusa</strong> utiliza esta lógica para incorporar la posibilidad de que un píxel de referencia pertenezca parcialmente a más de una clase (Gopal and Woodcock 1994, citado en Jensen 2015, 460).</p>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 15px 0;">
+    **Figura Ilustrativa 2: Lógica de Clasificación Hard vs. Soft (Fuzzy)**
+<pre class="language-text">Representación conceptual de la clasificación tradicional (Hard) con fronteras discretas frente a la clasificación difusa (Soft), que utiliza grados de pertenencia para modelar píxeles mixtos y transiciones graduales en el terreno.
+
+(Adaptado de Gomarasca 2009, Figuras 9-2 y 9-34)
+</pre>
+</div>
+<h2 id="infografía-clasificación-y-evaluación-de-imágenes-digitales">Infografía: Clasificación y Evaluación de Imágenes Digitales </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><strong>Elemento Central</strong></th>
+<th style="text-align:center"><strong>Clasificación de Imágenes Digitales</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Objetivo</strong></td>
+<td style="text-align:center">Asignar cada píxel a una clase temática utilizando patrones espectrales (Gomarasca 2009).</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Tipos de Lógica</strong></td>
+<td style="text-align:center"><strong>Hard (Crisp):</strong> 1 píxel = 1 clase. <strong>Soft (Fuzzy):</strong> Grados de pertenencia (0-1) (Zadeh 1973).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="i-clasificación-supervisada-richards-and-jia-2006">I. Clasificación Supervisada (Richards and Jia 2006) </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><strong>Definición</strong></th>
+<th style="text-align:center">El analista define áreas de entrenamiento <em>a priori</em> para generar firmas espectrales.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Algoritmos Clave</strong></td>
+<td style="text-align:center">Máxima Verosimilitud (MLL), Paralelepípedos, Distancia Mínima.</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Refinamiento</strong></td>
+<td style="text-align:center">Uso de Divergencia Transformada para evaluar la separabilidad de las clases (Gomarasca 2009).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ii-clasificación-no-supervisada">II. Clasificación No Supervisada </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><strong>Definición</strong></th>
+<th style="text-align:center">El algoritmo identifica cúmulos naturales (<em>clusters</em>). El etiquetado de clases es <em>a posteriori</em> (Richards and Jia 2006).</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Algoritmo Clave</strong></td>
+<td style="text-align:center">ISODATA (Jensen 2015).</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Híbridos</strong></td>
+<td style="text-align:center">Clustering Guiado (Gomarasca 2009).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="iii-evaluación-de-resultados-jensen-2015">III. Evaluación de Resultados (Jensen 2015) </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><strong>Herramienta</strong></th>
+<th style="text-align:center"><strong>Matriz de Error:</strong> Compara clases del mapa con la Verdad de Campo.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Métricas Descriptivas</strong></td>
+<td style="text-align:center">Exactitud Global (OA). Exactitud del Productor (Errores de Omisión). Exactitud del Usuario (Errores de Comisión).</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Métrica Estadística</strong></td>
+<td style="text-align:center">Coeficiente Kappa (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>K</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{K}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9468em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span>) (Congalton 1991).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mapa-mental-mermaid-code">Mapa Mental (Mermaid Code) </h2>
+<p><a href="https://mermaid.live/edit#pako:eNp1VU1v2zgQ_SsET1nADey4iWPdvLabBF1vjbq7h4UvE3KsEpBIgR9G4iA_Jsc9-LDoT9Af2yEdR5Kb6iSRbx7fzLyhnrgwEnnGS6VlCdVaMzYtwKmNEiBU_UMzieyurF9y1OjYTOXKQ0FvEcnYAr2RpjB5vQfHfq9fHMW5wx5jg_NTslWo0G6VAwkZm7ClVcaqI5yxuYeqCU8r2lvUUCrU3rQ3GLshRbYR-UnZshvL2FfcqGMw627FZ6a2aCkxoaDHbpXzJrdQQht4or_LMXEq142CZb1_QKpNA5oUOeXnS9PRtahfHlQJ7G-0xqlSFcoH2QbMSApEVQTda9VVtARLDSiwqvcVyob54qdi_2l-qrdxHk9qvrRGoDPdpEPC6ZydTXIbqldCDT7Q4b-1sRNnSOhbDaIEcsfcVSi8TU6B42J0kt4YalOCv1emCN1im_9u9WU2-TZpL31eIOhWRU_Svq3391ZJ-EVGN0GBNOzsTpIruj5fhXuRpL5m-Ef9I6d99sgmVZGARjftPe7egpUZm1rlqlZKLWsMWJWckdFb4j9lWJmNz9insNs9vs9QGctubJQdbYbWk_WTP876HwatdlACh6NaNLp-KZRTqfwL3JGApjuvfp5voQhNGb6iC4Wn0xx5RghquaAKOKqLK6lmR-5btPYwW-2xW4C3ahdp5taS7LNmYWr0Jrh4ypvkRUBHA95y3zdaiG1aKkrDUXhCQJJPAyNBJiooK9NKnCYG6_8MZUbYQ1flG-mi_pck0L3EZuiEVZVX27bk-QMIH2eQ3RTmHor3diQWcVJkEN7Y7i2Q8jzY25TKda3dZfjLBaDxY78kEKcMjXZKDWS9p-qItvipoTtOxC4g-wxVBYz3eE7-55m3AXu8RBq4-MmfYtSa--9Y4ppn9CpxA9TqNV_rZwqrQP9jTHmMtCbk33m2gcLRV6gkeJwpiHfkGwS1RDs1QXueDa4TBc-e-APPLi6G5x-Hg9Fl__J6eDHuD3v8kWcfPp73R1dX4-HVcDS4vrwcj597fJcO7Z-PD8-oPxgTZkR0ELxZPWpxPA-lovovDv-s9Ot6_h9hIDHt">Editor</a></p>
+<div class="mermaid">mindmap
+  Clasificación de Imágenes Digitales 
+    Metodologías Básicas
+      1. Clasificación Supervisada: A Priori
+        Etapas
+          Entrenamiento
+            Generación de Firmas
+            Refinamiento 
+                Divergencia, Histograma
+          Clasificación 
+            Asignación de Píxeles
+        Algoritmos
+          Máxima Verosimilitud
+          Distancia Mínima
+          Paralelepípedos
+      2. Clasificación No Supervisada: A Posteriori
+        Proceso
+          Clustering (Agrupación natural)
+          Asociación de Clases Espectrales a Clases de Información
+        Algoritmos Clave
+          ISODATA
+          KMeans
+        Clasificación Híbrida
+          Clustering Guiado (Identificación de Subclases)
+    Lógica y Aplicaciones
+      Lógica Hard: Crisp
+        Asignación 1 píxel: 1 clase
+      Lógica Soft: Fuzzy
+        Asignación por Grado de Pertenencia (0-1)
+        Subpíxel
+        Análisis de Mezcla Espectral 
+    Evaluación de Resultados: Accuracy Assessment
+      Herramientas
+        Matriz de Error (Matriz de Confusión)
+      Muestreo
+        Testing Pixels (Muestras de Verdad de Campo)
+        Diseño Estratificado
+      Métricas Descriptivas
+        Exactitud Global
+        Exactitud del Productor
+            Errores de omisión
+        Exactitud del Usuario 
+            Errores de comisión
+      Métricas Estadísticas
+        Coeficiente Kappa 
+</div><h2 id="bibliografía">Bibliografía </h2>
+<p>Anderson, J. R., E. Hardy, J. Roach, and R. Witmer. 1976. <em>A Land-Use and Land-Cover Classification System for Use with Remote Sensor Data</em>. Washington: U.S. Geological Survey, Professional Paper #964.</p>
+<p>Congalton, Russell G. 1991. "A Review of Assessing the Accuracy of Classifications of Remotely Sensed Data." <em>Remote Sensing of Environment</em> 37: 35–46.</p>
+<p>Gomarasca, Mario A. 2009. <em>Basics of Geomatics</em>. B.V.: Springer Science+Business Media.</p>
+<p>Gopal, Sucharita, and Curtis Woodcock. 1994. "Theory and Methods for Accuracy Assessment of Thematic Maps Using Fuzzy Sets." <em>Photogrammetric Engineering &amp; Remote Sensing</em> 60 (2): 181–188.</p>
+<p>Jensen, John R. 2015. <em>Introductory Digital Image Processing: A Remote Sensing Perspective</em>. 4th ed. Boston: Pearson Education, Inc.</p>
+<p>Richards, John A., and Xiuping Jia. 2006. <em>Remote Sensing Digital Image Analysis: An Introduction</em>. 4th ed. Berlin: Springer-Verlag.</p>
+<p>Zadeh, Lotfi A. 1973. "Fuzzy Pattern Recognition." En <em>Fuzzy Pattern Recognition</em>, editado por Lotfi A. Zadeh. London: Academic Press.</p>
+
+      </div>
+      
+      
+    
+    
+    <script type="module">
+// TODO: If ZenUML gets integrated into mermaid in the future,
+//      we can remove the following lines.
+
+
+var MERMAID_CONFIG = ({"startOnLoad":false});
+if (typeof MERMAID_CONFIG !== 'undefined') {
+  MERMAID_CONFIG.startOnLoad = false
+  MERMAID_CONFIG.cloneCssStyles = false
+  MERMAID_CONFIG.theme = "default"
+}
+
+mermaid.initialize(MERMAID_CONFIG || {})
+if (typeof(window['Reveal']) !== 'undefined') {
+  function mermaidRevealHelper(event) {
+    var currentSlide = event.currentSlide
+    var diagrams = currentSlide.querySelectorAll('.mermaid')
+    for (var i = 0; i < diagrams.length; i++) {
+      var diagram = diagrams[i]
+      if (!diagram.hasAttribute('data-processed')) {
+        mermaid.init(null, diagram, ()=> {
+          Reveal.slide(event.indexh, event.indexv)
+        })
+      }
+    }
+  }
+  Reveal.addEventListener('slidetransitionend', mermaidRevealHelper)
+  Reveal.addEventListener('ready', mermaidRevealHelper)
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+} else {
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+}
+</script>
+    
+    
+    
+  
+    </body></html>

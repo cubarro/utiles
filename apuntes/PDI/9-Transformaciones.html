@@ -1,0 +1,215 @@
+<!DOCTYPE html><html><head>
+      <title>9-Transformaciones</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////home/cubarro/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.19/crossnote/dependencies/katex/katex.min.css">
+      
+      
+      <script type="text/javascript" src="file:////home/cubarro/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.19/crossnote/dependencies/mermaid/mermaid.min.js" charset="UTF-8"></script>
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<h2 id="transformaciones-espaciales-en-el-procesamiento-de-imágenes-de-teledetección"><strong>Transformaciones Espaciales en el Procesamiento de Imágenes de Teledetección</strong> </h2>
+<p>La Geomática se define como un enfoque sistémico, multidisciplinario e integrado que abarca la selección de instrumentos y técnicas adecuadas para la recolección, almacenamiento, integración, modelado, análisis, transformación, visualización y distribución de datos georreferenciados espacialmente, provenientes de diversas fuentes y en formato digital (Gomarasca 2009, 2, 4). Dentro del vasto campo del análisis de imágenes digitales de teledetección, las transformaciones espaciales y espectrales desempeñan un papel fundamental para reducir la redundancia, sintetizar la información contenida en los datos originales y extraer información temática específica sobre la superficie terrestre (Gomarasca 2009, 437; Richards y Jia 2005, 138).</p>
+<p>El presente análisis se centra en tres aplicaciones clave de estas transformaciones: los Índices de Vegetación (IV), la Transformación de Kauth and Thomas (Tasseled Cap) y la Evaluación de Cambios Temporales.</p>
+<h3 id="1-índices-de-vegetación-iv">1. Índices de Vegetación (IV) </h3>
+<p>Los Índices de Vegetación (IV) son algoritmos basados en la relación cuantitativa entre bandas espectrales que permiten definir las relaciones entre la energía reflejada y la fenología de la vegetación (Gomarasca 2009, 437). Estos índices se utilizan para cuantificar las características biofísicas de la vegetación (Jensen 2015, 487).</p>
+<h4 id="fundamento-espectral">Fundamento Espectral </h4>
+<p>La vegetación es una de las clases más sencillas de distinguir mediante la teledetección debido a su respuesta espectral típica (Gomarasca 2009, 437). El comportamiento espectral de las diferentes especies varía en función de la estructura de las plantas y de sus hojas (Gomarasca 2009, 437).</p>
+<p>La vegetación sana y vigorosa exhibe consistentemente una baja reflectancia en la porción roja (Red) del espectro visible (aproximadamente 0.6–0.7 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">\mu m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">μ</span><span class="mord mathnormal">m</span></span></span></span>) debido a la absorción de la luz roja por la clorofila para la fotosíntesis, y una alta reflectancia en el infrarrojo cercano (NIR) (aproximadamente 0.7–0.9 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">\mu m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">μ</span><span class="mord mathnormal">m</span></span></span></span>) (Jensen 2015, 206, 229, 233). Por ejemplo, el pasto Centipede refleja solo entre el 3% y el 4% de la energía roja incidente, pero aproximadamente el 35% de la energía del infrarrojo cercano incidente (Jensen 2015, 229).</p>
+<h4 id="aplicaciones-y-tipología">Aplicaciones y Tipología </h4>
+<p>El enfoque de los IV busca sintetizar la información contenida en los datos originales para reducir el volumen de datos a procesar, concentrando la información en un número menor de bandas sintéticas (Gomarasca 2009, 442). Los índices se emplean para:</p>
+<ul>
+<li><strong>Monitoreo y Evaluación Agrícola:</strong> Monitorear daños a los cultivos debido a infestaciones, patologías y estrés hídrico; y evaluar y monitorear las fases fenológicas para la ideación de modelos agro-meteorológicos (Gomarasca 2009, 442).</li>
+<li><strong>Detección Ambiental:</strong> La vegetación puede actuar como un indicador superficial y subsuperficial de la modificación ambiental (Gomarasca 2009, 437).</li>
+</ul>
+<p>Uno de los índices más conocidos es el <strong>Índice de Vegetación de Diferencia Normalizada (NDVI)</strong>, que se calcula típicamente como la diferencia entre la reflectancia NIR (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mrow><mi>N</mi><mi>I</mi><mi>R</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\rho_{NIR}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>) y la reflectancia Red (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">\rho_{R}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>), normalizada por su suma, lo que resulta en una métrica relacionada con la densidad de la vegetación verde (Jensen 2015, 327, 508).</p>
+<p>Otros índices que utilizan relaciones espectrales incluyen:</p>
+<ul>
+<li><strong>Índice de Área Quemada (BAI)</strong> (Martin 1998): Relaciona las bandas Red e IR (Gomarasca 2009, 451).</li>
+<li><strong>Índice Urbano (UI)</strong> (Kawamura et al. 1996): Utiliza las bandas SWIR y NIR (Gomarasca 2009, 451).</li>
+<li><strong>Índice de Vegetación Transformado (TVI)</strong> (Myers 1983): Una transformación del índice de vegetación (Richards y Jia 2005, 287).</li>
+</ul>
+<h3 id="2-transformación-de-kauth-and-thomas-tasseled-cap">2. Transformación de Kauth and Thomas (Tasseled Cap) </h3>
+<p>La Transformación de Kauth and Thomas (Kauth and Thomas 1976), también conocida como <strong>Tasseled Cap</strong> (TCT), es una transformación lineal que se aplica a datos multiespectrales, como los de Landsat TM (Crist y Cicone 1984), para generar bandas sintéticas cuyo contenido de información está descorrelacionado y posee un significado físico específico (Gomarasca 2009, 451–452; Richards y Jia 2005, 156–157).</p>
+<p>A diferencia del Análisis de Componentes Principales (PCA), que genera ejes de variación máxima estadística, la TCT es específica para la aplicación agrícola, diseñando nuevos ejes ortogonales para maximizar la información de importancia en este sector (Richards y Jia 2005, 157, 113, 115).</p>
+<h4 id="significado-físico-y-desarrollo-fenológico">Significado Físico y Desarrollo Fenológico </h4>
+<p>La TCT se basa en la observación del comportamiento espectral-temporal del desarrollo de los cultivos agrícolas, el cual puede resumirse en un espacio tridimensional (Gomarasca 2009, 452; Richards y Jia 2005, 158).</p>
+<p><strong>Figura Ilustrativa del Concepto Tasseled Cap:</strong></p>
+<blockquote>
+<p><strong>Figura conceptual de la Transformación Tasseled Cap (TCT):</strong> La TCT resume la modificación temporal de la reflectancia espectral de un ciclo de cultivo. Se identifican tres direcciones ortogonales: la diagonal principal, a lo largo de la cual se distribuyen los suelos, está representada por el eje de la <strong>Brillo del Suelo</strong> (<em>Soil Brightness</em>); el desarrollo de la biomasa hasta un máximo sigue el eje de la <strong>Verdor</strong> (<em>Greenness</em>); y el amarilleamiento de los cultivos tiene lugar en un eje ortogonal a la línea del suelo y el retorno a la respuesta del suelo desnudo (<em>yellow staff</em>) (Kauth and Thomas 1976).</p>
+</blockquote>
+<p>Se identifican tres direcciones ortogonales principales significativas en la agricultura (Richards y Jia 2005, 159):</p>
+<ol>
+<li><strong>Brillo del Suelo (Soil Brightness):</strong> Es la diagonal principal a lo largo de la cual se distribuyen los suelos, formando el borde y la base del "capuchón" (Gomarasca 2009, 452; Richards y Jia 2005, 114, 115).</li>
+<li><strong>Verdor (Greenness):</strong> Eje ortogonal al brillo del suelo. Sigue el desarrollo de la biomasa verde a medida que los cultivos avanzan hacia la madurez, y se utiliza como un indicador de verdor (Richards y Jia 2005, 159).</li>
+<li><strong>Amarilleamiento (Yellow-stuff / Yellowness):</strong> Un tercer eje ortogonal que mide el amarilleamiento del cultivo (senescencia) (Richards y Jia 2005, 159).</li>
+<li><strong>No-tal (Non-such):</strong> Un cuarto eje es necesario para dar cuenta de la varianza de los datos no asociada sustancialmente con las diferencias en el brillo del suelo o la vegetación (Richards y Jia 2005, 159).</li>
+</ol>
+<p>Durante el ciclo de crecimiento, la trayectoria de los cultivos converge hacia la corona del capuchón en la madurez, y luego se pliega hacia el amarilleamiento, volviendo finalmente a varias posiciones de suelo, formando los "tassels" (borlas) (Richards y Jia 2005, 114).</p>
+<h4 id="aplicaciones-específicas">Aplicaciones Específicas </h4>
+<p>Además del análisis agrícola, la TCT se ha adaptado a otras aplicaciones. Por ejemplo, el componente <em>Greenness</em> derivado de la TCT de datos Landsat TM se ha relacionado empíricamente con la cantidad de vegetación verde para medir el <strong>área de superficie impermeable</strong> en zonas urbanas o desarrolladas, indicando la falta relativa de vegetación (Lillesand, Kiefer, y Chipman 2015, 529). Además, la diferencia de transformaciones TCT de múltiples fechas (cambios en brillo, verdor y/o humedad) es una técnica ampliamente adoptada para la detección de cambios (Jensen 2015, 519).</p>
+<h3 id="3-evaluación-de-cambios-temporales">3. Evaluación de Cambios Temporales </h3>
+<p>La evaluación de cambios temporales (Change Detection) es crucial en la teledetección para inventariar materiales biofísicos y características antrópicas dinámicas en la superficie terrestre, lo que facilita una comprensión más completa de los procesos físicos y humanos subyacentes (Jensen 2015, 501, 385). Este proceso requiere el preprocesamiento de imágenes de múltiples fechas, incluyendo corrección geométrica (rectificación o registro) y corrección radiométrica (normalización) (Jensen 2015, 501, 513; Richards y Jia 2005, 316).</p>
+<h4 id="31-detección-de-cambios-mediante-análisis-de-componentes-principales-pca">3.1. Detección de Cambios mediante Análisis de Componentes Principales (PCA) </h4>
+<p>La Transformación de Componentes Principales (PCA) es una técnica de reducción de redundancia que genera un nuevo conjunto de variables descorrelacionadas, donde el primer componente contiene la mayor parte de la varianza, y los componentes subsiguientes contienen porciones cada vez menores (Richards y Jia 2005, 134, 401).</p>
+<p>Cuando se aplica PCA a un conjunto de datos multitemporales y multiespectrales (apilados en una única capa), se utiliza para mejorar las regiones de cambio localizado (Richards y Jia 2005, 134). Este método se basa en la alta correlación que existe entre los datos de imagen para las regiones que <em>no cambian</em> significativamente, y la correlación relativamente baja asociada con las regiones que <em>cambian</em> sustancialmente (Richards y Jia 2005, 134).</p>
+<p>Si la mayor parte de la varianza se asocia con tipos de cobertura constante, las regiones de cambio localizado se realzarán en los componentes <strong>superiores</strong> del conjunto de imágenes transformadas (Richards y Jia 2005, 134, 136). Mientras que las variaciones asociadas con los tipos de cobertura constante se mapean a un pequeño rango de brillo en los componentes principales superiores, el efecto de cambio dominará estos componentes (Richards y Jia 2005, 136).</p>
+<p><strong>Figura Ilustrativa del PCA para Detección de Cambios (Concepto de Realce):</strong></p>
+<blockquote>
+<p><strong>Figura 7.27:</strong> Uso del análisis de componentes principales para aumentar el contraste de una columna de humo con las áreas terrestres y acuáticas subyacentes. (c) Tercer componente principal de imágenes derivado de las bandas MODIS 1–5 y 8. La columna de humo es muy aparente, ayudando a aumentar el contraste entre la columna y las superficies subyacentes (Lillesand, Kiefer, y Chipman 2015, 527).</p>
+</blockquote>
+<h4 id="32-análisis-del-vector-de-cambio-espectral-spectral-change-vector-analysis---cva">3.2. Análisis del Vector de Cambio Espectral (Spectral Change Vector Analysis - CVA) </h4>
+<p>El Análisis del Vector de Cambio Espectral (CVA) es un algoritmo de detección de cambios que produce una imagen que incorpora la magnitud y la dirección del cambio, utilizando las bandas espectrales (Jensen 2015, 542).</p>
+<p>En un espacio multiespectral bidimensional (por ejemplo, NIR vs. Red), el vector de cambio de un píxel se define por la magnitud del cambio (distancia en el espacio) y el ángulo de cambio (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>) entre las reflectancias del Píxel 1 (Fecha 1) y el Píxel 2 (Fecha 2) (Jensen 2015, 542).</p>
+<p>La <strong>magnitud del cambio</strong> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><msub><mi>M</mi><mrow><mi>p</mi><mi>i</mi><mi>x</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">CM_{pixel}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">x</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>) se calcula utilizando la raíz cuadrada de la suma de los cuadrados de las diferencias de reflectancia en cada banda (por ejemplo, Red y NIR) (Jensen 2015, 542, Ecuación 12.11). La <strong>dirección del cambio</strong> se calcula mediante la función arcotangente (Jensen 2015, 542, Ecuación 12.12).</p>
+<p>El CVA genera una única imagen de información de cambio que es insensible a la variación de la iluminación (Jensen 2015, 542, 543). Esto es una ventaja clave. La decisión de que ha ocurrido un cambio se toma si la magnitud del vector excede un umbral preestablecido (Virag y Colwell 1987; Jensen 2015, 543). La dirección del vector de cambio contiene información sobre el <em>tipo</em> de cambio (por ejemplo, el vector de cambio debido a la tala debería ser diferente al vector de cambio debido al rebrote de la vegetación) (Jensen 2015, 543).</p>
+<p><strong>Figura Ilustrativa del Análisis del Vector de Cambio Espectral:</strong></p>
+<blockquote>
+<p><strong>Figura 12-35:</strong> Diagrama esquemático del método de detección de cambios por Análisis del Vector de Cambio Espectral. (a)-(d) Muestra la magnitud y el ángulo del vector de cambio en un espacio bidimensional. (e) Muestra los posibles códigos de sector de cambio para un píxel medido en tres bandas en dos fechas (Jensen 2015, 542).</p>
+</blockquote>
+<h4 id="33-análisis-de-series-de-tiempo">3.3. Análisis de Series de Tiempo </h4>
+<p>El acceso a datos globales recolectados sistemáticamente y a largo plazo (por ejemplo, de sensores como MODIS) ha permitido el desarrollo del análisis de series de tiempo (Lillesand, Kiefer, y Chipman 2015, 588, 507). Las series de tiempo de imágenes, o de productos derivados como los índices de vegetación (EVI, NDVI), se utilizan para estudiar variaciones estacionales a decenales en sistemas agrícolas, ecológicos e hidrológicos a escala regional (Lillesand, Kiefer, y Chipman 2015, 588, 508).</p>
+<p>Un enfoque en este análisis es el modelado del perfil temporal de la vegetación, donde parámetros como la fecha de emergencia, el momento del pico de verdor y la amplitud del ciclo estacional (fenología) se utilizan para clasificar y modelar, reduciendo la dimensionalidad de los datos originales (Lillesand, Kiefer, y Chipman 2015, 588, 509). La fenología, el estudio de los ciclos predecibles de desarrollo de los ecosistemas, es fundamental para identificar el momento óptimo de recolección de datos de teledetección para obtener la máxima información útil sobre el cambio (Jensen 2015, 508, 391).</p>
+<h3 id="conclusión">Conclusión </h3>
+<p>Las transformaciones espaciales en el procesamiento de imágenes de teledetección son herramientas esenciales para el análisis cuantitativo de la superficie terrestre. Los Índices de Vegetación aprovechan el contraste espectral inherente de la vegetación entre las regiones roja e infrarroja para monitorear la biomasa y el estrés. La Transformación de Kauth and Thomas proporciona un marco ortogonal, conceptualmente guiado por la fenología de los cultivos, para sintetizar y descorrelacionar la información multiespectral en términos de brillo, verdor y amarilleamiento. Finalmente, la Evaluación de Cambios Temporales, mediante técnicas como el PCA multitemporal y el CVA, permite la cuantificación y caracterización precisa de los cambios dinámicos a lo largo del tiempo, facilitando la modelización y la gestión de recursos a diversas escalas (Gomarasca 2009, 437; Richards y Jia 2005, 134, 157). La integración de estas técnicas es un componente clave de los sistemas de información geoespacial modernos (Lillesand, Kiefer, y Chipman 2015, 591).</p>
+<h2 id="infografía-transformaciones-espaciales-clave-en-teledetección">Infografía: Transformaciones Espaciales Clave en Teledetección </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Tema</th>
+<th style="text-align:left">Concepto Principal</th>
+<th style="text-align:left">Bases Teóricas y Físicas</th>
+<th style="text-align:left">Aplicaciones y Ejes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Índices de Vegetación (IV)</strong></td>
+<td style="text-align:left">Algoritmos de relación entre bandas espectrales para cuantificar características biofísicas de la vegetación (Gomarasca 2009, 437).</td>
+<td style="text-align:left"><strong>Respuesta Espectral Típica:</strong> Alta absorción de energía en el rojo (clorofila) y alta reflectancia en el infrarrojo cercano (NIR) (Jensen 2015, 229, 233).</td>
+<td style="text-align:left"><strong>Monitoreo Fenológico:</strong> Seguimiento de la salud de los cultivos, detección de estrés hídrico y plagas (Gomarasca 2009, 442).</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Transformación de Kauth and Thomas (TCT)</strong></td>
+<td style="text-align:left">Transformación lineal ortogonal (Tasseled Cap) que genera bandas sintéticas con significado físico, optimizada para la agricultura (Richards y Jia 2005, 157, 115).</td>
+<td style="text-align:left"><strong>Fenología del Cultivo:</strong> Los ejes se definen para seguir las trayectorias de reflectancia espectral durante el ciclo de crecimiento, desde el suelo desnudo hasta la madurez (Gomarasca 2009, 452).</td>
+<td style="text-align:left"><strong>Ejes Principales:</strong> 1. Brillo del Suelo (Soil Brightness). 2. Verdor (Greenness). 3. Amarilleamiento (Yellow-stuff). 4. No-tal (Non-such) (Richards y Jia 2005, 159).</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Evaluación de Cambios Temporales (ECT)</strong></td>
+<td style="text-align:left">Uso de imágenes de múltiples fechas para inventariar y comprender los cambios dinámicos en la superficie terrestre (Jensen 2015, 501, 385).</td>
+<td style="text-align:left"><strong>Análisis Multitemporal:</strong> Requiere la corrección geométrica y radiométrica de las imágenes para asegurar la comparabilidad (Jensen 2015, 501).</td>
+<td style="text-align:left"><strong>Técnicas Clave:</strong> <strong>PCA</strong> (el cambio se realza en los componentes superiores) (Richards y Jia 2005, 134). <strong>CVA</strong> (mide magnitud y dirección del cambio, insensible a la iluminación) (Jensen 2015, 543). <strong>Series de Tiempo</strong> (análisis fenológico decenal) (Lillesand, Kiefer, y Chipman 2015, 507).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mapa-mental-mermaid">Mapa Mental (Mermaid) </h2>
+<p><a href="https://mermaid.live/edit#pako:eNqVVs1S4zgQfpUunzPZJE4I8Q0CwzKzsFMhRdVOcVGkdiJKllySzA5QPMI-xBw5cOIR_GLbsg0hTpgfH1KxrP767-tPuo-4ERglUSa1yFh-pYGeuWXapcZmjEuj0cGxy-kvU-jqDeE5wlRqyWX5rNeL4bmQzmPGICuUl0I6LnMlNbPSQM4sA6bL70o66WCJBhvkBE5MRl8dZzDo9SYdGG6i_onWskyi9syBQMit4ejqlQbYlU_aYwCm71I3CVB8O8Dj8Rq-34XyPy0k4QXLS1yirw1hM4Yv1uTls5PebK4DHH_zlvHahiCm5Ix7tOWT85JTwIfSpPQS_rdNpwXTXqb0yYJF1TimrCzSL9pl-cToQ6rwmgkGt5CiNsqE5Z_kVT9nRlPAFk0IDJ235aMjlJz5BsWRG-ChWTfG7YAcDjYhD5nDwAjklLNquwM4UJ7BwcIZ-5IKzMy1gQQ-oXb0Nuj1Rx0YDCbv2M5CstwzTcQI1uens7ZtHG_aHl9jlquttpwfXZ6212atGhM6lWOGYr1x0N0Ygaapn1nhV8ReAfMV1ci1yPG3twbOTbaw2HY5Z86hQkG8yHcUeNTfNDhDb0TTnO0StSOj2UKmwFhvlkaHSZpJvmJWhC5_kpUXKll_NN7GOgkEY7CgpCgfJ7UvH2vCCnTc2JqPhEqfdwU-2OqCA240ScBSV5QWBj5WvDfbzg-tVCqwUsFFgcokcGGkCsvLlSfVce9l0h9tg12iFcZSjBZR_67xAeVFsWCjJgn8gxTZvx-cL9L0V4EOSOU426GH9RBSmqEaxKPyu0UGMsvRZsgWChP4K3h31IUOfJaYou2Qr-lK5hl7ofzo7bjEXTi-YapgbxQnW0jjYE5zYGxQ6jY9F9cYJrwd26m-CZpqJckPKUv5nJG8UP8lqXRGfXOt0Yv3R21RxA0t3k5-GojUiOMJmow4ZqlU2xtnuKSzw5qWy1Gv_2PQGRPyFTahIaThUPLuRfx_DDYvH7muOD9V7Aa3PX2ZHsBZkEff1PY9RsTDbeNqLBTwqj1Awkm9V3eVrHFDcBrDkQWuIDZIUul3eRvv7eDt60laHVucZH7NhbVEw-6wziTtzRhNqi8EORPytaBhJuuQ29VrHwZrGtEmJ4nNwOAm0OmVmlIVdLvY3Yxh_JOsLqgs9bE8l6H871SYJpUoELY1vqtrC512tXzROPwhkGP179fGrTfe7erjm9N3KrmiWcktEnjIvQqUpJNZa5RqFy-e9KNOtLRSRIm3BXaijCSAhdfoPni7ivwKM7yKEvorMGXEuqvoSj-QWc70V2OyF0triuUqSlKmHL0VuWAejyRb0h3pdQtqgXZqCu2jpL9fQUTJffQtSgaDuDuM--NRb7QfDya9uBPdRsmHYbc33tubxHvxuL8_Gk0mD53ornLa607qZ9zrT2jPmODoODQXt5q_-EMR7hln9X2yulY-_A94KSWH">Editor</a></p>
+<div class="mermaid">mindmap
+    Transformaciones Espaciales
+        Definición
+            Sistema multidisciplinario para análisis geoespacial: Gomarasca 2009, 4
+            Herramientas de procesamiento para síntesis de información: Gomarasca 2009, 437
+        1. Índices de Vegetación 
+            Propósito
+              Extracción de Características Biofísicas
+              Cuantificar relación entre energía reflejada y fenología: Gomarasca 2009, 437
+              Monitoreo de estrés y patologías en cultivos: Gomarasca 2009, 442
+            Base Espectral
+                Alta Absorción en Rojo : Jensen 2015, 229
+                Alta Reflectancia en NIR: Jensen 2015, 233
+            Ejemplo
+              NDVI
+              Relación entre NIR y Red
+        2. Transformación de Kauth and Thomas 
+            Otro Nombre
+              Tasseled Cap: Gomarasca 2009, 451
+            Metodología
+                Transformación lineal ortogonal: Richards y Jia 2005, 157
+                Genera bandas sintéticas descorrelacionadas: Gomarasca 2009, 452
+            Ejes con Significado Físico
+                Brillo del Suelo: Soil Brightness: Richards y Jia 2005, 115
+                Verdor: Greenness: Richards y Jia 2005, 115
+                Amarilleamiento: Yellow-stuff: Richards y Jia 2005, 115
+            Aplicación
+                Modelado de área impermeable: Lillesand, Kiefer, y Chipman 2015, 529
+        3. Evaluación de Cambios Temporales 
+            Objetivo
+              Inventariar fenómenos dinámicos: Jensen 2015, 385
+            Preprocesamiento
+                Corrección Geométrica
+                Registro: Jensen 2015, 501
+                Corrección Radiométrica: Normalización: Jensen 2015, 501
+            Técnicas Clave
+                PCA Multitemporal: Richards y Jia 2005, 134
+                    El cambio se realza en componentes superiores: Richards y Jia 2005, 136
+                Análisis de Vector de Cambio Espectral 
+                    Mide magnitud y dirección del cambio: Jensen 2015, 542
+                    Insensible a variación de iluminación: Jensen 2015, 543
+                Análisis de Series de Tiempo
+                    Estudio de variaciones estacionales/decenales: Lillesand, Kiefer, y Chipman 2015, 507
+                    Fenología: Ciclos predecibles de desarrollo: Jensen 2015, 391
+</div>
+      </div>
+      
+      
+    
+    
+    <script type="module">
+// TODO: If ZenUML gets integrated into mermaid in the future,
+//      we can remove the following lines.
+
+
+var MERMAID_CONFIG = ({"startOnLoad":false});
+if (typeof MERMAID_CONFIG !== 'undefined') {
+  MERMAID_CONFIG.startOnLoad = false
+  MERMAID_CONFIG.cloneCssStyles = false
+  MERMAID_CONFIG.theme = "default"
+}
+
+mermaid.initialize(MERMAID_CONFIG || {})
+if (typeof(window['Reveal']) !== 'undefined') {
+  function mermaidRevealHelper(event) {
+    var currentSlide = event.currentSlide
+    var diagrams = currentSlide.querySelectorAll('.mermaid')
+    for (var i = 0; i < diagrams.length; i++) {
+      var diagram = diagrams[i]
+      if (!diagram.hasAttribute('data-processed')) {
+        mermaid.init(null, diagram, ()=> {
+          Reveal.slide(event.indexh, event.indexv)
+        })
+      }
+    }
+  }
+  Reveal.addEventListener('slidetransitionend', mermaidRevealHelper)
+  Reveal.addEventListener('ready', mermaidRevealHelper)
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+} else {
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+}
+</script>
+    
+    
+    
+  
+    </body></html>
