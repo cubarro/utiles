@@ -1,4 +1,7 @@
 # utiles
+
+[Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)
+
 Páginas útiles y básicas
 
 * [Calendario litúrgico](calendario)
