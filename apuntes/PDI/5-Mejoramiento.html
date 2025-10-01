@@ -77,12 +77,57 @@ Donde <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.
 <p>Mientras que la logaritmación amplifica los valores oscuros, la exponenciación se utiliza para realzar los <strong>valores de brillo en la parte más brillante del histograma</strong>.</p>
 <p>En un contexto relacionado, la transformación Gaussiana, que es un tipo de estiramiento no uniforme, tiende a una distribución normal (Gaussiana) y tiene el efecto de realzar el contraste de las <strong>áreas más oscuras de la imagen</strong>. Aunque la exponenciación se usa típicamente para las áreas más brillantes (como inverso del logaritmo), la bibliografía general de procesamiento digital de imágenes a menudo las menciona como herramientas complementarias para ajustar los extremos del histograma.</p>
 <h3 id="infografía-técnicas-de-mejoramiento-de-contraste-por-manipulación-del-histograma">INFOGRAFÍA: Técnicas de Mejoramiento de Contraste por Manipulación del Histograma </h3>
-<p>| Técnica | Tipo de Transformación | Objetivo Principal | Mecanismo | Efecto en el Contraste | Aplicación Clave | Citas Relevantes (Autor, Año) |<br>
-| : | : | : | : | : | : | : |<br>
-| <strong>1. Linearización</strong> | Lineal, Uniforme | Utilizar el rango dinámico completo del visualizador (ej. 0-255). | Mapea linealmente los valores <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>i</mi><msub><mi>n</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">min_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8095em;vertical-align:-0.15em;"></span><span class="mord mathnormal">mi</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> a <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>a</mi><msub><mi>x</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">max_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord mathnormal">ma</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> al rango de salida deseado. Incluye variantes saturadas y por tramos. | Mejora general del contraste. Aumenta la pendiente si se satura (e.g., <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><mi>σ</mi></mrow><annotation encoding="application/x-tex">\pm \sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">±</span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span></span></span></span>). | Visualización de imágenes con bajo contraste inherente. | Jensen 2015; Richards and Jia 2005. |<br>
-| <strong>2. Ecualización</strong> | No Lineal, Basada en Frecuencia | Crear un histograma de salida cuasi-uniforme. | Transforma los valores de DN basándose en la frecuencia de ocurrencia acumulada. Aplica mayor estiramiento a los rangos más poblados. | Máximo realce en las áreas más comunes y pobladas del histograma. | Mejora la percepción de detalles en imágenes complejas. No usar para clasificación cuantitativa. | Richards and Jia 2005; Jensen 2015. |<br>
-| <strong>3. Logaritmación</strong> | No Lineal, Estiramiento No Uniforme | Realzar detalles y contraste en las <strong>regiones oscuras</strong> de la imagen. | Escala los datos de entrada logarítmicamente. La curva de mapeo asciende rápidamente para valores bajos. | Aumenta el contraste en sombras y áreas oscuras. | Análisis de detalles en cuerpos de agua o áreas con baja iluminación. | Gomarasca 2009; Jensen 2015. |<br>
-| <strong>4. Exponenciación</strong> | No Lineal, Estiramiento No Uniforme | Realzar detalles y contraste en las <strong>regiones brillantes</strong> de la imagen. | Utiliza una función logarítmica inversa (o exponencial). | Aumenta el contraste en áreas claras o brillantes. | Énfasis en características altamente reflectivas o áreas con picos de brillo. | Gomarasca 2009; Richards and Jia 2005. |</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Técnica</th>
+<th style="text-align:left">Tipo de Transformación</th>
+<th style="text-align:left">Objetivo Principal</th>
+<th style="text-align:left">Mecanismo</th>
+<th style="text-align:left">Efecto en el Contraste</th>
+<th style="text-align:left">Aplicación Clave</th>
+<th style="text-align:left">Citas Relevantes (Autor, Año)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>1. Linearización</strong></td>
+<td style="text-align:left">Lineal, Uniforme</td>
+<td style="text-align:left">Utilizar el rango dinámico completo del visualizador (ej. 0-255).</td>
+<td style="text-align:left">Mapea linealmente los valores <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>i</mi><msub><mi>n</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">min_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8095em;vertical-align:-0.15em;"></span><span class="mord mathnormal">mi</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> a <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>a</mi><msub><mi>x</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">max_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord mathnormal">ma</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> al rango de salida deseado. Incluye variantes saturadas y por tramos.</td>
+<td style="text-align:left">Mejora general del contraste. Aumenta la pendiente si se satura (e.g., <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><mi>σ</mi></mrow><annotation encoding="application/x-tex">\pm \sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">±</span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span></span></span></span>).</td>
+<td style="text-align:left">Visualización de imágenes con bajo contraste inherente.</td>
+<td style="text-align:left">Jensen 2015; Richards and Jia 2005.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>2. Ecualización</strong></td>
+<td style="text-align:left">No Lineal, Basada en Frecuencia</td>
+<td style="text-align:left">Crear un histograma de salida cuasi-uniforme.</td>
+<td style="text-align:left">Transforma los valores de DN basándose en la frecuencia de ocurrencia acumulada. Aplica mayor estiramiento a los rangos más poblados.</td>
+<td style="text-align:left">Máximo realce en las áreas más comunes y pobladas del histograma.</td>
+<td style="text-align:left">Mejora la percepción de detalles en imágenes complejas. No usar para clasificación cuantitativa.</td>
+<td style="text-align:left">Richards and Jia 2005; Jensen 2015.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>3. Logaritmación</strong></td>
+<td style="text-align:left">No Lineal, Estiramiento No Uniforme</td>
+<td style="text-align:left">Realzar detalles y contraste en las <strong>regiones oscuras</strong> de la imagen.</td>
+<td style="text-align:left">Escala los datos de entrada logarítmicamente. La curva de mapeo asciende rápidamente para valores bajos.</td>
+<td style="text-align:left">Aumenta el contraste en sombras y áreas oscuras.</td>
+<td style="text-align:left">Análisis de detalles en cuerpos de agua o áreas con baja iluminación.</td>
+<td style="text-align:left">Gomarasca 2009; Jensen 2015.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>4. Exponenciación</strong></td>
+<td style="text-align:left">No Lineal, Estiramiento No Uniforme</td>
+<td style="text-align:left">Realzar detalles y contraste en las <strong>regiones brillantes</strong> de la imagen.</td>
+<td style="text-align:left">Utiliza una función logarítmica inversa (o exponencial).</td>
+<td style="text-align:left">Aumenta el contraste en áreas claras o brillantes.</td>
+<td style="text-align:left">Énfasis en características altamente reflectivas o áreas con picos de brillo.</td>
+<td style="text-align:left">Gomarasca 2009; Richards and Jia 2005.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="mapa-mental-técnicas-de-mejoramiento-de-contraste">MAPA MENTAL: Técnicas de Mejoramiento de Contraste </h3>
 <p><a href="https://mermaid.live/edit#pako:eNqVVU1v20YQ_SsDniRAViTZsmUBPQSugBaIC6NJLoUvq-VIXmO5w-4uXSeG_0hvOvbgU34C_1jfkhTFXFL0xiXn4703b5YvmZacs3VWGJcXqrx3RF4kjka3_CheFYZdFMqZbsRFr0JkKsXTLyZE2eO7Go9TDtGdl7L-FkyU9kzUVvBkFRkX2Zeeo9Km_uboyYRK2WPg52is-YpItuSV26OfcfWhMFpIS1FaBoQRP05pdrZYLsd9A8nNzui2xa5ybW1gBREW-kI_0W703IdvLD30sIlDytqqwDTyDGwBTDt4HKLK67cQURzpbYH5lD4Yx8oDahs22iCi16j5aPtun0wp4XgAVuPObuvDsylA5aNJpManrx9VrLzKpSlZH1yu_Ls78TpBehwG4iV9QksJNLozrPkvE07fb5RXGkp30Aftf2fbgbYNTEJlz5hLWUUIJVXEwzAcujNgAFKJogPhAkbiujFZUxgoJafED4qeoJBynU9iixUiV0G1pXKU8mZbaSMOQygqGyFKriyHo9SLKW00DHJSuvcbbf5sP0Skn5zAWjkTigGSz6Gx7cmo9F5XaJYo3QxcQfQ-mL3rGsEPKoc5HO0864rhKZXKiK68b06DWXjJK81DUwF0MGeVMzvxBR9Df8W0MY6W8Cn_t6NnBi7pHMJDYwFMffAM5Yv6ECDrFiS-G67hsG_YKieFsvUbYkdb5bGvBGAu5zD-rq8qYzdYbYF416BL_EHARcw0mieMS7Du3og_zuUcKyB7zDcWbfwP9N8ErWy_Gymrfotppft13LGOMvScslATLHR_1YC6531rFAmYwZB2_Tfujc5TuFksDJQSghTbRLy5MDBCDxqNNvvqtMwXcNhzibpppP9FpbNSf8MY98QedsYa2U6OtLl9vdMl8H85br2xNi3P8OZINcUl32IphWL9j3YYGDmho9OySbb3Js_W0Vc8yQr2hUrH7CXVuc_iA8OO2RqPOe8UVu4-u3evSCuV-0OkOGZ6qfYP2XqnbMCpKnMV-Wejkrv7ENwL7G-kcjFbzxfzpka2fsme0_FiOlsuLper2Wo-W15cXk-yL-n1Ynp-tZydr-Z4dbW4vHydZF-btrPpxfXqej5frRZXyJ7PFleTjHP8Rvxt-2dqflCv_wJ9UD4g">Editor</a></p>
 <div class="mermaid">mindmap
