@@ -1,4 +1,4 @@
-# utiles
+# Útiles
 
 [Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)
 
