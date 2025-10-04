@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Diagrama circular del año litúrgico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #666666;
+      --fg: #e9ecef;
+      --grid: #1f242b;
+      --adviento: #6f42c1;        /* morado */
+      --navidad: #f8f9fa;         /* blanco */
+      --navidad-stroke: #c9a227;  /* dorado */
+      --ordinario: #2e7d32;       /* verde */
+      --cuaresma: #6f42c1;        /* morado */
+      --triduo: #c62828;          /* rojo */
+      --pascua: #fff7e6;          /* blanco cálido */
+      --pascua-stroke: #c9a227;   /* dorado */
+      --pentecostes: #c62828;     /* rojo */
+      --today: #00d4ff;
+      --donut-outer: 44;          /* radio exterior en el viewBox (0–50) */
+      --donut-inner: 30;          /* radio interior en el viewBox (0–50) */
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 8rem; /* evita overflow vertical */
+    }
+
+    .wrap {
+      max-width: 900px;
+      width: 80%;
+      display: grid;
+      gap: 1rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      font-size: clamp(1.2rem, 1.5vw + 1rem, 2rem);
+    }
+
+    header p {
+      margin: 0;
+      color: #adb5bd;
+      font-size: 0.95rem;
+    }
+
+    .chart {
+      inline-size: min(92vmin, 100%); /* nunca supera el menor lado del viewport */
+      aspect-ratio: 1;
+      max-block-size: 88svh;          /* límite por altura visible en móviles */
+      background:
+        radial-gradient(transparent 56%, var(--grid) 57% 57.5%, transparent 58%) center/100% 100% no-repeat;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    svg {
+      inline-size: 100%;
+      block-size: auto;
+    }
+
+    .segment {
+      transition: filter 160ms ease, opacity 160ms ease;
+      cursor: pointer;
+    }
+
+    .segment:hover {
+      filter: brightness(1.12) contrast(1.05) saturate(1.05);
+    }
+
+    .label {
+      font-size: 3px;
+      fill: var(--fg);
+      opacity: 0.9;
+      pointer-events: none;
+      font-weight: 100;
+      filter: url(#label-shadow); /* 🔹 sombra aplicada */
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem 1rem;
+      align-items: start;
+    }
+
+    .legend-item {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 0.6rem;
+      align-items: center;
+      color: #dee2e6;
+      font-size: 0.95rem;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid #0006;
+      box-shadow: inset 0 0 0 1px #ffffff22;
+    }
+
+    .note {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0.75rem; }
+      header h1 { font-size: clamp(1rem, 2.5vw + 0.8rem, 1.4rem); }
+      .label { font-size: 5px; }
+      :root {
+        --donut-outer: 42;
+        --donut-inner: 32;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Tiempos litúrgicos</h1>
+    </header>
+
+    <figure class="chart" role="group" aria-labelledby="chart-title chart-desc">
+
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="false">
+        <!-- Punto central de referencia -->
+        <circle cx="50" cy="50" r="0.3" fill="#00d4ff" opacity="0.6"></circle>
+
+        <!-- Agujero del donut (se ajusta con la variable) -->
+        <circle cx="50" cy="50" r="30" fill="rgba(0,0,0,0.35)" stroke="none" opacity="0.3" ></circle>
+        
+        <defs>
+          <filter id="label-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0.8" dy="0.8" stdDeviation="0.6" flood-color="black" flood-opacity="1"/>
+          </filter>
+        </defs>
+
+
+        <!-- Contenedor de arcos -->
+        <g id="arcs"></g>
+
+        <!-- Marcador de hoy -->
+        <g id="today"></g>
+
+        <!-- Etiquetas -->
+        <g id="labels"></g>
+      </svg>
+    </figure>
+
+    <section class="legend" aria-label="Leyenda de colores">
+      <div class="legend-item"><span class="swatch" style="background: var(--adviento);"></span>Adviento</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--navidad); border-color: var(--navidad-stroke);"></span>Navidad</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--ordinario);"></span>Tiempo Ordinario (I y II)</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--cuaresma);"></span>Cuaresma</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--triduo);"></span>Triduo Pascual</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--pascua); border-color: var(--pascua-stroke);"></span>Pascua</div>
+      <div class="legend-item"><span class="swatch" style="background: var(--pentecostes);"></span>Pentecostés</div>
+    </section>
+
+    <p class="note">Al pasar el mouse sobre cada arco verás las fechas de inicio y fin de ese tiempo litúrgico.</p>
+  </div>
+
+  <script>
+    /* ========= Utilidades de fecha ========= */
+    const d = (y,m,day) => new Date(y, m-1, day);
+    const addDays = (date, n) => { const dt = new Date(date); dt.setDate(dt.getDate() + n); return dt; };
+    const toISO = d => d.toISOString().slice(0,10);
+    const daysBetween = (a, b) => {
+      const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+      const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+      return Math.max(0, Math.floor((B - A) / (24 * 3600 * 1000)) + 1); // inclusivo
+    };
+
+    const dow = d0 => d0.getDay(); // 0 domingo … 6 sábado
+
+    /* ========= Computus de Pascua (Meeus) ========= */
+    function easterSunday(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d1 = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d1 - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month - 1, day);
+    }
+
+    /* ========= Domingos relativos ========= */
+    function firstSundayAfter(date) {
+      const d0 = new Date(date);
+      const shift = (7 - dow(d0)) % 7;
+      return addDays(d0, shift === 0 ? 7 : shift);
+    }
+
+    function previousSunday(beforeDate) {
+      const d0 = new Date(beforeDate);
+      const shift = (dow(d0) + 6) % 7; // días desde el domingo anterior
+      return addDays(d0, -shift - 1);
+    }
+
+    /* ========= Fechas clave del ciclo ========= */
+    function adventStart(year) {
+      const christmas = d(year, 12, 25);
+      const lastSundayBeforeChristmas = previousSunday(addDays(christmas, 0));
+      return addDays(lastSundayBeforeChristmas, -21); // cuatro domingos antes
+    }
+
+    function baptismOfTheLord(year) {
+      const epiphany = d(year, 1, 6);
+      return firstSundayAfter(epiphany);
+    }
+
+    function liturgicalCycleForCivilYear(civilYear) {
+      const today = new Date();
+      const yearForAdvent = today.getMonth() >= 10 ? civilYear : civilYear - 1;
+
+      const startAdvent = adventStart(yearForAdvent);
+      const nextAdvent = adventStart(yearForAdvent + 1);
+
+      const easter = easterSunday(yearForAdvent + 1);
+      const ashWednesday = addDays(easter, -46);
+      const maundyThursday = addDays(easter, -3);
+      const holySaturday = addDays(easter, -1);
+      const pentecost = addDays(easter, 49);
+      const baptism = baptismOfTheLord(yearForAdvent + 1);
+
+      const css = getComputedStyle(document.documentElement);
+
+      const segments = [
+        { id: "adviento",     label: "Adviento",           start: startAdvent,              end: d(yearForAdvent,12,24), color: css.getPropertyValue("--adviento") },
+        { id: "navidad",      label: "Navidad",            start: d(yearForAdvent,12,25),   end: baptism,                 color: css.getPropertyValue("--navidad"), stroke: css.getPropertyValue("--navidad-stroke") },
+        { id: "ordinario1",   label: "Tiempo Ordinario I", start: addDays(baptism, 1),      end: addDays(ashWednesday,-1),color: css.getPropertyValue("--ordinario") },
+        { id: "cuaresma",     label: "Cuaresma",           start: ashWednesday,              end: addDays(maundyThursday,-1), color: css.getPropertyValue("--cuaresma") },
+        { id: "triduo",       label: "Triduo Pascual",     start: maundyThursday,           end: holySaturday,            color: css.getPropertyValue("--triduo") },
+        { id: "pascua",       label: "Pascua",             start: easter,                   end: pentecost,               color: css.getPropertyValue("--pascua"), stroke: css.getPropertyValue("--pascua-stroke") },
+        { id: "pentecostes",  label: "Pentecostés",        start: pentecost,                end: pentecost,               color: css.getPropertyValue("--pentecostes") },
+        { id: "ordinario2",   label: "Tiempo Ordinario II",start: addDays(pentecost, 1),    end: addDays(nextAdvent,-1),  color: css.getPropertyValue("--ordinario") },
+      ];
+
+      return { startAdvent, nextAdvent, segments, today, yearForAdvent };
+    }
+
+    /* ========= Geometría del donut ========= */
+    function describeArc(cx, cy, rOuter, rInner, startAngle, endAngle) {
+      const toRad = deg => (Math.PI / 180) * deg;
+      const polar = (r, angleDeg) => [cx + r * Math.cos(toRad(angleDeg)), cy + r * Math.sin(toRad(angleDeg))];
+
+      const startOuter = polar(rOuter, startAngle);
+      const endOuter   = polar(rOuter, endAngle);
+      const startInner = polar(rInner, endAngle);
+      const endInner   = polar(rInner, startAngle);
+
+      const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+
+      return [
+        `M ${startOuter[0]} ${startOuter[1]}`,
+        `A ${rOuter} ${rOuter} 0 ${largeArcFlag} 1 ${endOuter[0]} ${endOuter[1]}`,
+        `L ${startInner[0]} ${startInner[1]}`,
+        `A ${rInner} ${rInner} 0 ${largeArcFlag} 0 ${endInner[0]} ${endInner[1]}`,
+        `Z`
+      ].join(" ");
+    }
+
+    function angleForDate(date, start, totalDays) {
+      const deltaDays = daysBetween(start, date) - 1; // 0-based
+      const fraction = deltaDays / totalDays;
+      return -90 + fraction * 360; // comienza en la parte superior
+    }
+
+    function formatRange(a, b) {
+      const opts = { day: "2-digit", month: "short" };
+      const A = a.toLocaleDateString("es-ES", opts);
+      const B = b.toLocaleDateString("es-ES", opts);
+      return `${A} – ${B}`;
+    }
+    function buildChart() {
+      const now = new Date();
+      const civilYear = now.getFullYear();
+      const { startAdvent, nextAdvent, segments, today, yearForAdvent } = liturgicalCycleForCivilYear(civilYear);
+      const totalDays = daysBetween(startAdvent, nextAdvent);
+
+      const arcs = document.getElementById("arcs");
+      const labels = document.getElementById("labels");
+      arcs.innerHTML = "";
+      labels.innerHTML = "";
+
+      const rOuter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--donut-outer"));
+      const rInner = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--donut-inner"));
+
+      let startAngle = -90;
+
+      segments.forEach(seg => {
+        const len = daysBetween(seg.start, seg.end);
+        const span = (len / totalDays) * 360;
+        const endAngle = startAngle + span;
+
+        const pathD = describeArc(50, 50, rOuter, rInner, startAngle, endAngle);
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathD);
+        path.setAttribute("class", "segment");
+        path.setAttribute("fill", seg.color.trim());
+        path.setAttribute("data-id", seg.id);
+        path.setAttribute("tabindex", "0");
+        path.setAttribute("role", "img");
+        path.setAttribute("aria-label", `${seg.label}: ${formatRange(seg.start, seg.end)} (${len} días)`);
+
+        if (seg.stroke) {
+          path.setAttribute("stroke", seg.stroke.trim());
+          path.setAttribute("stroke-width", "0.4");
+        } else {
+          path.setAttribute("stroke", "rgba(0,0,0,0.20)");
+          path.setAttribute("stroke-width", "0.2");
+        }
+
+        // Tooltip nativo en hover con fechas de inicio y fin
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = `${seg.label}: ${seg.start.toLocaleDateString("es-ES")} – ${seg.end.toLocaleDateString("es-ES")}`;
+        path.appendChild(title);
+
+        arcs.appendChild(path);
+
+        // Etiqueta en el centro angular del segmento
+        const midAngle = (startAngle + endAngle) / 2;
+        const midR = (rOuter + rInner) / 2;
+        const lx = 50 + (midR - 2.2) * Math.cos((Math.PI / 180) * midAngle);
+        const ly = 50 + (midR - 2.2) * Math.sin((Math.PI / 180) * midAngle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", lx.toFixed(2));
+        text.setAttribute("y", ly.toFixed(2));
+        text.setAttribute("class", "label");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("alignment-baseline", "middle");
+        text.textContent = seg.label;
+        labels.appendChild(text);
+
+        startAngle = endAngle;
+      });
+
+      // Marcador de hoy
+      const angleToday = angleForDate(today, startAdvent, totalDays);
+      const tx = 50 + (rOuter + 1) * Math.cos((Math.PI / 180) * angleToday);
+      const ty = 50 + (rOuter + 1) * Math.sin((Math.PI / 180) * angleToday);
+
+      const todayGroup = document.getElementById("today");
+      todayGroup.innerHTML = "";
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const tx2 = 50 + (rInner - 2) * Math.cos((Math.PI / 180) * angleToday);
+      const ty2 = 50 + (rInner - 2) * Math.sin((Math.PI / 180) * angleToday);
+      line.setAttribute("x1", tx.toFixed(2));
+      line.setAttribute("y1", ty.toFixed(2));
+      line.setAttribute("x2", tx2.toFixed(2));
+      line.setAttribute("y2", ty2.toFixed(2));
+      line.setAttribute("stroke", getComputedStyle(document.documentElement).getPropertyValue("--today").trim());
+      line.setAttribute("stroke-width", "0.6");
+      line.setAttribute("stroke-linecap", "round");
+      todayGroup.appendChild(line);
+
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", tx.toFixed(2));
+      dot.setAttribute("cy", ty.toFixed(2));
+      dot.setAttribute("r", "0.9");
+      dot.setAttribute("fill", getComputedStyle(document.documentElement).getPropertyValue("--today").trim());
+      dot.setAttribute("opacity", "0.9");
+      dot.setAttribute("aria-label", `Hoy (${toISO(today)}) en el ciclo ${yearForAdvent}–${yearForAdvent+1}`);
+      todayGroup.appendChild(dot);
+    }
+
+    // Construir y actualizar
+    buildChart();
+    window.addEventListener("resize", () => buildChart());
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        const active = document.activeElement;
+        if (active && active.classList.contains("segment")) active.click();
+      }
+    });
+  </script>
+</body>
+</html>
