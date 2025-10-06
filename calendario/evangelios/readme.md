@@ -1,5 +1,7 @@
- 
-A continuación los listados de lecturas del Santo Evangelio para cada día por trimestre del año para 2025 y 2026
+
+# Archivos CSV
+
+A continuación los listados de lecturas del Santo Evangelio para cada día por trimestre del año para 2025 y 2026 en archivos csv [para cargar en el calendario](../).
 
 2025  
 [1er trimestre](evang2025tri1.csv)  
