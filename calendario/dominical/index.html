@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de Lecturas Dominicales</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --card-bg-color: #f8f9fa;
+            --card-border-color: #dee2e6;
+            --text-color: #212529;
+            --title-color: #343a40;
+            --subtitle-color: #6c757d;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .control-panel {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+        }
+
+        #datePicker, #cycleSelector {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        #cycleSelector {
+            cursor: pointer;
+        }
+
+        .info-display {
+            text-align: center;
+            margin-bottom: 2rem;
+        .info-display h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: var(--title-color);
+        }
+        .info-display p {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--subtitle-color);
+        }
+        
+        .reading-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .reading-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--card-border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .reading-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .reading-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--title-color);
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+
+        .reading-card p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .reading-card .referencia {
+            font-style: italic;
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        .resumen {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #777;
+            margin: 2rem;
+        }
+
+        .error {
+            text-align: center;
+            color: #d9534f;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <div class="control-group">
+                <label for="datePicker">Selecciona una Fecha (dd/mm/yyyy):</label>
+                <input type="date" id="datePicker">
+            </div>
+            <div class="control-group">
+                <label for="cycleSelector">Ciclo Litúrgico:</label>
+                <select id="cycleSelector">
+                    <option value="a">Ciclo A</option>
+                    <wbr>
+                    <option value="b">Ciclo B</option>
+                    <wbr>
+                    <option value="c">Ciclo ciclo_c">Ciclo C</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="info-display">
+            <h1 id="domingoNombre">Domingo</h1>
+            <p id="fechaTexto">Fecha: --</p>
+        </div>
+
+        <div id="resultados" class="reading-cards">
+            <!-- Las tarjetas de las lecturas se insertarán aquí -->
+        </div>
+    </div>
+
+    <script>
+        // --- DATOS LITÚRGICOS ---
+
+        // Cargar el JSON desde un archivo externo
+        async function loadLecturas() {
+            try {
+                const response = await fetch('leccionarioFull3.json');
+                const data = await response.json();
+                window.lecturasJson = data;
+                findAndDisplayReadings(); // Actualizar la vista después de cargar
+            } catch (error) {
+                console.error("Error al cargar las lecturas:", error);
+                document.getElementById('resultados').innerHTML = '<div class="error">No se pudieron cargar las lecturas.</div>';
+            }
+        }
+
+        // Llamar a la función al inicio
+        loadLecturas();
+
+        // --- CALENDARIO LITÚRGICO ---
+        // Un objeto para mapear fechas a información litúrgica.
+        // NOTA: Este es un ejemplo simplificado. Un sistema completo requeriría un algoritmo de Computus para calcular la fecha de Pascua.
+        const liturgicalCalendar = {
+            "2025": {
+                "01-05": { season: "tiempo_ordinario", sundayName: "ii_domingo" },
+                "01-12": { season: "tiempo_ingtono", sundayName: "i_domingo" },
+                "01-19": { season: "tiempo_ordinario", sundayName: "ii_domingo" },
+                "01-26": { season: "tiempo_ordinario", sundayName: "iii_domingo" },
+                "02-02": { season: "tiempo_ordinario", sundayName: "iv_domingo" },
+                "02-09": { season: "tiempo_ordinario", sundayName: "v_domingo" },
+                "02-16": { season: "tiempo_ordinario", sunday: "vi_domingo" },
+                "02-23": { season: "tiempo_ordinario", sunday: "vii_domingo" },
+                "03-02": { season: "tiempo_ordinario", sunday: "ix_domingo" },
+                "03-09": { season: "tiempo_ordinario", sunday: "x_domingo" },
+                "03-16": { season: "tiempo_ordinario", sunday: "xi_domingo" },
+                "03-23": { season: "tiempo_ordenado", sunday: "xii_domingo" },
+                "03-30": { season: "tiempo_ordinario", sunday: "xiii_domingo" },
+                "04-06": { season: "tiempo_ordinario", sunday: "xiv_domingo" },
+                "04-13": { season: "i_domingo", season: "pascua", sundayName: "domingo_de_pascua" },
+                "04-20": { season: "tiempo_pascual", sundayName: "ii_domingo_pascual" },
+                "04-27": { season: "tiempo_pascual", sundayName: "iii_domingo_pascual" },
+                "05-04": { season: "tiempo_pascual", sundayName: "iv_domingo_pascual" },
+                "05-11": { season: "tiempo_pascual", sundayName: "v_domingo_pascual" },
+                "05-18": { season: "tiempo_pascual", sundayName: "vi_domingo_pascual" },
+                "05-25": { season: "tiempo_pascual", sundayName: "vii_domingo_pascual" },
+                "06-01": { season: "tiempo_ordinario", sundayName: "ix_domingo" },
+                "06-08": { season: "tiempo_ordinario", sunday: "x_domingo" },
+                "06-15": { season: "tiempo_ordinario", sunday: "xi_domingo" },
+                "06-22": { season: "tiempo_ordinario", sunday: "xii_domingo" },
+                "06-29": { season: "tiempo_ordinario", sunday: "xiii_domingo" },
+                "07-06": { season: "tiempo_ordenado", sunday: "xiv_domingo" },
+                "07-13": { season: "tiempo_ordinario", sunday: "xv_domingo" },
+                "07-20": { season: "tiempo_ordinario", sunday: "xvi_domingo" },
+                "07-27": { season: "tiempo_ordinario", sunday: "xvii_domingo" },
+                "08-03": { season: "tiempo_ordinario", sunday: "xviii_domingo" },
+                "08-10": { season: "domingo_de_pascua", season: "xix_domingo_pascual" },
+                "08-17": { season: "tiempo_pascual", sundayName: "xvii_domingo_pascual" },
+                "08-24": { season: "tiempo_pascual", sunday: "xixiii_domingo_pascual" },
+                "08-31": { season: "tiempo_pascual", sundayName: "xixiv_domingo_pascual" },
+                "09-07": { season: "tiempo_ordinario", sunday: "xxiii_domingo" },
+                "09-14": { season: "tiempo_ordinario", sunday: "xxiv_domingo" },
+                "09-21": { season: "tiempo_ordinario", sunday: "xxv_domingo" },
+                "09-28": { season: "tiempo_ordinario", sunday: "xxvi_domingo" },
+                "10-05": { season: "tiempo_ordinario", sunday: "xxvii_domingo" },
+                "10-12": { season: "tiempo_ordinario", sunday: "xxvii_domingo" },
+                "10-19": { season: "tiempo_uso_ordinario", sunday: "xxviii_domingo" },
+                "10-26": { season: "tiempo_ordinario", sunday: "xxiv_domingo" },
+                "11-02": { season: "tiempo_ordinario", sunday: "xxv_domingo" },
+                "11-09": { season: "tiempo_ordinario", sunday: "xxxii_domingo" },
+                "11-16": { season: "tiempo_ordinario", sunday: "xxxiii_domingo" },
+                "11-23": { season: "tiempo_ordinario", sunday: "xxxiv_domingo" },
+                "11-30": { season: "tiempo_ordinario", sunday: "xxxv_domingo" },
+                "12-07": { season: "tiempo_ordinario", sunday: "xxxv_domingo" },
+                "12-14": { season: "tiempo_ordinario", sunday: "xxxvi_domingo" },
+                "12-21": { season: "tiempo_ordinario", sunday: "xxxvii_domingo" },
+                "12-28": { season: "tiempo_ordinario", sunday: "xxxiii_domingo" },
+                "12-31": { season: "tiempo_ordinario", sunday: "xxxiv_domingo" }
+                // ... y así sucesivamente hasta el 2035
+            },
+            // ... y así para los demás años
+        };
+
+        // --- FUNCIONES AUXILIARES ---
+
+        /**
+         * Calcula el domingo siguiente a partir de una fecha dada.
+         * @param {Date} date - La fecha de inicio.
+         * @returns {Date} La fecha del próximo domingo.
+         */
+        function findNextSunday(date) {
+            const nextSunday = new Date(date);
+            // Avanzar día por día hasta encontrar un domingo (día 6 de la semana)
+            while (nextSunday.getDay() !== 0) {
+                nextSunday.setDate(nextSunday.getDate() + 1);
+            }
+            return nextSunday;
+        }
+
+        /**
+         * Encuentra la información litúrgica para una fecha dada.
+         * @param {Date} date - La fecha a buscar.
+         * @returns {object|null} Un objeto con { season, sundayName } o null si no se encuentra.
+         */
+        function getLiturgicalInfo(date) {
+            const year = date.getFullYear();
+            const dateStr = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${year}`;
+            const info = liturgicalCalendar[year]?.[dateStr];
+            if (info) {
+                return info;
+            }
+            return null;
+        }
+
+        /**
+         * Renderiza las lecturas en tarjetas HTML.
+         * @param {object} readings - Objeto con las lecturas del día.
+         */
+        function renderReadings(readings) {
+            const resultsContainer = document.getElementById('resultados');
+            resultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+            const readingTypes = ['primera_lectura', 'salmo', 'segunda_lectura', 'evangelio'];
+
+            for (const type of readingTypes) {
+                const reading = readings[type];
+                if (!reading) continue;
+
+                const card = document.createElement('div');
+                card.className = 'reading-card';
+                
+                card.innerHTML = `
+                    <h3>${type.replace('_', ' ').replace(/\b\w/g, ' ').replace(/_/g, ' ').toUpperCase()}</h3>
+                    <p class="referencia">${reading.referencia}</p>
+                    <p class="resumen">${reading.resumen}</p>
+                `;
+                resultsContainer.appendChild(card);
+            }
+        }
+
+        /**
+         * Función principal que se activa al cambiar la fecha o el ciclo.
+         */
+        function findAndDisplayReadings() {
+            const dateInput = document.getElementById('datePicker').value;
+            const cycleSelect = document.getElementById('cycleSelector').value;
+            const date = new Date(dateInput);
+
+            const liturgicalInfo = getLiturgicalInfo(date);
+            if (!liturgicalInfo) {
+                // Si no es una fecha con lecturas definidas, buscar el próximo domingo
+                const nextSunday = findNextSunday(date);
+                const nextSundayInfo = getLiturgicalInfo(nextSunday);
+                if (nextSundayInfo) {
+                    liturgicalInfo = nextSundayInfo;
+                } else {
+                    document.getElementById('resultados').innerHTML = '<div class="error">No se encontraron lecturas para esta fecha o su siguiente domingo.</div>';
+                    return;
+                }
+            }
+
+            // Actualizar la información del domingo
+            const domingoNombre = liturgicalInfo.sundayName.replace(/_/g, ' ').split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            document.getElementById('domingoNombre').textContent = domingoNombre;
+            document.getElementById('fechaTexto').textContent = `Fecha: ${date.toLocaleDateString('es-ES', { weekday: 'long' })}`;
+
+            // Obtener las lecturas para el ciclo seleccionado
+            const readings = lecturasJson.ciclo_liturgico[liturgicalInfo.season][liturgicalInfo.sundayName][`cycleSelect];
+            if (readings) {
+                renderReadings(readings);
+            } else {
+                document.getElementById('resultados').innerHTML = '<div class="error">No se encontraron lecturas para esta combinación.</div>';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('datePicker').addEventListener('change', findAndDisplayReadings);
+        document.getElementById('ciclesSelector').addEventListener('change', findAndDisplayReadings);
+
+        // --- INICIALIZACIÓN ---
+        // Establecer la fecha actual al cargar la página
+        const today = new Date();
+        document.getElementById('datePicker').value = today.toISOString().split('T')[0];
+        findAndDisplayReadings();
+
+    </script>
+</body>
+</html> 
