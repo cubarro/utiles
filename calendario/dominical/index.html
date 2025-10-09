@@ -158,7 +158,7 @@
             </div>
             <div class="col-md-3 mb-3">
                 <div class="info-card">
-                    <h5>Año Litúrgico</h5>
+                    <h5>Ciclo Litúrgico</h5>
                     <p id="liturgicalYear">-</p>
                 </div>
             </div>
@@ -3253,7 +3253,7 @@
         const dateObjectForDisplay = new Date(dateString + 'T12:00:00Z');
 
         document.getElementById('currentYear').textContent = dateObjectForDisplay.getUTCFullYear();
-        document.getElementById('liturgicalYear').textContent = `Ciclo ${getLiturgicalYear(dateString)}`;
+        document.getElementById('liturgicalYear').textContent = ` ${getLiturgicalYear(dateString)}`;
         document.getElementById('liturgicalTime').textContent = getLiturgicalTime(dateString);
         document.getElementById('celebration').textContent = getCelebrationName(readingsPath);
         document.getElementById('nextSundayDate').textContent = formatDate(dateObjectForDisplay);
@@ -3270,7 +3270,7 @@
             { key: 'primera_lectura', title: 'Primera Lectura' },
             { key: 'salmo', title: 'Salmo Responsorial' },
             { key: 'segunda_lectura', title: 'Segunda Lectura' },
-            { key: 'evangelio', title: 'Evangelio' }
+            { key: 'evangelio', title: 'Santo Evangelio' }
         ];
         
         readingTypes.forEach(type => {
