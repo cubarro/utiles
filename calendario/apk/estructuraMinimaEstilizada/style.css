@@ -1,0 +1,138 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #4a4a4a; /* Texto en un gris suave en lugar de negro puro */
+    background-color: #e0e0e0; /* Fondo general en gris claro */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+header {
+    background-color: #333333; /* Gris oscuro para el encabezado */
+    color: white;
+    padding: 2rem 1rem; /* Más padding para dar énfasis */
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Sombra pronunciada para dar profundidad */
+    border-bottom-left-radius: 20px; /* Bordes redondeados inferiores */
+    border-bottom-right-radius: 20px;
+}
+
+header h1 {
+    font-size: 2.8rem; /* Título grande y prominente */
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+/* Contenido principal */
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch; /* Hace que todas las áreas tengan la misma altura */
+    padding: 2rem;
+    gap: 2rem;
+}
+
+/* Áreas de contenido */
+.area {
+    background-color: #f7f7f7; /* Fondo muy claro para las tarjetas */
+    border-radius: 16px; /* Bordes redondeados significativos */
+    padding: 2rem;
+    width: 600px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Sombra suave y elevada */
+    border: 1px solid #dddddd; /* Borde sutil para definir la tarjeta */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.area:hover {
+    transform: translateY(-8px); /* Efecto de elevación al pasar el ratón */
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18); /* Sombra más intensa al hover */
+}
+
+.area h2 {
+    color: #333333; /* Títulos en un gris oscuro */
+    font-size: 1.8rem; /* Texto grande para los subtítulos */
+    margin-bottom: 1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #cccccc; /* Línea inferior en gris */
+    padding-bottom: 0.5rem;
+}
+
+.area p {
+    font-size: 1rem; /* Texto de tamaño estándar para párrafos */
+    margin-bottom: 1.5rem;
+    color: #555555; /* Un poco más claro que el título */
+}
+
+.area-btn {
+    background-color: #666666; /* Botón en gris medio */
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem; /* Texto del botón un poco más pequeño */
+    border-radius: 8px; /* Bordes redondeados en el botón */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.area-btn:hover {
+    background-color: #555555; /* Botón más oscuro al hover */
+    transform: scale(1.05); /* Ligero aumento de tamaño */
+}
+
+.area-btn:active {
+    transform: scale(0.98); /* Efecto de presión al hacer clic */
+}
+
+/* Pie de página */
+footer {
+    background-color: #333333; /* Mismo gris oscuro que el encabezado */
+    color: #aaaaaa; /* Texto en gris más claro para menos contraste */
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: auto;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2); /* Sombra hacia arriba */
+    border-top-left-radius: 20px; /* Bordes redondeados superiores */
+    border-top-right-radius: 20px;
+}
+
+footer p {
+    font-size: 0.85rem; /* Texto pequeño para el pie de página */
+}
+
+/* Clase para animación de clic (desde script.js) */
+.clicked {
+    animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+
+/* Responsive */
+@media (max-width: 1280px) {
+    header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .area {
+        width: 100%;
+        max-width: 400px;
+    }
+} 

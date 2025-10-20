@@ -1,0 +1,2265 @@
+// Configuración de los datos y dimensiones del gráfico
+const SEASONS = [
+  // Usando los nombres de colores de Tailwind configurados arriba
+  { name: "Adviento",            weeks: 4,  colorClass: "adviento-cuaresma", textColor: "#fff" },
+  { name: "Navidad",             weeks: 2,  colorClass: "navidad-pascua",    textColor: "#000", stroke: "#ccc" }, // Borde para el color muy claro
+  { name: "Tiempo Ordinario I",  weeks: 6,  colorClass: "ordinario",         textColor: "#fff" },
+  { name: "Cuaresma",            weeks: 6,  colorClass: "adviento-cuaresma", textColor: "#fff" },
+  { name: "Pascua",              weeks: 7,  colorClass: "navidad-pascua",    textColor: "#000", stroke: "#ccc" },
+  { name: "Tiempo Ordinario II", weeks: 27, colorClass: "ordinario",         textColor: "#fff" }
+];
+
+// Función para obtener el color real de una clase de Tailwind
+function getColor(className) {
+  // Intenta obtener el color del DOM (configuración personalizada de Tailwind)
+  const element = document.createElement('div');
+  element.className = `bg-${className}`;
+  document.body.appendChild(element);
+  const color = window.getComputedStyle(element).backgroundColor;
+  document.body.removeChild(element);
+
+  // Si no se pudo obtener, usa un fallback basado en el nombre de la clase
+  if (!color || color === 'rgba(0, 0, 0, 0)') {
+    switch (className) {
+      case 'adviento-cuaresma': return '#5D2E8C'; // Morado
+      case 'ordinario': return '#0A6847';          // Verde
+      case 'navidad-pascua': return '#FFFDD0';     // Blanco/Oro
+      case 'linea-actual': return '#4285F4';       // Azul
+      default: return '#cccccc';
+    }
+  }
+  return color;
+}
+
+// Convertir las clases de color a valores HEX/RGB reales después de que Tailwind se inicialice
+SEASONS.forEach(s => {
+  s.color = getColor(s.colorClass);
+});
+
+// 1) Variables de Fechas
+const now   = new Date();
+// Intenta calcular el inicio del año litúrgico (Primer domingo de Adviento).
+// Para simplificar, asumimos el 1 de diciembre, o el anterior si ya pasó.
+let start   = new Date(now.getFullYear(), 11, 1);
+if (now < start) start = new Date(now.getFullYear() - 1, 11, 1);
+const next  = new Date(start.getFullYear() + 1, 11, 1);
+const adventYear = start.getFullYear();
+
+// 2) Cálculos de Semanas y Estación Actual
+const totalWeeks    = SEASONS.reduce((sum, s) => sum + s.weeks, 0);
+const elapsedWeeks  = (now - start) / (1000 * 60 * 60 * 24 * 7); // Semanas transcurridas
+let weekSum = 0, currentSeason = SEASONS[0], endWeekSum = 0;
+
+for (const s of SEASONS) {
+  weekSum += s.weeks;
+  if (elapsedWeeks <= weekSum) {
+    currentSeason = s;
+    endWeekSum     = weekSum;
+    break;
+  }
+}
+
+// Fecha en que culmina el tiempo actual
+const endDate = new Date(start.getTime() + endWeekSum * 7 * 24 * 60 * 60 * 1000);
+
+// Formato de fechas
+const longDate = now.toLocaleDateString("es-ES", {
+  weekday: "long", year: "numeric", month: "long", day: "numeric"
+});
+const endDateString = endDate.toLocaleDateString("es-ES", {
+  day: "2-digit", month: "long", year: "numeric"
+});
+const shortDate = now.toLocaleDateString("es-ES", {
+    day: "2-digit", month: "2-digit", year: "numeric"
+});
+
+// 3) Cálculo del Ciclo Litúrgico (A, B o C)
+// Regla: Se basa en el año de Adviento. (Año) % 3 -> 0:A, 1:B, 2:C
+const cycles = ['A', 'B', 'C'];
+const cycleIndex = (adventYear) % 3;
+const currentCycle = cycles[cycleIndex];
+
+
+// 4) Actualizar el Panel de Control (Dashboard)
+
+// Tarjeta 1: Ciclo Litúrgico
+document.getElementById("card-cycle").innerHTML = `
+    <span class="text-xs font-semibold uppercase text-gray-500 mb-1">Ciclo de la Palabra</span>
+    <div class="text-4xl font-extrabold text-adviento-cuaresma">${currentCycle}</div>
+    <span class="text-sm text-gray-500">Inició en Adviento ${adventYear}</span>
+`;
+
+// Tarjeta 2: Fecha Actual
+document.getElementById("card-date").innerHTML = `
+    <span class="text-xs font-semibold uppercase text-gray-500 mb-1">Hoy es</span>
+    <div class="text-2xl font-bold text-gray-800">${longDate.split(',')[0]}</div>
+    <span class="text-lg font-extrabold text-gray-700">${shortDate}</span>
+`;
+
+// Tarjeta 3: Tiempo Actual
+document.getElementById("card-time").innerHTML = `
+    <span class="text-xs font-semibold uppercase text-gray-500 mb-1">Tiempo Litúrgico Actual</span>
+    <div class="text-xl font-bold text-gray-800">${currentSeason.name}</div>
+    <span class="text-sm font-medium" style="color: ${currentSeason.color}">${currentSeason.weeks} semanas de duración</span>
+`;
+
+// Tarjeta 4: Culminación del Tiempo
+document.getElementById("card-end").innerHTML = `
+    <span class="text-xs font-semibold uppercase text-gray-500 mb-1">Culmina el Tiempo Actual</span>
+    <div class="text-xl font-bold text-gray-800">${endDateString.split(',')[0]}</div>
+    <span class="text-sm text-gray-500">Para dar inicio al siguiente</span>
+`;
+
+
+// 5) Dibujo del Diagrama SVG
+const svg     = document.getElementById("litYear");
+const tooltip0 = document.getElementById("tooltip0");
+const chart   = document.getElementById("chart");
+
+// Dimensiones del SVG, ajustadas para el viewBox
+const svgWidth = +svg.getAttribute("width");
+const svgHeight = +svg.getAttribute("height");
+const padding = 10;
+const chartW  = svgWidth - 2 * padding;
+const chartH  = svgHeight - 2 * padding; // Altura total de la barra
+let   currentX  = padding;
+
+SEASONS.forEach((s, index) => {
+  const segW = (s.weeks / totalWeeks) * chartW;
+
+  // 5.1) Crear el rectángulo (Barra de tiempo)
+  const rect = document.createElementNS(svg.namespaceURI, "rect");
+  rect.setAttribute("x",      currentX);
+  rect.setAttribute("y",      padding);
+  rect.setAttribute("width",  segW);
+  rect.setAttribute("height", chartH);
+  rect.setAttribute("fill",   s.color);
+  // Aplicar borde redondeado a los extremos (solo a los primeros y últimos segmentos)
+  if (index === 0) {
+    rect.setAttribute("rx", 5); // Radio de esquina horizontal
+    rect.setAttribute("ry", 5); // Radio de esquina vertical
+  } else if (index === SEASONS.length - 1) {
+    rect.setAttribute("rx", 5);
+    rect.setAttribute("ry", 5);
+  }
+  // Borde sutil para los segmentos claros
+  if (s.stroke) {
+    rect.setAttribute("stroke", s.stroke);
+    rect.setAttribute("stroke-width", 1);
+  }
+  svg.appendChild(rect);
+
+  // 5.2) Crear la etiqueta de texto
+  const text = document.createElementNS(svg.namespaceURI, "text");
+  text.setAttribute("x",           currentX + segW / 2);
+  text.setAttribute("y",           padding + chartH / 2 + 5); // Centrado verticalmente
+  text.setAttribute("fill",        s.textColor);
+  text.setAttribute("font-size",   "14"); // Un poco más grande
+  text.setAttribute("font-weight", "600");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("class",       "svg-text-shadow"); // Sombra para mejor lectura
+  // Solo mostrar el nombre si hay espacio
+  const truncatedName = segW > 60 ? s.name : (s.name.includes("Ordinario") ? 'T.O.' : s.name.substring(0, 3) + '.');
+  text.textContent = truncatedName;
+  svg.appendChild(text);
+
+  // 5.3) Tooltips
+  rect.addEventListener("mousemove", e => {
+    const box = chart.getBoundingClientRect();
+    tooltip0.textContent   = `${s.name} (${s.weeks} semanas)`;
+    tooltip0.style.left    = `${e.clientX - box.left}px`;
+    tooltip0.style.top     = `${e.clientY - box.top}px`;
+    tooltip0.style.opacity = 1;
+  });
+  rect.addEventListener("mouseout", () => {
+    tooltip0.style.opacity = 0;
+  });
+
+  currentX += segW;
+});
+
+// 6) Línea de Fecha Actual
+const linePos = ((now - start) / (next - start)) * chartW + padding; // Posición X relativa
+const line = document.createElementNS(svg.namespaceURI, "line");
+line.setAttribute("x1", linePos);
+line.setAttribute("y1", padding - 5);
+line.setAttribute("x2", linePos);
+line.setAttribute("y2", chartH + padding + 5);
+line.setAttribute("stroke", getColor('linea-actual')); // Usar color personalizado
+line.setAttribute("stroke-width", 3); // Un poco más gruesa
+line.setAttribute("stroke-linecap", "round");
+svg.appendChild(line);
+
+// 6.1) Tooltip de Fecha Actual
+line.addEventListener("mousemove", e => {
+  const box = chart.getBoundingClientRect();
+  tooltip0.textContent   = `Hoy: ${shortDate}`;
+  tooltip0.style.left    = `${e.clientX - box.left}px`;
+  tooltip0.style.top     = `${e.clientY - box.top}px`;
+  tooltip0.style.opacity = 1;
+});
+line.addEventListener("mouseout", () => {
+  tooltip0.style.opacity = 0;
+});
+
+
+// Los santos
+// El santoral católico   
+
+// Base de datos completa de santos por día del año
+// Base de datos simulada de santos (cuarto trimestre)
+const santosDatabase = {
+    '01-01': [
+        { name: 'María, Madre de Dios', description: 'María es venerada como la Madre de Dios y Madre de la Iglesia. Esta solemnidad celebra su maternidad divina y su papel en la historia de la salvación.' },
+        { name: 'San Basilio Magno', description: 'Obispo de Cesarea y Doctor de la Iglesia. Conocido por sus escritos teológicos y su regla monástica que influyó en el monacato oriental.' },
+        { name: 'San Fulgencio', description: 'Obispo de Ruspe en África. Defensor de la fe católica contra el arrianismo y escritor de importantes obras teológicas.' }
+    ],
+    '01-02': [
+        { name: 'San Basilio y San Gregorio Nacianceno', description: 'Dos grandes Doctores de la Iglesia, conocidos como los Capadocios. Contribuyeron enormemente a la teología trinitaria.' },
+        { name: 'San Silvestre I', description: 'Papa que gobernó la Iglesia durante el reinado del emperador Constantino. Presidió el Concilio de Nicea I.' }
+    ],
+    '01-03': [
+        { name: 'Santos Inocentes', description: 'Los niños mártires de Belén, asesinados por orden del rey Herodes en su búsqueda del Niño Jesús.' },
+        { name: 'San Genaro', description: 'Obispo de Benevento y mártir. Su sangre, conservada en una ampolla, se licúa anualmente en Nápoles.' }
+    ],
+    '01-04': [
+        { name: 'Santa Ángela de Foligno', description: 'Mística y escritora italiana. Conocida por sus visiones y su profunda vida espiritual.' },
+        { name: 'San Rigoberto', description: 'Obispo de Reims. Fue exiliado por defender los derechos de la Iglesia frente al poder civil.' }
+    ],
+    '01-05': [
+        { name: 'San Juan Nepomuceno Neumann', description: 'Obispo de Filadelfia. Primer santo canonizado de Estados Unidos, conocido por su trabajo con los inmigrantes.' },
+        { name: 'Santa Emiliana', description: 'Virgen y mártir romana. Hermana de Santa Tarsila, ambas dedicaron su vida a Dios.' }
+    ],
+    '01-06': [
+        { name: 'Epifanía del Señor', description: 'Manifestación de Jesucristo a los pueblos. Celebración de la adoración de los Reyes Magos.' },
+        { name: 'San Andrés Bessette', description: 'Religioso canadiense, conocido como el "hermano Andrés". Construyó la basílica de San José en Montreal.' }
+    ],
+    '01-07': [
+        { name: 'San Raimundo de Peñafort', description: 'Dominico español, maestro general de la Orden. Codificó el derecho canónico y fundó misiones.' },
+        { name: 'San Luciano', description: 'Mártir de Antioquía. Sacerdote que sufrió persecución bajo el emperador Decio.' }
+    ],
+    '01-08': [
+        { name: 'San Severino', description: 'Monje y apóstol de Noricum. Evangelizador de Austria y protector de los pueblos durante las invasiones bárbaras.' },
+        { name: 'San Apolinar', description: 'Obispo de Hierápolis. Defensor de la fe contra las herejías gnósticas.' }
+    ],
+    '01-09': [
+        { name: 'San Adriano de Canterbury', description: 'Abad y erudito bizantino. Contribuyó a la educación en Inglaterra tras su llegada como refugiado.' },
+        { name: 'San Julio I', description: 'Papa que construyó varias iglesias en Roma y luchó contra el arrianismo.' }
+    ],
+    '01-10': [
+        { name: 'San Guillermo', description: 'Obispo de Bourges. Conocido por su caridad con los pobres y su defensa de los derechos eclesiásticos.' },
+        { name: 'San Pedro Orseolo', description: 'Doge de Venecia que renunció a su cargo para hacerse monje ermitaño.' }
+    ],
+    '01-11': [
+        { name: 'San Higinio', description: 'Papa y mártir. Organizó el clero romano y estableció las órdenes menores.' },
+        { name: 'San Paulino', description: 'Obispo de Nola. Poeta y padre de la Iglesia, conocido por su caridad durante las invasiones.' }
+    ],
+    '01-12': [
+        { name: 'San Margarita de Hungría', description: 'Princesa y religiosa dominica. Renunció a su vida real para dedicarse a la oración y la penitencia.' },
+        { name: 'San Benito Biscop', description: 'Abad y fundador de monasterios en Inglaterra. Introdujo el canto gregoriano y el arte romano.' }
+    ],
+    '01-13': [
+        { name: 'San Hilario de Poitiers', description: 'Obispo y Doctor de la Iglesia. Defensor de la fe contra el arrianismo.' },
+        { name: 'San Verónica', description: 'Mujer piadosa que, según la tradición, limpió el rostro de Jesús en el camino al Calvario.' }
+    ],
+    '01-14': [
+        { name: 'San Hilarión', description: 'Abad y padre del monacato en Palestina. Discípulo de San Antonio Abad.' },
+        { name: 'Santa Nina', description: 'Apóstol de Georgia. Llevó el cristianismo a este país y es su patrona.' }
+    ],
+    '01-15': [
+        { name: 'San Pablo, primer ermitaño', description: 'Considerado el primer ermitaño cristiano. Vivió más de 100 años en el desierto egipcio.' },
+        { name: 'San Mauro', description: 'Discípulo de San Benito. Primer monje benedictino conocido por sus milagros.' }
+    ],
+    '01-16': [
+        { name: 'San Marcelo I', description: 'Papa y mártir. Gobernó la Iglesia durante la persecución de Diocleciano.' },
+        { name: 'San Honorato', description: 'Fundador de la abadía de Lérins. Obispo de Arles y modelo de vida monástica.' }
+    ],
+    '01-17': [
+        { name: 'San Antonio Abad', description: 'Padre del monacato. Considerado el patriarca de todos los monjes.' },
+        { name: 'San Sulpicio', description: 'Obispo de Bourges. Conocido por su sabiduría y su defensa de los pobres.' }
+    ],
+    '01-18': [
+        { name: 'Santa Prisca', description: 'Virgen y mártir romana. Sufrió el martirio durante la persecución de Claudio.' },
+        { name: 'San Volusiano', description: 'Obispo de Tours. Renunció a su cargo para vivir como ermitaño.' }
+    ],
+    '01-19': [
+        { name: 'San Mario', description: 'Soldado romano y mártir. Convertido al cristianismo, sufrió persecución bajo Nerón.' },
+        { name: 'San Canuto', description: 'Rey de Dinamarca. Mártir que defendió la fe y la justicia en su reino.' }
+    ],
+    '01-20': [
+        { name: 'San Fabián', description: 'Papa y mártir. Organizó la Iglesia de Roma y murió durante la persecución de Decio.' },
+        { name: 'San Sebastián', description: 'Soldado y mártir. Patrón de los atletas y soldados, famoso por su valentía.' }
+    ],
+    '01-21': [
+        { name: 'Santa Inés', description: 'Virgen y mártir romana. Una de las santas más veneradas de la Iglesia primitiva.' },
+        { name: 'San Publio', description: 'Primer obispo de Malta. Acogió a San Pablo tras su naufragio.' }
+    ],
+    '01-22': [
+        { name: 'San Vicente', description: 'Diácono y mártir de Zaragoza. Patrón de los vinateros y diáconos.' },
+        { name: 'San Anastasio', description: 'Monje y mártir persa. Convertido del zoroastrismo al cristianismo.' }
+    ],
+    '01-23': [
+        { name: 'San Ildefonso', description: 'Obispo de Toledo. Defensor de la virginidad de María y doctor de la Iglesia.' },
+        { name: 'San Juan el Almonero', description: 'Patriarca de Alejandría. Conocido por su caridad con los pobres.' }
+    ],
+    '01-24': [
+        { name: 'San Francisco de Sales', description: 'Obispo de Ginebra y Doctor de la Iglesia. Patrón de los escritores y periodistas.' },
+        { name: 'San Timoteo', description: 'Discípulo de San Pablo. Primer obispo de Éfeso.' }
+    ],
+    '01-25': [
+        { name: 'Conversión de San Pablo', description: 'Celebración de la conversión de Saulo en el camino a Damasco.' },
+        { name: 'San Artema', description: 'Obispo de Listra. Discípulo de San Pablo y mártir.' }
+    ],
+    '01-26': [
+        { name: 'San Timoteo y San Tito', description: 'Discípulos de San Pablo y primeros obispos. Colaboradores cercanos del apóstol.' },
+        { name: 'San Alberico', description: 'Fundador de la abadía de Cîteaux. Uno de los fundadores de la Orden Cisterciense.' }
+    ],
+    '01-27': [
+        { name: 'Santa Ángela Merici', description: 'Fundadora de las Ursulinas. Pionera en la educación de las mujeres.' },
+        { name: 'San Juan Crisóstomo', description: 'Doctor de la Iglesia. Arzobispo de Constantinopla y gran predicador.' }
+    ],
+    '01-28': [
+        { name: 'Santo Tomás de Aquino', description: 'Doctor de la Iglesia y teólogo. Autor de la Suma Teológica.' },
+        { name: 'San Pedro Nolasco', description: 'Fundador de la Mercedarios. Redimió a cristianos cautivos.' }
+    ],
+    '01-29': [
+        { name: 'San Valerio', description: 'Obispo de Saragos. Mártir que predicó el Evangelio en Hispania.' },
+        { name: 'San Gildas el Sabio', description: 'Monje e historiador británico. Conocido por sus crónicas de la historia celta.' }
+    ],
+    '01-30': [
+        { name: 'Santa Jacinta Mariscotti', description: 'Religiosa franciscana. Conocida por su penitencia y caridad.' },
+        { name: 'San Martina', description: 'Virgen y mártir romana. Protegió a los cristianos durante las persecuciones.' }
+    ],
+    '01-31': [
+        { name: 'San Juan Bosco', description: 'Fundador de los Salesianos. Patrón de los jóvenes y aprendices.' },
+        { name: 'Santa Ciro', description: 'Mártir egipcio. Médico que curaba en nombre de Cristo.' }
+    ],
+    '02-01': [
+        { name: 'San Brígida de Kildare', description: 'Abadesa irlandesa. Una de las santas patronas de Irlanda.' },
+        { name: 'San Segismundo', description: 'Rey de los burgundios. Convertido al cristianismo y mártir.' }
+    ],
+    '02-02': [
+        { name: 'Presentación del Señor', description: 'Jesús es presentado en el Templo. También conocida como la Candelaria.' },
+        { name: 'Santa Catalina de Ricci', description: 'Dominica italiana. Mística conocida por sus estigmas y éxtasis.' }
+    ],
+    '02-03': [
+        { name: 'San Blas', description: 'Obispo y mártir. Patrón de los enfermos de garganta.' },
+        { name: 'San Anscar', description: 'Apóstol de Escandinavia. Obispo de Hamburgo y Bremen.' }
+    ],
+    '02-04': [
+        { name: 'San Andrés Corsini', description: 'Obispo de Fiesole. Carmelita conocido por sus milagros.' },
+        { name: 'Santa Gilberta', description: 'Abadesa fundadora. Estableció la orden de Gilbertinas.' }
+    ],
+    '02-05': [
+        { name: 'Santa Águeda', description: 'Virgen y mártir. Patrona de Sicilia y protectora contra los incendios.' },
+        { name: 'San Felipe de Jesús', description: 'Primer santo mexicano. Mártir en Japón.' }
+    ],
+    '02-06': [
+        { name: 'San Pablo Miki y compañeros', description: 'Mártires de Japón. Veintiséis religiosos ejecutados en Nagasaki.' },
+        { name: 'San Doroteo', description: 'Mártir de Cesarea. Joven virgen que murió por su fe.' }
+    ],
+    '02-07': [
+        { name: 'San Ricardo', description: 'Rey de Inglaterra. Peregrino a Tierra Santa y padre de santos.' },
+        { name: 'Santa Coleta', description: 'Reformadora de las Clarisas. Fundó diecisiete monasterios.' }
+    ],
+    '02-08': [
+        { name: 'San Jerónimo Emiliani', description: 'Fundador de los Somascos. Padre de los huérfanos.' },
+        { name: 'Santa Josefina Bakhita', description: 'Esclava liberada y religiosa. Testimonio de perdón y caridad.' }
+    ],
+    '02-09': [
+        { name: 'San Miguel Febres Cordero', description: 'Hermano cristiano ecuatoriano. Educador y escritor.' },
+        { name: 'San Apolonia', description: 'Virgen y mártir. Patrona de los dentistas.' }
+    ],
+    '02-10': [
+        { name: 'Santa Escolástica', description: 'Hermana de San Benito. Fundadora del monacato femenino.' },
+        { name: 'San José Gabriel del Rosario', description: 'Sacerdote italiano. Fundador de los Hijos de María Inmaculada.' }
+    ],
+    '02-11': [
+        { name: 'Nuestra Señora de Lourdes', description: 'Aparición de la Virgen a Santa Bernardita. Patrona de los enfermos.' },
+        { name: 'San Pío V', description: 'Papa dominico. Implementó las reformas del Concilio de Trento.' }
+    ],
+    '02-12': [
+        { name: 'San Benito de Aniano', description: 'Reformador monástico. Restauró la Regla de San Benito.' },
+        { name: 'Santa Ludovica', description: 'Religiosa colombiana. Fundadora de las Hermanas de la Caridad.' }
+    ],
+    '02-13': [
+        { name: 'San Ciro', description: 'Mártir egipcio. Médico que curaba en nombre de Cristo.' },
+        { name: 'Santa Catalina de Ricci', description: 'Dominica italiana. Mística conocida por sus estigmas.' }
+    ],
+    '02-14': [
+        { name: 'San Valentín', description: 'Presbítero y mártir. Patrón de los enamorados.' },
+        { name: 'Santos Cirilo y Metodio', description: 'Apóstoles de los eslavos. Crearon el alfabeto cirílico.' }
+    ],
+    '02-15': [
+        { name: 'San Claudio de la Colombière', description: 'Jesuita francés. Confesor de Santa Margarita María.' },
+        { name: 'Santa Faustina', description: 'Virgen y mártir. Testimonio de fe en la persecución.' }
+    ],
+    '02-16': [
+        { name: 'San Onésimo', description: 'Esclavo convertido y obispo. Mencionado por San Pablo.' },
+        { name: 'San Daniel', description: 'Mártir de Celesiria. Joven que defendió su fe.' }
+    ],
+    '02-17': [
+        { name: 'San Alejo', description: 'Hombre de Dios. Vivió como mendigo bajo las escaleras de su casa.' },
+        { name: 'Santa Flaviana', description: 'Virgen y mártir. Testimonio de pureza y fe.' }
+    ],
+    '02-18': [
+        { name: 'Santa Bernadette Soubirous', description: 'Vidente de Lourdes. Humilde pastorilla.' },
+        { name: 'San Simeón', description: 'Obispo y mártir. Defensor de la ortodoxia.' }
+    ],
+    '02-19': [
+        { name: 'San Barbato', description: 'Obispo de Benevento. Convertió al pueblo lombardo.' },
+        { name: 'San Conrado', description: 'Confesor y penitente. Modelo de humildad.' }
+    ],
+    '02-20': [
+        { name: 'San Eleuterio', description: 'Papa y mártir. Gobernó durante la paz de la Iglesia.' },
+        { name: 'Santa Jacinta', description: 'Hermana de San Francisco Marto. Vidente de Fátima.' }
+    ],
+    '02-21': [
+        { name: 'San Pedro Damián', description: 'Cardenal y Doctor de la Iglesia. Reformador monástico.' },
+        { name: 'San Germánico', description: 'Mártir de Esmirna. Joven que murió por Cristo.' }
+    ],
+    '02-22': [
+        { name: 'Cátedra de San Pedro', description: 'Celebración del primado de Pedro. Fundamento de la Iglesia.' },
+        { name: 'San Papias', description: 'Obispo de Hierápolis. Padre apostólico.' }
+    ],
+    '02-23': [
+        { name: 'San Policarpo', description: 'Obispo y mártir. Discípulo del apóstol Juan.' },
+        { name: 'Santa Serapia', description: 'Virgen y mártir. Compañera de Santa Fe.' }
+    ],
+    '02-24': [
+        { name: 'San Matías', description: 'Apóstol. Elegido para reemplazar a Judas.' },
+        { name: 'San Montano', description: 'Mártir de África. Testimonio de valentía.' }
+    ],
+    '02-25': [
+        { name: 'Santa Walburga', description: 'Abadesa inglesa. Evangelizadora de Alemania.' },
+        { name: 'San Tarasio', description: 'Patriarca de Constantinopla. Defensor de las imágenes.' }
+    ],
+    '02-26': [
+        { name: 'San Porfirio', description: 'Obispo de Gaza. Convertió a su ciudad al cristianismo.' },
+        { name: 'Santa Paula', description: 'Viuda y amiga de San Jerónimo. Fundadora de monasterios.' }
+    ],
+    '02-27': [
+        { name: 'San Gabriel de la Dolorosa', description: 'Pasionista italiano. Modelo de juventud cristiana.' },
+        { name: 'Santa Lea', description: 'Viuda romana. Modelo de caridad y oración.' }
+    ],
+    '02-28': [
+        { name: 'San Román', description: 'Confesor y mártir. Defensor de la fe.' },
+        { name: 'Santa Ángela', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '02-29': [
+        { name: 'San Oswaldo', description: 'Rey y mártir. Modelo de rey cristiano.' },
+        { name: 'San Augusto Chapdelaine', description: 'Mártir en China. Misionero valiente.' }
+    ],
+    '03-01': [
+        { name: 'San David de Gales', description: 'Obispo y patrón de Gales. Fundador de monasterios.' },
+        { name: 'Santa Alba', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '03-02': [
+        { name: 'San Chad', description: 'Obispo de Lichfield. Misionero en Inglaterra.' },
+        { name: 'Santa Inés de Praga', description: 'Princesa y abadesa. Renunció al trono.' }
+    ],
+    '03-03': [
+        { name: 'San Cunegunda', description: 'Emperatriz y abadesa. Modelo de esposa cristiana.' },
+        { name: 'San Marino', description: 'Diácono y ermitaño. Fundador de San Marino.' }
+    ],
+    '03-04': [
+        { name: 'San Casimiro', description: 'Príncipe de Polonia. Patrón de Lituania.' },
+        { name: 'Santa Lucía Filippini', description: 'Fundadora de las Maestras Pías. Educadora.' }
+    ],
+    '03-05': [
+        { name: 'San Juan José de la Cruz', description: 'Franciscano y místico. Modelo de humildad.' },
+        { name: 'Santa Catalina de Bolonia', description: 'Abadesa y artista. Patrona de los artistas.' }
+    ],
+    '03-06': [
+        { name: 'San Coleta', description: 'Reformadora de las Clarisas. Fundadora.' },
+        { name: 'San Fridolino', description: 'Misionero en Alemania. Apóstol de los alamanes.' }
+    ],
+    '03-07': [
+        { name: 'Santas Perpetua y Felicidad', description: 'Mártires cartaginesas. Testimonio de valentía.' },
+        { name: 'San Tomás de Aquino', description: 'Doctor de la Iglesia. Teólogo insigne.' }
+    ],
+    '03-08': [
+        { name: 'San Juan de Dios', description: 'Fundador de los Hospitalarios. Patrón de los enfermos.' },
+        { name: 'Santa Sofía', description: 'Virgen y mártir. Sabiduría divina.' }
+    ],
+    '03-09': [
+        { name: 'Santa Francisca Romana', description: 'Viuda y fundadora. Patrona de los conductores.' },
+        { name: 'San Pacomio', description: 'Padre del monacato cenobítico. Fundador.' }
+    ],
+    '03-10': [
+        { name: 'San Macario', description: 'Eremita egipcio. Padre del desierto.' },
+        { name: 'Santa Simplicia', description: 'Viuda romana. Modelo de caridad.' }
+    ],
+    '03-11': [
+        { name: 'San Eulogio', description: 'Sacerdote y mártir. Defensor de la fe.' },
+        { name: 'Santa Sofronia', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '03-12': [
+        { name: 'San Gregorio I', description: 'Papa y Doctor de la Iglesia. "El Grande".' },
+        { name: 'Santa Maximiliana', description: 'Virgen y mártir. Modelo de juventud.' }
+    ],
+    '03-13': [
+        { name: 'Santa Eufrasia', description: 'Virgen y abadesa. Modelo de obediencia.' },
+        { name: 'San Rodrigo', description: 'Sacerdote y mártir. Defensor de la fe.' }
+    ],
+    '03-14': [
+        { name: 'Santa Matilde', description: 'Reina y emperatriz. Madre de Otto I.' },
+        { name: 'San Leobardo', description: 'Eremita francés. Modelo de penitencia.' }
+    ],
+    '03-15': [
+        { name: 'San Clemente María Hofbauer', description: 'Redentorista. Apóstol de Viena.' },
+        { name: 'Santa Luisa de Marillac', description: 'Fundadora de las Hijas de la Caridad.' }
+    ],
+    '03-16': [
+        { name: 'San Heriberto', description: 'Obispo de Colonia. Modelo de obispo.' },
+        { name: 'Santa Juana de la Cruz', description: 'Abadesa española. Mística.' }
+    ],
+    '03-17': [
+        { name: 'San Patricio', description: 'Apóstol de Irlanda. Patrón nacional.' },
+        { name: 'San José de Arimatea', description: 'Discípulo de Jesús. Sepultó a Cristo.' }
+    ],
+    '03-18': [
+        { name: 'San Cirilo de Jerusalén', description: 'Doctor de la Iglesia. Catequista.' },
+        { name: 'Santa Salvadora', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '03-19': [
+        { name: 'San José', description: 'Esposo de María. Patrono universal.' },
+        { name: 'San Juan Panal', description: 'Mártir español. Defensor de la fe.' }
+    ],
+    '03-20': [
+        { name: 'San Martín de Dumio', description: 'Obispo de Braga. Evangelizador.' },
+        { name: 'Santa Alejandrina', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '03-21': [
+        { name: 'San Nicolás de Flüe', description: 'Eremita suizo. Patrono de Suiza.' },
+        { name: 'Santa Serapia', description: 'Virgen y mártir. Testimonio.' }
+    ],
+    '03-22': [
+        { name: 'San Lea', description: 'Viuda romana. Modelo de caridad.' },
+        { name: 'San Epafrodito', description: 'Discípulo de Pablo. Colaborador.' }
+    ],
+    '03-23': [
+        { name: 'San Toribio de Mogrovejo', description: 'Obispo de Lima. Defensor de los indígenas.' },
+        { name: 'Santa Rafqa', description: 'Monja maronita. Mística libanesa.' }
+    ],
+    '03-24': [
+        { name: 'San Óscar', description: 'Misionero en Suecia. Mártir.' },
+        { name: 'Santa Catalina de Suecia', description: 'Hija de Santa Brígida. Abadesa.' }
+    ],
+    '03-25': [
+        { name: 'Anunciación del Señor', description: 'María acepta ser Madre de Dios.' },
+        { name: 'San Dimas', description: 'Buen ladrón. Primero en entrar al cielo.' }
+    ],
+    '03-26': [
+        { name: 'San Braulio', description: 'Obispo de Zaragoza. Escritor.' },
+        { name: 'Santa Margarita Clitherow', description: 'Mártir inglesa. Protegió sacerdotes.' }
+    ],
+    '03-27': [
+        { name: 'San Juan Damasceno', description: 'Doctor de la Iglesia. Defensor de iconos.' },
+        { name: 'Santa Lidia', description: 'Primera cristiana de Europa. Vendedora.' }
+    ],
+    '03-28': [
+        { name: 'San Gontrán', description: 'Rey de Borgoña. Modelo de monarca.' },
+        { name: 'Santa Estanislava', description: 'Virgen y mártir. Reina polaca.' }
+    ],
+    '03-29': [
+        { name: 'San Bertrán', description: 'Obispo de Comminges. Fundador.' },
+        { name: 'Santa Gualteria', description: 'Virgen y mártir. Testimonio.' }
+    ],
+    '03-30': [
+        { name: 'San Juan Clímaco', description: 'Monje del Sinaí. Místico.' },
+        { name: 'Santa Zoa', description: 'Virgen y mártir. Valiente.' }
+    ],
+    '03-31': [
+        { name: 'San Benjamín', description: 'Diácono y mártir. Persa.' },
+        { name: 'Santa Balbina', description: 'Virgen y mártir. Romana.' }
+    ],
+    // ABRIL - Segundo trimestre
+    '04-01': [
+        { name: 'San Hugo de Grenoble', description: 'Obispo de Grenoble. Fundador de la Cartuja, conocido por su sabiduría y santidad.' },
+        { name: 'Santa María de la Encarnación', description: 'Religiosa ursulina. Misionera en Nueva Francia, pionera de la educación femenina.' }
+    ],
+    '04-02': [
+        { name: 'San Francisco de Paula', description: 'Fundador de los Mínimos. Ermitaño conocido por su humildad y milagros.' },
+        { name: 'Santa Apolonia', description: 'Virgen y mártir de Alejandría. Patrona de los dentistas.' }
+    ],
+    '04-03': [
+        { name: 'San Ricardo de Wyche', description: 'Obispo de Chichester. Modelo de obispo y defensor de los derechos eclesiásticos.' },
+        { name: 'Santa Sixto II', description: 'Papa y mártir. Gobernó durante la persecución de Valeriano.' }
+    ],
+    '04-04': [
+        { name: 'San Isidoro de Sevilla', description: 'Doctor de la Iglesia. Enciclopedista y patrono de internet.' },
+        { name: 'Santa Platónides', description: 'Virgen y mártir. Testimonio de fe en las persecuciones.' }
+    ],
+    '04-05': [
+        { name: 'San Vicente Ferrer', description: 'Dominico valenciano. Gran predicador y taumaturgo del siglo XV.' },
+        { name: 'Santa Catalina Tomás', description: 'Dominica mallorquina. Mística conocida por sus éxtasis.' }
+    ],
+    '04-06': [
+        { name: 'San Celestino I', description: 'Papa. Luchó contra el pelagianismo y el nestorianismo.' },
+        { name: 'San Guillermo de Eskil', description: 'Obispo danés. Misionero en Escandinavia.' }
+    ],
+    '04-07': [
+        { name: 'San Juan Bautista de la Salle', description: 'Fundador de los Hermanos de las Escuelas Cristianas. Patrono de los maestros.' },
+        { name: 'Santa Heraclia', description: 'Virgen y mártir. Valiente defensora de la fe.' }
+    ],
+    '04-08': [
+        { name: 'San Dionisio de Corinto', description: 'Obispo y mártir. Discípulo de los apóstoles.' },
+        { name: 'Santa Julia', description: 'Virgen y mártir. Patrona de Córcega.' }
+    ],
+    '04-09': [
+        { name: 'San Casilda', description: 'Virgen y patrona de Toledo. Princesa musulmana convertida al cristianismo.' },
+        { name: 'San Waldetrudis', description: 'Abadesa belga. Fundadora del monasterio de Mons.' }
+    ],
+    '04-10': [
+        { name: 'San Miguel de los Santos', description: 'Trinitario descalzo. Místico español del siglo XVII.' },
+        { name: 'Santa Magdalena de Canossa', description: 'Fundadora de las Hijas de la Caridad. Trabajó con los pobres.' }
+    ],
+    '04-11': [
+        { name: 'San Estanislao', description: 'Obispo y mártir de Cracovia. Defensor de la fe frente al poder civil.' },
+        { name: 'San Gema Galgani', description: 'Mística italiana. Estigmatizada y patrona de los estudiantes.' }
+    ],
+    '04-12': [
+        { name: 'San Julio I', description: 'Papa. Construyó varias iglesias en Roma.' },
+        { name: 'Santa Teresa de los Andes', description: 'Carmelita chilena. Primera santa de Chile.' }
+    ],
+    '04-13': [
+        { name: 'San Martín I', description: 'Papa y mártir. Defensor de la fe contra el monotelismo.' },
+        { name: 'Santa Hermenegilda', description: 'Princesa visigoda. Mártir por defender la fe católica.' }
+    ],
+    '04-14': [
+        { name: 'San Justino', description: 'Filósofo y mártir. Uno de los primeros apologistas cristianos.' },
+        { name: 'San Ladislao', description: 'Rey de Hungría. Modelo de monarca cristiano.' }
+    ],
+    '04-15': [
+        { name: 'San Paterno', description: 'Obispo de Avranches. Evangelizador de Normandía.' },
+        { name: 'Santa Catarina de Génova', description: 'Mística italiana. Escribió sobre el purgatorio.' }
+    ],
+    '04-16': [
+        { name: 'San Bernadete Soubirous', description: 'Vidente de Lourdes. Humilde pastorilla.' },
+        { name: 'San Turibio de Mogrovejo', description: 'Obispo de Lima. Defensor de los indígenas.' }
+    ],
+    '04-17': [
+        { name: 'San Aniceto', description: 'Papa y mártir. Gobernó durante la paz de la Iglesia.' },
+        { name: 'San Roberto de Molesme', description: 'Fundador de Cîteaux. Iniciador de la reforma cisterciense.' }
+    ],
+    '04-18': [
+        { name: 'San Galdino', description: 'Cardenal y arzobispo de Milán. Defensor de los pobres.' },
+        { name: 'Santa María de la Cabeza', description: 'Patrona de Andalucía. Esposa de San Isidro Labrador.' }
+    ],
+    '04-19': [
+        { name: 'San León IX', description: 'Papa. Reformador de la Iglesia y gran diplomático.' },
+        { name: 'San Expedito', description: 'Mártir romano. Patrón de las causas urgentes.' }
+    ],
+    '04-20': [
+        { name: 'San Marcos', description: 'Evangelista. Patrón de Venecia y los escribanos.' },
+        { name: 'Santa Inés de Montepulciano', description: 'Dominica italiana. Abadesa y mística.' }
+    ],
+    '04-21': [
+        { name: 'San Anselmo', description: 'Doctor de la Iglesia. Arzobispo de Canterbury y filósofo.' },
+        { name: 'San Conrado de Parzham', description: 'Capuchino alemán. Portero del convento, modelo de humildad.' }
+    ],
+    '04-22': [
+        { name: 'San Soter', description: 'Papa y mártir. Conocido por su caridad con los pobres.' },
+        { name: 'Santa Adela', description: 'Abadesa benedictina. Hija de Guillermo el Conquistador.' }
+    ],
+    '04-23': [
+        { name: 'San Jorge', description: 'Mártir y patrón de Inglaterra. Vencedor del dragón.' },
+        { name: 'San Adalberto', description: 'Obispo de Praga. Mártir y evangelizador.' }
+    ],
+    '04-24': [
+        { name: 'San Fidel de Sigmaringa', description: 'Capuchino y mártir. Defensor de la fe católica.' },
+        { name: 'Santa María de San José', description: 'Fundadora venezolana. Trabajó con los pobres.' }
+    ],
+    '04-25': [
+        { name: 'San Marcos', description: 'Evangelista. Compañero de San Pedro y San Pablo.' },
+        { name: 'San Pedro de San José Betancur', description: 'Hermano betlemita. Primer santo de Guatemala.' }
+    ],
+    '04-26': [
+        { name: 'San Cleto', description: 'Papa y mártir. Tercer sucesor de San Pedro.' },
+        { name: 'Santa María Mazzarello', description: 'Cofundadora de las Hijas de María Auxiliadora.' }
+    ],
+    '04-27': [
+        { name: 'San Zita', description: 'Sirvienta italiana. Patrona de las empleadas domésticas.' },
+        { name: 'San Anastasio', description: 'Obispo y mártir. Defensor de la ortodoxia.' }
+    ],
+    '04-28': [
+        { name: 'San Pedro Chanel', description: 'Mártir en Oceanía. Primer mártir de Oceanía.' },
+        { name: 'Santa Luisa de Marillac', description: 'Fundadora de las Hijas de la Caridad.' }
+    ],
+    '04-29': [
+        { name: 'San Pedro de Verona', description: 'Dominico y mártir. Primer mártir de la Inquisición.' },
+        { name: 'Santa Catalina de Siena', description: 'Doctora de la Iglesia. Mística y patrona de Europa.' }
+    ],
+    '04-30': [
+        { name: 'San Pío V', description: 'Papa dominico. Implementó las reformas del Concilio de Trento.' },
+        { name: 'Santa María de la Encarnación', description: 'Religiosa ursulina. Misionera en Canadá.' }
+    ],
+    // MAYO - Segundo trimestre
+    '05-01': [
+        { name: 'San José Obrero', description: 'Esposo de María. Patrono de los trabajadores.' },
+        { name: 'Santiago el Menor', description: 'Apóstol y primer obispo de Jerusalén.' }
+    ],
+    '05-02': [
+        { name: 'San Atanasio', description: 'Doctor de la Iglesia. Defensor de la divinidad de Cristo.' },
+        { name: 'Santa Boris', description: 'Príncipe y mártir ruso. Defensor de la fe.' }
+    ],
+    '05-03': [
+        { name: 'Santos Felipe y Santiago', description: 'Apóstoles. Evangelizadores del mundo antiguo.' },
+        { name: 'Santa Juana de Lestonnac', description: 'Fundadora de la Compañía de María Nuestra Señora.' }
+    ],
+    '05-04': [
+        { name: 'San Mónico', description: 'Madre de San Agustín. Modelo de madre cristiana.' },
+        { name: 'San Florián', description: 'Mártir romano. Patrón de los bomberos.' }
+    ],
+    '05-05': [
+        { name: 'San Hilario de Arles', description: 'Obispo y Doctor de la Iglesia. Monje y escritor.' },
+        { name: 'Santa Ángela de la Cruz', description: 'Fundadora de las Hermanas de la Cruz.' }
+    ],
+    '05-06': [
+        { name: 'San Juan Antes de la Puerta Latina', description: 'Apóstol y evangelizador. Patrón de los escritores.' },
+        { name: 'Santa Lucía Filippini', description: 'Fundadora de las Maestras Pías.' }
+    ],
+    '05-07': [
+        { name: 'San Agustín de Canterbury', description: 'Apóstol de Inglaterra. Primer arzobispo de Canterbury.' },
+        { name: 'Santa Rosa Venerini', description: 'Fundadora de las Maestras Pías Venerini.' }
+    ],
+    '05-08': [
+        { name: 'San Miguel Arcángel', description: 'Príncipe de la milicia celestial. Defensor de la Iglesia.' },
+        { name: 'San Víctor', description: 'Mártir de Marsella. Soldado romano convertido.' }
+    ],
+    '05-09': [
+        { name: 'San Pacomio', description: 'Padre del monacato cenobítico. Fundador.' },
+        { name: 'Santa Beatriz', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '05-10': [
+        { name: 'San Juan de Ávila', description: 'Doctor de la Iglesia. Apóstol de Andalucía.' },
+        { name: 'Santa Antonia', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '05-11': [
+        { name: 'San Ignacio de Laconi', description: 'Capuchino sardo. Mendicante y taumaturgo.' },
+        { name: 'Santa Mamerta', description: 'Virgen y mártir. Patrona de Ginebra.' }
+    ],
+    '05-12': [
+        { name: 'San Pancracio', description: 'Mártir romano. Patrón de los niños.' },
+        { name: 'Santo Domingo de la Calzada', description: 'Peregrino y constructor de caminos.' }
+    ],
+    '05-13': [
+        { name: 'Nuestra Señora de Fátima', description: 'Aparición de la Virgen a los tres pastorcillos.' },
+        { name: 'San Roberto Belarmino', description: 'Doctor de la Iglesia. Cardenal y teólogo.' }
+    ],
+    '05-14': [
+        { name: 'San Matías', description: 'Apóstol. Elegido para reemplazar a Judas.' },
+        { name: 'San Miguel Garicoits', description: 'Fundador de los Sacerdotes del Sagrado Corazón.' }
+    ],
+    '05-15': [
+        { name: 'San Isidro Labrador', description: 'Patrono de los agricultores. Modelo de trabajador.' },
+        { name: 'Santa Dinfna', description: 'Virgen y mártir. Patrona de los enfermos mentales.' }
+    ],
+    '05-16': [
+        { name: 'San Juan Nepomuceno', description: 'Mártir checo. Patrón de los confesores.' },
+        { name: 'San Simón Stock', description: 'Carmelita inglés. Recibió el escapulario.' }
+    ],
+    '05-17': [
+        { name: 'San Pascual Bailón', description: 'Religioso franciscano. Patrón de las congregaciones eucarísticas.' },
+        { name: 'Santa Restituta', description: 'Virgen y mártir. Patrona de Nápoles.' }
+    ],
+    '05-18': [
+        { name: 'San Juan I', description: 'Papa y mártir. Enviado por Teodorico a Constantinopla.' },
+        { name: 'Santa Venancia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '05-19': [
+        { name: 'San Pedro Celestino', description: 'Papa y ermitaño. Renunció al pontificado.' },
+        { name: 'Santa Ivo', description: 'Patrona de Bretaña. Abadesa.' }
+    ],
+    '05-20': [
+        { name: 'San Bernardino de Siena', description: 'Franciscano. Gran predicador y reformador.' },
+        { name: 'Santa Bárbula', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '05-21': [
+        { name: 'San Cristóbal Magallanes', description: 'Mártir mexicano. Patrón de los sacerdotes mexicanos.' },
+        { name: 'Santa Eugenia', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '05-22': [
+        { name: 'Santa Rita de Casia', description: 'Abadesa agustina. Patrona de los casos imposibles.' },
+        { name: 'San Joaquín', description: 'Padre de la Virgen María.' }
+    ],
+    '05-23': [
+        { name: 'San Juan Bautista de Rossi', description: 'Sacerdote romano. Apóstol de los marginados.' },
+        { name: 'Santa Desiderata', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '05-24': [
+        { name: 'María Auxiliadora', description: 'Advocación mariana. Patrona de los salesianos.' },
+        { name: 'San David I', description: 'Rey de Escocia. Modelo de monarca cristiano.' }
+    ],
+    '05-25': [
+        { name: 'San Beda el Venerable', description: 'Doctor de la Iglesia. Monje e historiador inglés.' },
+        { name: 'San Gregorio VII', description: 'Papa. Reformador de la Iglesia.' }
+    ],
+    '05-26': [
+        { name: 'San Felipe Neri', description: 'Fundador del Oratorio. Patrón de la alegría.' },
+        { name: 'Santa Mariana de Jesús', description: 'Lirio de Quito. Primera santa de Ecuador.' }
+    ],
+    '05-27': [
+        { name: 'San Agustín de Canterbury', description: 'Apóstol de Inglaterra. Monje benedictino.' },
+        { name: 'Santa Beda', description: 'Monja inglesa. Modelo de vida contemplativa.' }
+    ],
+    '05-28': [
+        { name: 'San Germán', description: 'Obispo de París. Patrón de la ciudad.' },
+        { name: 'Santa Justina', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '05-29': [
+        { name: 'San Maximino', description: 'Obispo de Tréveris. Discípulo de San Pedro.' },
+        { name: 'Santa Úrsula', description: 'Virgen y mártir. Patrona de las estudiantes.' }
+    ],
+    '05-30': [
+        { name: 'San Fernando III', description: 'Rey de Castilla y León. Modelo de monarca.' },
+        { name: 'Santa Juana de Arco', description: 'Doncella de Orleans. Patrona de Francia.' }
+    ],
+    '05-31': [
+        { name: 'Visitación de la Virgen', description: 'María visita a su prima Isabel.' },
+        { name: 'San Petronio', description: 'Obispo de Bolonia. Patrón de la ciudad.' }
+    ],
+    // JUNIO - Segundo trimestre
+    '06-01': [
+        { name: 'San Justino', description: 'Filósofo y mártir. Apologista cristiano.' },
+        { name: 'Santa Ángela', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '06-02': [
+        { name: 'Santos Marcelino y Pedro', description: 'Mártires romanos. Perseguidos bajo Diocleciano.' },
+        { name: 'San Eugenio I', description: 'Papa. Defensor de la fe contra el monotelismo.' }
+    ],
+    '06-03': [
+        { name: 'San Carlos Lwanga y compañeros', description: 'Mártires de Uganda. Defensores de la castidad.' },
+        { name: 'San Claudio', description: 'Obispo y mártir. Defensor de la fe.' }
+    ],
+    '06-04': [
+        { name: 'San Francisco Caracciolo', description: 'Fundador de los Clérigos Regulares Menores.' },
+        { name: 'Santa Francisca', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '06-05': [
+        { name: 'San Bonifacio', description: 'Apóstol de Alemania. Mártir y obispo.' },
+        { name: 'Santa Dorotea', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '06-06': [
+        { name: 'San Norberto', description: 'Fundador de los Premonstratenses. Arzobispo de Magdeburgo.' },
+        { name: 'Santa Claudia', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '06-07': [
+        { name: 'San Roberto', description: 'Abad de Molesme. Fundador de Cîteaux.' },
+        { name: 'Santa Ana', description: 'Madre de la Virgen María.' }
+    ],
+    '06-08': [
+        { name: 'San Medardo', description: 'Obispo de Noyon. Patrón del buen tiempo.' },
+        { name: 'Santa Melania', description: 'Viuda romana. Modelo de caridad.' }
+    ],
+    '06-09': [
+        { name: 'San José de Anchieta', description: 'Apóstol de Brasil. Misionero jesuita.' },
+        { name: 'Santa Efrasia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '06-10': [
+        { name: 'San Maximiliano Kolbe', description: 'Franciscano. Mártir de Auschwitz.' },
+        { name: 'Santa Getulio', description: 'Mártir romano. Valiente soldado.' }
+    ],
+    '06-11': [
+        { name: 'San Bernabé', description: 'Apóstol. Compañero de San Pablo.' },
+        { name: 'Santa Paula', description: 'Viuda romana. Amiga de San Jerónimo.' }
+    ],
+    '06-12': [
+        { name: 'San Juan de Sahagún', description: 'Agustino español. Patrón de Salamanca.' },
+        { name: 'Santa Gaspara', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '06-13': [
+        { name: 'San Antonio de Padua', description: 'Doctor de la Iglesia. Patrón de los objetos perdidos.' },
+        { name: 'Santa Felicidad', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '06-14': [
+        { name: 'San Eliseo', description: 'Profeta. Sucesor de Elías.' },
+        { name: 'Santa Valeria', description: 'Virgen y mártir. Patrona de Milán.' }
+    ],
+    '06-15': [
+        { name: 'San Germán', description: 'Obispo de Auxerre. Evangelizador de Galia.' },
+        { name: 'Santa Virginia', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '06-16': [
+        { name: 'San Juan Francisco Régis', description: 'Jesuita. Misionero en Francia.' },
+        { name: 'Santa Lutgarda', description: 'Cisterciense. Mística y visionaria.' }
+    ],
+    '06-17': [
+        { name: 'San Raniero', description: 'Patrono de Pisa. Peregrino y ermitaño.' },
+        { name: 'Santa Hilda', description: 'Abadesa inglesa. Fundadora de monasterios.' }
+    ],
+    '06-18': [
+        { name: 'Santos Marcos y Marceliano', description: 'Mártires romanos. Hermanos y soldados.' },
+        { name: 'Santa Isabel', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '06-19': [
+        { name: 'San Romualdo', description: 'Fundador de los Camaldulenses. Eremita.' },
+        { name: 'Santa Juliana', description: 'Virgen y mártir. Patrona de Nápoles.' }
+    ],
+    '06-20': [
+        { name: 'San Adalberto', description: 'Obispo de Magdeburgo. Evangelizador.' },
+        { name: 'Santa Florentina', description: 'Hermana de San Leandro. Abadesa.' }
+    ],
+    '06-21': [
+        { name: 'San Luis de Gonzaga', description: 'Jesuita. Patrón de la juventud.' },
+        { name: 'Santa Alicia', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '06-22': [
+        { name: 'San Paulino de Nola', description: 'Obispo y poeta. Modelo de caridad.' },
+        { name: 'Santa Albina', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '06-23': [
+        { name: 'San José Cafasso', description: 'Sacerdote italiano. Formador de sacerdotes.' },
+        { name: 'Santa Juana', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '06-24': [
+        { name: 'San Juan Bautista', description: 'Precursor del Señor. El mayor de los santos.' },
+        { name: 'Santa María', description: 'Virgen y mártir. Compañera de Juan.' }
+    ],
+    '06-25': [
+        { name: 'San Guillermo', description: 'Abad de Vercelli. Fundador de monasterios.' },
+        { name: 'Santa Fe', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '06-26': [
+        { name: 'San José', description: 'Esposo de María. Patrono universal.' },
+        { name: 'Santa Vigilia', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '06-27': [
+        { name: 'San Cirilo de Alejandría', description: 'Doctor de la Iglesia. Defensor de María.' },
+        { name: 'Santa Samson', description: 'Obispo y mártir. Evangelizador.' }
+    ],
+    '06-28': [
+        { name: 'San Ireneo', description: 'Doctor de la Iglesia. Obispo de Lyon.' },
+        { name: 'Santa Paula', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '06-29': [
+        { name: 'San Pedro y San Pablo', description: 'Apóstoles. Fundadores de la Iglesia de Roma.' },
+        { name: 'Santa Emma', description: 'Viuda alemana. Modelo de caridad.' }
+    ],
+    '06-30': [
+        { name: 'Primeros Mártires de la Iglesia de Roma', description: 'Mártires bajo Nerón. Testimonio de fe.' },
+        { name: 'San Marcial', description: 'Obispo de Limoges. Discípulo de Pedro.' }
+    ],
+    // JULIO - Tercer trimestre
+    '07-01': [
+        { name: 'San Junípero Serra', description: 'Franciscano español. Fundador de misiones en California.' },
+        { name: 'Santo Tomás', description: 'Apóstol. Patrón de la India.' }
+    ],
+    '07-02': [
+        { name: 'Visitación de la Virgen', description: 'María visita a su prima Isabel.' },
+        { name: 'San Bernardino Realino', description: 'Jesuita italiano. Modelo de sacerdote.' }
+    ],
+    '07-03': [
+        { name: 'Santo Tomás', description: 'Apóstol incrédulo. Patrón de los arquitectos.' },
+        { name: 'San Anatolio', description: 'Obispo de Constantinopla. Defensor de la fe.' }
+    ],
+    '07-04': [
+        { name: 'Santa Isabel de Portugal', description: 'Reina y santa. Patrona de la paz.' },
+        { name: 'San Caro', description: 'Mártir romano. Defensor de la fe.' }
+    ],
+    '07-05': [
+        { name: 'San Antonio María Zaccaría', description: 'Fundador de los Barnabitas. Reformador.' },
+        { name: 'Santa Ciro', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '07-06': [
+        { name: 'Santa María Goretti', description: 'Virgen y mártir. Patrona de la pureza.' },
+        { name: 'San Romualdo', description: 'Fundador de los Camaldulenses.' }
+    ],
+    '07-07': [
+        { name: 'San Pío I', description: 'Papa y mártir. Defensor de la fe.' },
+        { name: 'San Willibaldo', description: 'Obispo de Eichstätt. Misionero.' }
+    ],
+    '07-08': [
+        { name: 'San Aquila y Priscila', description: 'Misioneros. Colaboradores de San Pablo.' },
+        { name: 'Santa Prisca', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '07-09': [
+        { name: 'San Juan de Dios', description: 'Fundador de los Hospitalarios.' },
+        { name: 'Santa Verónica', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '07-10': [
+        { name: 'Santos Rufina y Secunda', description: 'Vírgenes y mártires. Testimonio de pureza.' },
+        { name: 'San Ulrico', description: 'Obispo de Augsburgo. Modelo de obispo.' }
+    ],
+    '07-11': [
+        { name: 'San Benito', description: 'Patriarca del monacato occidental. Patrón de Europa.' },
+        { name: 'Santa Olga', description: 'Princesa de Kiev. Primera cristiana de Rusia.' }
+    ],
+    '07-12': [
+        { name: 'San Juan Gualberto', description: 'Fundador de los Vallombrosanos. Reformador.' },
+        { name: 'Santa Javiera', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '07-13': [
+        { name: 'San Enrique', description: 'Emperador germano. Modelo de monarca cristiano.' },
+        { name: 'Santa Teresa de los Andes', description: 'Carmelita chilena. Mística.' }
+    ],
+    '07-14': [
+        { name: 'San Camilo de Lelis', description: 'Fundador de los Ministros de los Enfermos.' },
+        { name: 'Santa Francisca', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '07-15': [
+        { name: 'San Buenaventura', description: 'Doctor de la Iglesia. Ministro general franciscano.' },
+        { name: 'Santa Vladimir', description: 'Princesa de Hungría. Modelo de fe.' }
+    ],
+    '07-16': [
+        { name: 'Nuestra Señora del Carmen', description: 'Patrona del Carmelo. Protectora del purgatorio.' },
+        { name: 'San Atanasio', description: 'Obispo y mártir. Defensor de la fe.' }
+    ],
+    '07-17': [
+        { name: 'San Alejo', description: 'Hombre de Dios. Eremita.' },
+        { name: 'Santa Marina', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '07-18': [
+        { name: 'San Camilo de Lelis', description: 'Patrono de los enfermos y hospitales.' },
+        { name: 'Santa Arnulfa', description: 'Abadesa alemana. Modelo de vida monástica.' }
+    ],
+    '07-19': [
+        { name: 'San Justa y Rufina', description: 'Vírgenes y mártires. Patronas de Sevilla.' },
+        { name: 'San Macario', description: 'Eremita egipcio. Padre del desierto.' }
+    ],
+    '07-20': [
+        { name: 'San Elias', description: 'Profeta. Patrón de las órdenes carmelitas.' },
+        { name: 'Santa Margarita', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '07-21': [
+        { name: 'San Lorenzo de Brindisi', description: 'Doctor de la Iglesia. Capuchino.' },
+        { name: 'Santa Práxedes', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '07-22': [
+        { name: 'Santa María Magdalena', description: 'Apóstol de los apóstoles. Testigo de la resurrección.' },
+        { name: 'San Cirilo', description: 'Obispo de Jerusalén. Doctor de la Iglesia.' }
+    ],
+    '07-23': [
+        { name: 'Santa Brígida', description: 'Patrona de Irlanda. Abadesa.' },
+        { name: 'San Apolinar', description: 'Obispo y mártir. Defensor de la fe.' }
+    ],
+    '07-24': [
+        { name: 'Santa Cristina', description: 'Virgen y mártir. Valiente cristiana.' },
+        { name: 'San Charbel Makhluf', description: 'Monje maronita. Místico libanés.' }
+    ],
+    '07-25': [
+        { name: 'Santiago Apóstol', description: 'Patrón de España. Apóstol peregrino.' },
+        { name: 'San Cristóbal', description: 'Patrón de los viajeros. Mártir.' }
+    ],
+    '07-26': [
+        { name: 'Santos Joaquín y Ana', description: 'Padres de la Virgen María. Abuelos de Jesús.' },
+        { name: 'San Bartolomé', description: 'Apóstol. Mártir en Armenia.' }
+    ],
+    '07-27': [
+        { name: 'San Pantaleón', description: 'Médico y mártir. Patrón de los médicos.' },
+        { name: 'Santa Natalia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '07-28': [
+        { name: 'San Nazario y Celso', description: 'Mártires milaneses. Testimonio de valentía.' },
+        { name: 'Santa Inés', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '07-29': [
+        { name: 'Santa Marta', description: 'Hermana de María y Lázaro. Amiga de Jesús.' },
+        { name: 'San Félix', description: 'Mártir romano. Valiente defensor.' }
+    ],
+    '07-30': [
+        { name: 'San Pedro Crisólogo', description: 'Doctor de la Iglesia. Obispo de Rávena.' },
+        { name: 'Santa Leopoldina', description: 'Virgen y mártir. Patrona de Brasil.' }
+    ],
+    '07-31': [
+        { name: 'San Ignacio de Loyola', description: 'Fundador de la Compañía de Jesús. Patrón de los ejercicios espirituales.' },
+        { name: 'Santa Elena', description: 'Emperatriz. Madre de Constantino.' }
+    ],
+    // AGOSTO - Tercer trimestre
+    '08-01': [
+        { name: 'San Alfonso María de Ligorio', description: 'Doctor de la Iglesia. Fundador de los Redentoristas.' },
+        { name: 'San Pedro Fabro', description: 'Primer jesuita. Compañero de San Ignacio.' }
+    ],
+    '08-02': [
+        { name: 'San Eusebio de Vercelli', description: 'Obispo y mártir. Defensor de la fe.' },
+        { name: 'Santa Alfonza', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '08-03': [
+        { name: 'San Agustín', description: 'Doctor de la Iglesia. Obispo de Hipona.' },
+        { name: 'Santa Lidia', description: 'Primera cristiana de Europa.' }
+    ],
+    '08-04': [
+        { name: 'San Juan María Vianney', description: 'Patrón de los párrocos. Cura de Ars.' },
+        { name: 'Santa Dominga', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '08-05': [
+        { name: 'Dedicación de la Basílica de Santa María Mayor', description: 'Antigua basílica mariana de Roma.' },
+        { name: 'San Afra', description: 'Mártir de Augsburgo. Testimonio de conversión.' }
+    ],
+    '08-06': [
+        { name: 'Transfiguración del Señor', description: 'Jesús se manifiesta en su gloria.' },
+        { name: 'San Sixto II', description: 'Papa y mártir. Defensor de la fe.' }
+    ],
+    '08-07': [
+        { name: 'San Cayetano', description: 'Fundador de los Teatinos. Patrón del pan y del trabajo.' },
+        { name: 'Santa Vicenta', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '08-08': [
+        { name: 'Santo Domingo de Guzmán', description: 'Fundador de los Dominicos. Patrón de los científicos.' },
+        { name: 'Santa Cecilia', description: 'Virgen y mártir. Patrona de la música.' }
+    ],
+    '08-09': [
+        { name: 'Santa Teresa Benedicta de la Cruz', description: 'Edith Stein. Filósofa y mártir.' },
+        { name: 'San Román', description: 'Mártir romano. Defensor de la fe.' }
+    ],
+    '08-10': [
+        { name: 'San Lorenzo', description: 'Diácono y mártir. Patrón de Roma.' },
+        { name: 'Santa Susana', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '08-11': [
+        { name: 'Santa Clara de Asís', description: 'Fundadora de las Clarisas. Seguidora de San Francisco.' },
+        { name: 'San Hipólito', description: 'Mártir romano. Defensor de la ortodoxia.' }
+    ],
+    '08-12': [
+        { name: 'Santa Juana Francisca de Chantal', description: 'Fundadora de la Visitación. Modelo de viuda cristiana.' },
+        { name: 'San Porfirio', description: 'Obispo de Gaza. Evangelizador.' }
+    ],
+    '08-13': [
+        { name: 'San Ponciano', description: 'Papa y mártir. Defensor de la fe.' },
+        { name: 'Santa Hipólita', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '08-14': [
+        { name: 'San Maximiliano María Kolbe', description: 'Franciscano. Mártir de Auschwitz.' },
+        { name: 'Santa Eusebia', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '08-15': [
+        { name: 'Asunción de la Virgen María', description: 'María es elevada al cielo en cuerpo y alma.' },
+        { name: 'San Tarsicio', description: 'Mártir romano. Patrón de los monaguillos.' }
+    ],
+    '08-16': [
+        { name: 'San Esteban I', description: 'Rey de Hungría. Patrón nacional.' },
+        { name: 'San Roque', description: 'Patrón de los enfermos contagiosos.' }
+    ],
+    '08-17': [
+        { name: 'San Jacinto', description: 'Dominico polaco. Apóstol de Polonia.' },
+        { name: 'Santa Beatriz', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '08-18': [
+        { name: 'Santa Elena', description: 'Emperatriz. Encontró la verdadera cruz.' },
+        { name: 'San Agapito', description: 'Mártir romano. Valiente cristiano.' }
+    ],
+    '08-19': [
+        { name: 'San Juan Eudes', description: 'Fundador de los Eudistas. Apóstol del Corazón de María.' },
+        { name: 'Santa Magdalena', description: 'Virgen y mártir. Modelo de penitencia.' }
+    ],
+    '08-20': [
+        { name: 'San Bernardo', description: 'Doctor de la Iglesia. Abad cisterciense.' },
+        { name: 'Santa Susana', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '08-21': [
+        { name: 'San Pío X', description: 'Papa. Reformador de la liturgia.' },
+        { name: 'Santa Mónica', description: 'Madre de San Agustín. Modelo de perseverancia.' }
+    ],
+    '08-22': [
+        { name: 'María Reina', description: 'María como Reina del universo.' },
+        { name: 'San Timoteo', description: 'Obispo y mártir. Discípulo de Pablo.' }
+    ],
+    '08-23': [
+        { name: 'Santa Rosa de Lima', description: 'Primera santa de América. Dominica terciaria.' },
+        { name: 'San Felipe Benicio', description: 'Servita. Modelo de humildad.' }
+    ],
+    '08-24': [
+        { name: 'San Bartolomé', description: 'Apóstol. Mártir en Armenia.' },
+        { name: 'Santa Olaya', description: 'Virgen y mártir. Patrona de los astrónomos.' }
+    ],
+    '08-25': [
+        { name: 'San Luis', description: 'Rey de Francia. Modelo de monarca cristiano.' },
+        { name: 'San José de Calasanz', description: 'Fundador de las Escuelas Pías. Patrón de las escuelas.' }
+    ],
+    '08-26': [
+        { name: 'Nuestra Señora de Czestochowa', description: 'Patrona de Polonia. Icono milagroso.' },
+        { name: 'Santa Teresa', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '08-27': [
+        { name: 'Santa Mónica', description: 'Madre de San Agustín. Modelo de oración.' },
+        { name: 'San Cesáreo', description: 'Obispo de Arlés. Defensor de la fe.' }
+    ],
+    '08-28': [
+        { name: 'San Agustín', description: 'Doctor de la Iglesia. Padre del monacato.' },
+        { name: 'Santa Edith', description: 'Virgen y mártir. Modelo de conversión.' }
+    ],
+    '08-29': [
+        { name: 'Martirio de San Juan Bautista', description: 'Precursor del Señor. Mártir de la verdad.' },
+        { name: 'Santa Sabina', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '08-30': [
+        { name: 'Santa Rosa de Lima', description: 'Patrona de Perú y América.' },
+        { name: 'San Félix', description: 'Mártir romano. Valiente defensor.' }
+    ],
+    '08-31': [
+        { name: 'San Ramón Nonato', description: 'Mercedario. Patrón de las parturientas.' },
+        { name: 'Santa Paulina', description: 'Virgen y mártir. Modelo de caridad.' }
+    ],
+    // SEPTIEMBRE - Tercer trimestre
+    '09-01': [
+        { name: 'San Gil', description: 'Eremita francés. Patrón de los mendigos.' },
+        { name: 'Santa Ana', description: 'Madre de la Virgen María.' }
+    ],
+    '09-02': [
+        { name: 'San Inés de Praga', description: 'Princesa y abadesa. Modelo de renuncia.' },
+        { name: 'San Guillermo', description: 'Obispo de Roskilde. Misionero.' }
+    ],
+    '09-03': [
+        { name: 'San Gregorio Magno', description: 'Doctor de la Iglesia. Papa y monje.' },
+        { name: 'Santa Fe', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '09-04': [
+        { name: 'San Rosalía', description: 'Virgen y ermitaña. Patrona de Palermo.' },
+        { name: 'Santa Ida', description: 'Abadesa belga. Modelo de caridad.' }
+    ],
+    '09-05': [
+        { name: 'Santa Teresa de Calcuta', description: 'Fundadora de las Misioneras de la Caridad.' },
+        { name: 'San Lorenzo', description: 'Diácono y mártir. Patrón de los pobres.' }
+    ],
+    '09-06': [
+        { name: 'San Eleuterio', description: 'Obispo y mártir. Defensor de la fe.' },
+        { name: 'Santa Beatriz', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '09-07': [
+        { name: 'San Clodoaldo', description: 'Eremita francés. Príncipe convertido.' },
+        { name: 'Santa Regina', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '09-08': [
+        { name: 'Natividad de la Virgen María', description: 'Nacimiento de la Madre de Dios.' },
+        { name: 'San Adriano', description: 'Mártir romano. Defensor de la fe.' }
+    ],
+    '09-09': [
+        { name: 'San Pedro Claver', description: 'Apóstol de los esclavos. Patrón de Colombia.' },
+        { name: 'Santa Gorgonia', description: 'Hermana de San Gregorio Nacianceno.' }
+    ],
+    '09-10': [
+        { name: 'San Nicolás de Tolentino', description: 'Agustino. Patrón de las almas del purgatorio.' },
+        { name: 'Santa Pulqueria', description: 'Emperatriz bizantina. Defensora de María.' }
+    ],
+    '09-11': [
+        { name: 'San Juan Gabriel Perboyre', description: 'Misionero en China. Mártir.' },
+        { name: 'Santa Protasia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '09-12': [
+        { name: 'Santísimo Nombre de María', description: 'Festividad del nombre de la Virgen.' },
+        { name: 'San Guido', description: 'Eremita italiano. Modelo de penitencia.' }
+    ],
+    '09-13': [
+        { name: 'San Juan Crisóstomo', description: 'Doctor de la Iglesia. Arzobispo de Constantinopla.' },
+        { name: 'Santa Eulalia', description: 'Virgen y mártir. Patrona de Barcelona.' }
+    ],
+    '09-14': [
+        { name: 'Exaltación de la Santa Cruz', description: 'Celebración de la cruz de Cristo.' },
+        { name: 'San Cornelio', description: 'Papa y mártir. Defensor de la unidad.' }
+    ],
+    '09-15': [
+        { name: 'Nuestra Señora de los Dolores', description: 'María al pie de la cruz.' },
+        { name: 'San Nicomedes', description: 'Mártir romano. Valiente confesor.' }
+    ],
+    '09-16': [
+        { name: 'San Cornelio y San Cipriano', description: 'Mártires. Defensores de la fe.' },
+        { name: 'Santa Edith', description: 'Virgen y mártir. Modelo de conversión.' }
+    ],
+    '09-17': [
+        { name: 'San Roberto Belarmino', description: 'Doctor de la Iglesia. Cardenal y teólogo.' },
+        { name: 'Santa Hildegarda', description: 'Abadesa alemana. Mística y doctora.' }
+    ],
+    '09-18': [
+        { name: 'San José de Cupertino', description: 'Franciscano. Patrón de los estudiantes.' },
+        { name: 'Santa Ariadna', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '09-19': [
+        { name: 'San Januarius', description: 'Obispo y mártir. Patrón de Nápoles.' },
+        { name: 'Santa María', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '09-20': [
+        { name: 'San Andrés Kim Taegon', description: 'Primer sacerdote coreano. Mártir.' },
+        { name: 'Santa Eustaquia', description: 'Abadesa italiana. Modelo de obediencia.' }
+    ],
+    '09-21': [
+        { name: 'San Mateo', description: 'Apóstol y evangelista. Patrón de los economistas.' },
+        { name: 'Santa Maura', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '09-22': [
+        { name: 'Santo Tomás de Villanueva', description: 'Arzobispo de Valencia. Modelo de caridad.' },
+        { name: 'Santa Emilia', description: 'Madre de San Agustín. Modelo de madre cristiana.' }
+    ],
+    '09-23': [
+        { name: 'San Pío de Pietrelcina', description: 'Padre Pío. Estigmatizado y confesor.' },
+        { name: 'Santa Lin', description: 'Virgen y mártir. Patrona de China.' }
+    ],
+    '09-24': [
+        { name: 'Nuestra Señora de la Merced', description: 'Patrona de los cautivos.' },
+        { name: 'San Gerardo', description: 'Obispo de Cuenca. Modelo de pastor.' }
+    ],
+    '09-25': [
+        { name: 'San Cleofás', description: 'Discípulo de Emaús. Testigo de la resurrección.' },
+        { name: 'Santa Auria', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '09-26': [
+        { name: 'San Cosme y San Damián', description: 'Médicos y mártires. Patronos de los médicos.' },
+        { name: 'Santa Cipriana', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '09-27': [
+        { name: 'San Vicente de Paúl', description: 'Fundador de los Lazaristas. Patrón de la caridad.' },
+        { name: 'Santa Elisa', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '09-28': [
+        { name: 'San Wenceslao', description: 'Duque de Bohemia. Patrón de Chequia.' },
+        { name: 'Santa Exuperancia', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '09-29': [
+        { name: 'San Miguel, San Gabriel y San Rafael', description: 'Arcángeles. Protectores de la Iglesia.' },
+        { name: 'Santa Micaela', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '09-30': [
+        { name: 'San Jerónimo', description: 'Doctor de la Iglesia. Traductor de la Biblia.' },
+        { name: 'Santa Sofía', description: 'Virgen y mártir. Sabiduría divina.' }
+    ],
+// OCTUBRE - Cuarto trimestre
+    '10-01': [
+        { name: 'Santa Teresa del Niño Jesús', description: 'Doctora de la Iglesia. Carmelita conocida como la "Santa Flor de Lis". Patrona de las misiones.' },
+        { name: 'San Román', description: 'Mártir romano. Defensor de la fe durante las persecuciones.' }
+    ],
+    '10-02': [
+        { name: 'Santos Ángeles Custodios', description: 'Ángeles guardianes. Protectores asignados por Dios a cada persona.' },
+        { name: 'San Leodegario', description: 'Obispo de Autun. Mártir defensor de la fe.' }
+    ],
+    '10-03': [
+        { name: 'San Francisco de Borja', description: 'Duque de Gandía y General de los Jesuitas. Modelo de conversión.' },
+        { name: 'Santa Candida', description: 'Virgen y mártir. Testimonio de fe en Roma.' }
+    ],
+    '10-04': [
+        { name: 'San Francisco de Asís', description: 'Fundador de los Franciscanos. Patrón de Italia, ecología y animales.' },
+        { name: 'San Petronio', description: 'Obispo de Bolonia. Patrón de la ciudad.' }
+    ],
+    '10-05': [
+        { name: 'San Faustino', description: 'Obispo de Brescia. Defensor de la ortodoxia.' },
+        { name: 'Santa María', description: 'Virgen y mártir. Valiente testigo de Cristo.' }
+    ],
+    '10-06': [
+        { name: 'San Bruno', description: 'Fundador de la Cartuja. Eremita y reformador monástico.' },
+        { name: 'San Adalberto', description: 'Obispo de Praga. Mártir y evangelizador.' }
+    ],
+    '10-07': [
+        { name: 'Nuestra Señora del Rosario', description: 'Patrona de la victoria en Lepanto. Advocación mariana de la oración.' },
+        { name: 'San Marcos', description: 'Papa y mártir. Defensor de la unidad de la Iglesia.' }
+    ],
+    '10-08': [
+        { name: 'Santa Pelagia', description: 'Virgen y mártir. Testimonio de pureza y fe.' },
+        { name: 'San Simeón', description: 'Eremita sirio. Vivió 37 años en una columna.' }
+    ],
+    '10-09': [
+        { name: 'San Juan Leonardo', description: 'Fundador de los Clérigos Regulares de la Madre de Dios.' },
+        { name: 'Santa Dionisia', description: 'Virgen y mártir. Valiente defensora de la fe.' }
+    ],
+    '10-10': [
+        { name: 'San Francisco Borgia', description: 'Gran duque de Gandía. Modelo de renuncia a las riquezas.' },
+        { name: 'Santa Gaudencia', description: 'Virgen y mártir. Testimonio de caridad.' }
+    ],
+    '10-11': [
+        { name: 'San Juan XXIII', description: 'Papa bueno. Convocó el Concilio Vaticano II.' },
+        { name: 'Santa Soledad', description: 'Virgen y mártir. Modelo de contemplación.' }
+    ],
+    '10-12': [
+        { name: 'Nuestra Señora del Pilar', description: 'Patrona de Hispanidad. Aparición de la Virgen a Santiago.' },
+        { name: 'San Serafín', description: 'Monje italiano. Modelo de humildad y caridad.' }
+    ],
+    '10-13': [
+        { name: 'San Eduardo', description: 'Rey de Inglaterra. Modelo de monarca cristiano.' },
+        { name: 'Santa Teófila', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '10-14': [
+        { name: 'San Calixto I', description: 'Papa y mártir. Defensor de la unidad de la Iglesia.' },
+        { name: 'Santa Fortunata', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '10-15': [
+        { name: 'Santa Teresa de Jesús', description: 'Doctora de la Iglesia. Reformadora del Carmelo y mística.' },
+        { name: 'San Magno', description: 'Obispo de Oderzo. Evangelizador del norte de Italia.' }
+    ],
+    '10-16': [
+        { name: 'Santa Margarita María Alacoque', description: 'Vidente del Sagrado Corazón. Apóstol del amor divino.' },
+        { name: 'San Lulio', description: 'Obispo de Mainz. Evangelizador de Germania.' }
+    ],
+    '10-17': [
+        { name: 'San Ignacio de Antioquía', description: 'Obispo y mártir. Discípulo de San Juan.' },
+        { name: 'Santa Inés', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '10-18': [
+        { name: 'San Lucas', description: 'Evangelista. Médico y compañero de San Pablo.' },
+        { name: 'San Julián', description: 'Obispo de Le Mans. Defensor de los pobres.' }
+    ],
+    '10-19': [
+      { name: 'José Gregorio Hernández', description: 'Médico de los pobres. Primer santo venezolano.' },
+      { name: 'Carmen Rendiles', description: 'Pionera en el servicio a los necesitados. Primera santa venezolana' },
+      { name: 'San Pedro de Alcántara', description: 'Franciscano. Reformador y consejero de Santa Teresa.' },
+        { name: 'Santa Laura', description: 'Virgen y mártir. Patrona de España.' }
+    ],
+    '10-20': [
+        { name: 'San Juan de Capistrano', description: 'Franciscano. Predicador y defensor de Europa.' },
+        { name: 'Santa Cornelia', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '10-21': [
+        { name: 'Santa Úrsula', description: 'Virgen y mártir. Patrona de las estudiantes.' },
+        { name: 'San Hilarión', description: 'Eremita. Padre del monacato en Palestina.' }
+    ],
+    '10-22': [
+        { name: 'San Juan Pablo II', description: 'Papa polaco. Gran viajero y evangelizador del siglo XX.' },
+        { name: 'Santa Salomé', description: 'Discípula de Jesús. Testigo de la resurrección.' }
+    ],
+    '10-23': [
+        { name: 'San Juan de Capistrano', description: 'Apóstol de Europa. Defensor de la cristiandad.' },
+        { name: 'Santa Severina', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '10-24': [
+        { name: 'San Antonio María Claret', description: 'Fundador de los Claretianos. Arzobispo de Cuba.' },
+        { name: 'San Magno', description: 'Mártir escocés. Defensor de la fe.' }
+    ],
+    '10-25': [
+        { name: 'Santos Crispín y Crispiniano', description: 'Mártires zapateros. Patronos de los zapateros.' },
+        { name: 'Santa Gaudentia', description: 'Virgen y mártir. Testimonio de caridad.' }
+    ],
+    '10-26': [
+        { name: 'San Evaristo', description: 'Papa y mártir. Quinto sucesor de San Pedro.' },
+        { name: 'Santa Demetria', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '10-27': [
+        { name: 'Santa Sabina', description: 'Viuda romana. Modelo de caridad y oración.' },
+        { name: 'San Abrahán', description: 'Eremita sirio. Padre del monacato.' }
+    ],
+    '10-28': [
+        { name: 'San Simón y San Judas', description: 'Apóstoles. Evangelizadores del mundo antiguo.' },
+        { name: 'Santa Anastasia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '10-29': [
+        { name: 'San Narciso', description: 'Obispo de Jerusalén. Modelo de santidad episcopal.' },
+        { name: 'Santa Eulalia', description: 'Virgen y mártir. Patrona de Barcelona.' }
+    ],
+    '10-30': [
+        { name: 'San Marcelo', description: 'Centurión romano. Mártir por su fe.' },
+        { name: 'Santa Serapia', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '10-31': [
+        { name: 'San Alfonso Rodríguez', description: 'Hermano jesuita. Portero del colegio de Mallorca.' },
+        { name: 'San Quintín', description: 'Mártir romano. Patrón de los confesores.' }
+    ],
+    // NOVIEMBRE - Cuarto trimestre
+    '11-01': [
+        { name: 'Todos los Santos', description: 'Festividad de todos los santos conocidos y desconocidos.' },
+        { name: 'San Benito', description: 'Patriarca del monacato occidental.' }
+    ],
+    '11-02': [
+        { name: 'Conmemoración de los Fieles Difuntos', description: 'Día de oración por las almas del purgatorio.' },
+        { name: 'San Malo', description: 'Obispo de Saint-Malo. Evangelizador de Bretaña.' }
+    ],
+    '11-03': [
+        { name: 'San Martín de Porres', description: 'Dominico peruano. Patrón de la justicia social.' },
+        { name: 'Santa Silvia', description: 'Madre del Papa Gregorio Magno.' }
+    ],
+    '11-04': [
+        { name: 'San Carlos Borromeo', description: 'Cardenal y arzobispo de Milán. Modelo de obispo.' },
+        { name: 'Santa Vitalia', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '11-05': [
+        { name: 'San Galo', description: 'Monje irlandés. Evangelizador de Suiza.' },
+        { name: 'Santa Isabel', description: 'Viuda romana. Modelo de caridad.' }
+    ],
+    '11-06': [
+        { name: 'San Leonardo', description: 'Eremita francés. Patrón de los prisioneros.' },
+        { name: 'Santa Winifreda', description: 'Virgen y mártir galesa.' }
+    ],
+    '11-07': [
+        { name: 'San Caro', description: 'Mártir romano. Defensor de la fe.' },
+        { name: 'Santa Florentina', description: 'Hermana de San Leandro. Abadesa.' }
+    ],
+    '11-08': [
+        { name: 'Los Cuatro Santos Coronados', description: 'Mártires escultores. Patronos de los artistas.' },
+        { name: 'Santa Wivina', description: 'Abadesa belga. Modelo de vida contemplativa.' }
+    ],
+    '11-09': [
+        { name: 'Dedicación de la Basílica de San Juan de Letrán', description: 'Catedral del Papa como obispo de Roma.' },
+        { name: 'San Teodoro', description: 'Mártir soldado. Patrón de Venecia.' }
+    ],
+    '11-10': [
+        { name: 'San León Magno', description: 'Doctor de la Iglesia. Papa y defensor de Roma.' },
+        { name: 'Santa Justina', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '11-11': [
+        { name: 'San Martín de Tours', description: 'Obispo y soldado. Patrón de Francia y los soldados.' },
+        { name: 'San Menas', description: 'Mártir egipcio. Patrón de los perdidos.' }
+    ],
+    '11-12': [
+        { name: 'San Josafat', description: 'Arzobispo de Polotsk. Mártir por la unidad.' },
+        { name: 'Santa Cunegunda', description: 'Emperatriz y abadesa.' }
+    ],
+    '11-13': [
+        { name: 'San Francisco Javier', description: 'Apóstol de Oriente. Patrón de las misiones.' },
+        { name: 'Santa Brígida', description: 'Patrona de Irlanda. Abadesa.' }
+    ],
+    '11-14': [
+        { name: 'San Lorenzo', description: 'Diácono y mártir. Patrón de los pobres.' },
+        { name: 'Santa Sidonia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '11-15': [
+        { name: 'San Alberto Magno', description: 'Doctor de la Iglesia. Maestro de Santo Tomás.' },
+        { name: 'Santa Leopoldina', description: 'Virgen y mártir. Patrona de Brasil.' }
+    ],
+    '11-16': [
+        { name: 'Santa Margarita de Escocia', description: 'Reina y santa. Modelo de monarca cristiana.' },
+        { name: 'San Gerardo', description: 'Obispo de Cuenca. Modelo de pastor.' }
+    ],
+    '11-17': [
+        { name: 'Santa Isabel de Hungría', description: 'Princesa y terciaria franciscana. Patrona de la caridad.' },
+        { name: 'San Gregorio', description: 'Obispo de Tours. Defensor de la fe.' }
+    ],
+    '11-18': [
+        { name: 'Dedicación de las Basílicas de Pedro y Pablo', description: 'Basílicas papales de Roma.' },
+        { name: 'Santa Otilia', description: 'Abadesa alemana. Patrona de Alsacia.' }
+    ],
+    '11-19': [
+        { name: 'Santa Matilde', description: 'Reina y emperatriz. Madre de Otto I.' },
+        { name: 'San Severo', description: 'Obispo de Barcelona. Defensor de los pobres.' }
+    ],
+    '11-20': [
+        { name: 'San Félix de Valois', description: 'Fundador de la Trapa. Eremita.' },
+        { name: 'Santa Edith', description: 'Virgen y mártir. Modelo de conversión.' }
+    ],
+    '11-21': [
+        { name: 'Presentación de la Virgen María', description: 'María es presentada en el Templo.' },
+        { name: 'San Gelasio', description: 'Papa. Defensor de la libertad de la Iglesia.' }
+    ],
+    '11-22': [
+        { name: 'Santa Cecilia', description: 'Virgen y mártir. Patrona de la música.' },
+        { name: 'San Fileas', description: 'Obispo y mártir. Defensor de la fe.' }
+    ],
+    '11-23': [
+        { name: 'San Clemente I', description: 'Papa y mártir. Tercer sucesor de San Pedro.' },
+        { name: 'Santa Felicidad', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '11-24': [
+        { name: 'San Andrés Dung-Lac y compañeros', description: 'Mártires de Vietnam. Testimonio de valentía.' },
+        { name: 'Santa Flora', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '11-25': [
+        { name: 'Santa Catalina de Alejandría', description: 'Virgen y mártir. Patrona de los filósofos.' },
+        { name: 'San Pedro', description: 'Apóstol. Fundamento de la Iglesia.' }
+    ],
+    '11-26': [
+        { name: 'San Silvestre', description: 'Abad de Gandía. Modelo de vida monástica.' },
+        { name: 'Santa Leonor', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '11-27': [
+        { name: 'Las Vírgenes de la Presentación', description: 'Comunidad religiosa dedicada a María.' },
+        { name: 'San Jacobo', description: 'Apóstol. Hermano del Señor.' }
+    ],
+    '11-28': [
+        { name: 'San Santiago de la Marca', description: 'Franciscano. Inquisidor y teólogo.' },
+        { name: 'Santa Catalina', description: 'Virgen y mártir. Modelo de sabiduría.' }
+    ],
+    '11-29': [
+        { name: 'San Saturnino', description: 'Obispo de Toulouse. Mártir y evangelizador.' },
+        { name: 'Santa Radegunda', description: 'Reina y abadesa. Modelo de caridad.' }
+    ],
+    '11-30': [
+        { name: 'San Andrés Apóstol', description: 'Apóstol y mártir. Patrón de Escocia.' },
+        { name: 'Santa Catalina Labouré', description: 'Vidente de la Medalla Milagrosa.' }
+    ],
+    // DICIEMBRE - Cuarto trimestre
+    '12-01': [
+        { name: 'San Nahúm', description: 'Profeta menor. Anunció la caída de Nínive.' },
+        { name: 'Santa Natalia', description: 'Esposa de San Adriano. Mártir.' }
+    ],
+    '12-02': [
+        { name: 'San Bibiana', description: 'Virgen y mártir. Testimonio de fe en Roma.' },
+        { name: 'Silvestre', description: 'Eremita. Modelo de vida contemplativa.' }
+    ],
+    '12-03': [
+        { name: 'San Francisco Javier', description: 'Misionero jesuita. Apóstol de las Indias.' },
+        { name: 'Santa Lucía', description: 'Virgen y mártir. Patrona de la vista.' }
+    ],
+    '12-04': [
+        { name: 'San Juan Damasceno', description: 'Doctor de la Iglesia. Defensor de las imágenes.' },
+        { name: 'Santa Bárbara', description: 'Virgen y mártir. Patrona de los mineros.' }
+    ],
+    '12-05': [
+        { name: 'San Sabas', description: 'Eremita. Fundador de monasterios en Palestina.' },
+        { name: 'Santa Crispina', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '12-06': [
+        { name: 'San Nicolás', description: 'Obispo de Mira. Patrón de los niños.' },
+        { name: 'Santa Asela', description: 'Virgen romana. Modelo de oración.' }
+    ],
+    '12-07': [
+        { name: 'San Ambrosio', description: 'Doctor de la Iglesia. Obispo de Milán.' },
+        { name: 'Santa María', description: 'Virgen y mártir. Testimonio de pureza.' }
+    ],
+    '12-08': [
+        { name: 'Inmaculada Concepción', description: 'María concebida sin pecado original. Patrona de América.' },
+        { name: 'San Eugenio', description: 'Obispo de Toledo. Defensor de la fe.' }
+    ],
+    '12-09': [
+        { name: 'San Juan Diego', description: 'Vidente de la Virgen de Guadalupe.' },
+        { name: 'Santa Leocadia', description: 'Virgen y mártir. Patrona de Toledo.' }
+    ],
+    '12-10': [
+        { name: 'San Eulogio', description: 'Mártir de Córdoba. Defensor de la fe.' },
+        { name: 'Santa Brígida', description: 'Abadesa sueca. Mística.' }
+    ],
+    '12-11': [
+        { name: 'San Dámaso I', description: 'Papa. Encargó la Vulgata a San Jerónimo.' },
+        { name: 'Santa Daniel', description: 'Virgen y mártir. Valiente cristiana.' }
+    ],
+    '12-12': [
+        { name: 'Nuestra Señora de Guadalupe', description: 'Patrona de América. Aparición en México.' },
+        { name: 'San Corentino', description: 'Obispo de Quimper. Evangelizador.' }
+    ],
+    '12-13': [
+        { name: 'Santa Lucía', description: 'Virgen y mártir de Siracusa. Patrona de la luz.' },
+        { name: 'San Odón', description: 'Abad de Cluny. Reformador monástico.' }
+    ],
+    '12-14': [
+        { name: 'San Juan de la Cruz', description: 'Doctor de la Iglesia. Místico carmelita.' },
+        { name: 'Santa Venancia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '12-15': [
+        { name: 'San Nicasio', description: 'Obispo de Reims. Mártir por los vándalos.' },
+        { name: 'Santa María', description: 'Virgen y mártir. Modelo de pureza.' }
+    ],
+    '12-16': [
+        { name: 'Inicio de las Posadas', description: 'Novena preparatoria a la Navidad.' },
+        { name: 'San Adulfo', description: 'Obispo de Utrecht. Defensor de los pobres.' }
+    ],
+    '12-17': [
+        { name: 'San Lázaro', description: 'Amigo de Jesús. Resucitado por Cristo.' },
+        { name: 'Santa Olimpia', description: 'Diaconisa. Modelo de caridad.' }
+    ],
+    '12-18': [
+        { name: 'Expectación del parto de la Virgen', description: 'María espera el nacimiento de Jesús.' },
+        { name: 'San Samón', description: 'Obispo de Reims. Defensor de la fe.' }
+    ],
+    '12-19': [
+        { name: 'San Anastasio I', description: 'Papa. Luchó contra las herejías.' },
+        { name: 'Santa Meurilda', description: 'Abadesa irlandesa. Modelo de vida monástica.' }
+    ],
+    '12-20': [
+        { name: 'San Domingo de Silos', description: 'Abad benedictino. Patrón de los parturientos.' },
+        { name: 'Santa Ursula', description: 'Virgen y mártir. Patrona de las estudiantes.' }
+    ],
+    '12-21': [
+        { name: 'San Tomás', description: 'Apóstol. Patrón de la India.' },
+        { name: 'Santa Petronila', description: 'Virgen romana. Hija espiritual de San Pedro.' }
+    ],
+    '12-22': [
+        { name: 'San Francisco de Sales', description: 'Doctor de la Iglesia. Obispo de Ginebra.' },
+        { name: 'Santa Honorina', description: 'Virgen y mártir. Patrona de Normandía.' }
+    ],
+    '12-23': [
+        { name: 'San Juan de Kanty', description: 'Sacerdote polaco. Patrón de Polonia.' },
+        { name: 'Santa Victoria', description: 'Virgen y mártir. Valiente defensora.' }
+    ],
+    '12-24': [
+        { name: 'Nochebuena', description: 'Vigilia del nacimiento del Señor.' },
+        { name: 'Santa Adela', description: 'Abadesa benedictina. Modelo de vida monástica.' }
+    ],
+    '12-25': [
+        { name: 'Natividad del Señor', description: 'Jesús nace en Belén. Celebración central del cristianismo.' },
+        { name: 'Santa Anastasia', description: 'Virgen y mártir. Testimonio de fe.' }
+    ],
+    '12-26': [
+        { name: 'San Esteban', description: 'Primer mártir. Protomártir de la Iglesia.' },
+        { name: 'San Dionisio', description: 'Obispo de París. Patrón de Francia.' }
+    ],
+    '12-27': [
+        { name: 'San Juan Apóstol', description: 'Discípulo amado. Patrón de los teólogos.' },
+        { name: 'Santa Fabiola', description: 'Viuda romana. Fundadora de hospitales.' }
+    ],
+    '12-28': [
+        { name: 'Santos Inocentes', description: 'Niños mártires de Belén. Testimonio de inocencia.' },
+        { name: 'San Germánico', description: 'Mártir de Esmirna. Valiente confesor.' }
+    ],
+    '12-29': [
+        { name: 'San Tomás Becket', description: 'Arzobispo de Canterbury. Mártir por la libertad.' },
+        { name: 'Santa Trofima', description: 'Virgen y mártir. Testimonio de valentía.' }
+    ],
+    '12-30': [
+        { name: 'San Rogerio', description: 'Obispo de Canosa. Defensor de los pobres.' },
+        { name: 'Santa Sabinia', description: 'Virgen y mártir. Modelo de fe.' }
+    ],
+    '12-31': [
+        { name: 'San Silvestre I', description: 'Papa. Gobernó durante la paz de Constantino.' },
+        { name: 'Santa Catalina', description: 'Virgen y mártir. Valiente defensora de la fe.' }
+    ]
+};
+
+// Función para formatear fecha
+function formatDate(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('es-ES', options);
+}
+
+// Función para formatear fecha en formato venezolano DD/MM
+function formatDateVenezuelan(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day}/${month}`;
+}
+
+// Función para obtener la clave de la base de datos
+function getDateKey(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}`;
+}
+
+// Función para actualizar el display de fecha
+function updateDateDisplay() {
+    const datePicker = document.getElementById('datePicker');
+    const dateDisplay = document.getElementById('dateDisplay');
+    
+    if (datePicker.value) {
+        // Corrección: El valor del date picker ya está en UTC, hay que tener cuidado con la zona horaria
+        const [year, month, day] = datePicker.value.split('-').map(Number);
+        const selectedDate = new Date(year, month - 1, day);
+        dateDisplay.textContent = formatDateVenezuelan(selectedDate);
+    }
+}
+
+// Función para generar los próximos 7 días
+function generateDays(startDate) {
+    const container = document.getElementById('daysContainer');
+    container.innerHTML = '';
+    
+    const weekIndicator = document.getElementById('weekIndicator');
+    const weekText = document.getElementById('weekText');
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    
+    weekText.textContent = `Mostrando 7 días desde el ${formatDate(startDate)}`;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        currentDate.setHours(0, 0, 0, 0);
+        
+        const isToday = currentDate.getTime() === today.getTime();
+        const dateKey = getDateKey(currentDate);
+        const saints = santosDatabase[dateKey] || [
+            { name: 'Información no disponible', description: 'No hay información registrada para esta fecha en nuestra base de datos.' }
+        ];
+        
+        const dayCard = document.createElement('div');
+        dayCard.className = 'col-lg-12 col-md-12 mb-3';
+        
+        dayCard.innerHTML = `
+            <div class="day-card ${isToday ? 'today' : ''}">
+                <div class="day-content">
+                    <div class="date-section">
+                        <div class="date-number">${currentDate.getDate()}</div>
+                        <div class="date-month">${currentDate.toLocaleDateString('es-ES', { month: 'long' })}</div>
+                        <div class="date-weekday">${currentDate.toLocaleDateString('es-ES', { weekday: 'long' })}</div>
+                        <div class="date-year">${currentDate.getFullYear()}</div>
+                    </div>
+                    <div class="saints-section">
+                        <div class="saints-header">
+                            <i class="bi bi-star-fill"></i>
+                            <h3>Recordamos y celebramos</h3>
+                        </div>
+                        <div class="saints-list">
+                            ${saints.map((saint, index) => `
+                                <div class="saint-item" data-saint='${JSON.stringify(saint)}'>
+                                    <div class="saint-name">
+                                        <i class="bi bi-person-fill saint-icon"></i>
+                                        ${saint.name}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(dayCard);
+    }
+    
+    // Agregar event listeners para los tooltips
+    setupTooltips();
+}
+
+// Configurar tooltips
+function setupTooltips() {
+    const globalTooltip1 = document.getElementById('globalTooltip1');
+    const tooltipTitle = document.getElementById('tooltipTitle');
+    const tooltipContent = document.getElementById('tooltipContent');
+    let hideTimeout;
+
+    document.querySelectorAll('.saint-item').forEach(item => {
+        item.addEventListener('mouseenter', function(e) {
+            clearTimeout(hideTimeout);
+            
+            const saintData = JSON.parse(this.dataset.saint);
+            tooltipTitle.textContent = saintData.name;
+            tooltipContent.textContent = saintData.description;
+            
+            globalTooltip1.classList.add('show');
+            
+            // Posicionar tooltip inicialmente
+            updateTooltipPosition(e);
+        });
+        
+        item.addEventListener('mousemove', function(e) {
+            updateTooltipPosition(e);
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            hideTimeout = setTimeout(() => {
+                globalTooltip1.classList.remove('show');
+            }, 100);
+        });
+    });
+
+    // Prevenir que el tooltip se oculte al pasar sobre él
+    globalTooltip1.addEventListener('mouseenter', function() {
+        clearTimeout(hideTimeout);
+    });
+
+    globalTooltip1.addEventListener('mouseleave', function() {
+        globalTooltip1.classList.remove('show');
+    });
+}
+
+// Actualizar posición del tooltip
+function updateTooltipPosition(e) {
+    const tooltip = document.getElementById('globalTooltip1');
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let left = e.clientX;
+    let top = e.clientY;
+    
+    // Ajustar posición horizontal si se sale de la pantalla
+    if (left + tooltipRect.width / 2 > viewportWidth) {
+        left = viewportWidth - tooltipRect.width / 2 - 10;
+    } else if (left - tooltipRect.width / 2 < 0) {
+        left = tooltipRect.width / 2 + 10;
+    }
+    
+    // Ajustar posición vertical si se sale de la pantalla
+    if (top - tooltipRect.height - 20 < 0) {
+        top = tooltipRect.height + 30;
+    }
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    const datePicker = document.getElementById('datePicker');
+    const today = new Date();
+    
+    // Establecer la fecha actual en el picker
+    datePicker.value = today.toISOString().split('T')[0];
+    
+    // Actualizar el display de fecha
+    updateDateDisplay();
+    
+    // Generar los próximos 7 días desde hoy
+    generateDays(today);
+    
+    // Event listener para el selector de fecha
+    datePicker.addEventListener('change', function() {
+        // Corrección: El valor del date picker ya está en UTC, hay que tener cuidado con la zona horaria
+        const [year, month, day] = this.value.split('-').map(Number);
+        const selectedDate = new Date(year, month - 1, day);
+
+        // Mostrar spinner
+        document.getElementById('loadingSpinner').classList.add('show');
+        document.getElementById('daysContainer').style.opacity = '0.5';
+        
+        // Simular carga
+        setTimeout(() => {
+            generateDays(selectedDate);
+            document.getElementById('loadingSpinner').classList.remove('show');
+            document.getElementById('daysContainer').style.opacity = '1';
+        }, 500);
+    });
+
+    // Event listener para actualizar el display cuando cambia la fecha
+    datePicker.addEventListener('input', updateDateDisplay);
+});
+
+
+// El evangelio para estos días
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const evangelioTab = document.getElementById('evangelio-tab');
+    const instruccionesTab = document.getElementById('instrucciones-tab');
+    const evangelioContent = document.getElementById('evangelio-content');
+    const instruccionesContent = document.getElementById('instrucciones-content');
+    
+    const dateInput = document.getElementById('date-input');
+    const todayButton = document.getElementById('today-button');
+    const currentDateElement = document.getElementById('current-date');
+    const gospelContentElement = document.getElementById('gospel-content');
+    const csvFileInput = document.getElementById('csv-file');
+
+    // Datos del evangelio embebidos
+    const embeddedCSVData = `fecha,cita,resumen
+2025-09-29," Jn 1,47-51","«Veréis el cielo abierto y a los ángeles de Dios subir y bajar sobre el Hijo del hombre» Hoy, en la fiesta de los Santos..."
+2025-09-30," Lc 9,51-56","«Él se afirmó en su voluntad de ir a Jerusalén» Hoy, el Evangelio nos ofrece dos puntos principales para la reflexión pe..."
+2025-10-01," Lc 9,57-62","«Sígueme» Hoy, el Evangelio nos invita a reflexionar, con mucha claridad y no menor insistencia, sobre un punto central ..."
+2025-10-02," Lc 10,1-12",«Rogad (...) al dueño de la mies que envíe obreros a su mies» Hoy Jesús nos habla de la misión apostólica. Aunque «desig..."
+2025-10-03," Lc 10,13-16","«Quien a vosotros os escucha, a mí me escucha» Hoy, el Evangelio nos presenta a Jesús dirigir su mirada hacia aquellas ciudades de Galilea qu..."
+2025-10-04," Lc 10,17-24","«Se llenó de gozo Jesús en el Espíritu Santo, y dijo: ‘Yo te bendigo, Padre, Señor del cielo y de la tierra’» Hoy, el ev..."
+2025-10-05," Lc 17,5-10",«Somos siervos» Hoy se nos presenta un Evangelio con dos partes que parecen inconexas. ¿Qué tiene que ver la fe con el s..."
+2025-10-06," Lc 10,25-37","«¿Qué he de hacer para tener en herencia la vida eterna?» Hoy, el mensaje evangélico señala el camino de la vida: «Amará..."
+2025-10-07," Lc 10,38-42","«Marta, Marta, te preocupas y te agitas por muchas cosas; y hay necesidad de pocas, o mejor, de una sola» Hoy, como cada..."
+2025-10-08," Lc 11,1-4","«Señor, enséñanos a orar, como enseñó Juan a sus discípulos» Hoy vemos cómo uno de los discípulos le dice a Jesús: «Seño..."
+2025-10-09," Lc 11,5-13","«El Padre del cielo dará el Espíritu Santo a los que se lo pidan» Hoy, el Evangelio es una catequesis de Jesús sobre la ..."
+2025-10-10," Lc 11,15-26","«Algunos dijeron: 'Por Beelzebul, Príncipe de los demonios, expulsa los demonios'» Hoy contemplamos asombrados cómo Jesú..."
+2025-10-11," Lc 11,27-28",«¡Dichoso el seno que te llevó y los pechos que te criaron!» Hoy escuchamos la mejor de las alabanzas que Jesús podía ha..."
+2025-10-12," Lc 17,11-19","«¡Jesús, Maestro, ten compasión de nosotros!» Hoy podemos comprobar, ¡una vez más!, cómo nuestra actitud de fe puede rem..."
+2025-10-13," Lc 11,29-32","«Esta generación es una generación malvada; pide una señal» Hoy, la voz dulce —pero severa— de Cristo pone en guardia a ..."
+2025-10-14," Lc 11,37-41","«Dad más bien en limosna lo que tenéis, y así todas las cosas serán puras para vosotros» Hoy, el evangelista sitúa a Jes..."
+2025-10-15," Lc 11,42-46",«Esto es lo que había que practicar aunque sin omitir aquello» Hoy vemos cómo el Divino Maestro nos da algunas lecciones..."
+2025-10-16," Lc 11,47-54","«¡(...) edificáis los sepulcros de los profetas que vuestros padres mataron!» Hoy, se nos plantea el sentido, aceptación..."
+2025-10-17," Lc 12,1-7",«No temáis; valéis más que muchos pajarillos» Hoy contemplamos a Nuestro Señor Jesucristo dirigiéndose a las gentes desp..."
+2025-10-18," Lc 10,1-9","«El Reino de Dios está cerca de vosotros» Hoy, en la fiesta de san Lucas —el Evangelista de la mansedumbre de Cristo—, l..."
+2025-10-19," Lc 18,1-8","«Es preciso orar siempre sin desfallecer» Hoy, Jesús nos recuerda que «es preciso orar siempre sin desfallecer» (Lc 18,1..."
+2025-10-20," Lc 12,13-21","«La vida de uno no está asegurada por sus bienes» Hoy, el Evangelio, si no nos tapamos los oídos y no cerramos los ojos,..."
+2025-10-21," Lc 12,35-38",«Sed como hombres que esperan a que su señor vuelva de la boda» Hoy es preciso fijarse en estas palabras de Jesús: «Sed ..."
+2025-10-22," Lc 12,39-48","«Estad preparados, porque en el momento que no penséis, vendrá el Hijo del hombre» Hoy, con la lectura de este fragmento..."
+2025-10-23," Lc 12,49-53","«He venido a prender fuego en el mundo» Hoy, el Evangelio nos presenta a Jesús como una persona de grandes deseos: «He v..."
+2025-10-24," Lc 12,54-59","«¿Cómo no exploráis (...) este tiempo? ¿Por qué no juzgáis por vosotros mismos lo que es justo?» Hoy, Jesús quiere que l..."
+2025-10-25," Lc 13,1-9","«Fue a buscar fruto (...) y no lo encontró» Hoy, las palabras de Jesús nos invitan a meditar sobre el inconveniente de l..."
+2025-10-26," Lc 18,9-14",«¡Oh Dios! ¡Ten compasión de mí...» Hoy leemos con atención y novedad el Evangelio de san Lucas. Una parábola dirigida a..."
+2025-10-27," Lc 13,10-17","«Pero el jefe de la sinagoga, indignado de que Jesús hubiese hecho una curación en sábado...» Hoy, vemos a Jesús realiza..."
+2025-10-28," Lc 6,12-19",«Jesús se fue al monte a orar» Hoy contemplamos un día entero de la vida de Jesús. Una vida que tiene dos claras vertien..."
+2025-10-29," Lc 13,22-30","«Luchad por entrar por la puerta estrecha» Hoy, camino de Jerusalén, Jesús se detiene un momento y alguien lo aprovecha ..."
+2025-10-30," Lc 13,31-35","«¡Jerusalén, Jerusalén! (...) ¡Cuántas veces he querido reunir a tus hijos (...) y no habéis querido!» Hoy podemos admir..."
+2025-10-31," Lc 14,1-6","«¿Es lícito curar en sábado, o no?» Hoy el Evangelio nos deja ver a Jesús: firme como buey, manso como asno. Está en cas..."
+2025-11-01," Mt 5,1-12a",«Alegraos y regocijaos» Hoy celebramos la realidad de un misterio salvador expresado en el “credo” y que resulta muy con..."
+2025-11-02," Lc 23,33.39-43","«Jesús, acuérdate de mí cuando vengas con tu Reino» Hoy, el Evangelio evoca el hecho más fundamental del cristiano: la m..."
+2025-11-03," Lc 14,12-14","«Cuando des un banquete, llama a los pobres, (...) porque no te pueden corresponder, pues se te recompensará en la resur..."
+2025-11-04," Lc 14,15-24","«Sal a los caminos y cercas, y obliga a entrar hasta que se llene mi casa» Hoy, el Señor nos ofrece una imagen de la ete..."
+2025-11-05," Lc 14,25-33",«Quien no lleve su cruz detrás de mí no puede ser discípulo mío» Hoy contemplamos a Jesús en camino hacia Jerusalén. All..."
+2025-11-06," Lc 15,1-10","«Habrá más alegría en el cielo por un solo pecador que se convierta» Hoy, el evangelista de la misericordia de Dios nos ..."
+2025-11-07," Lc 16,1-8","«Los hijos de este mundo son más astutos (...) que los hijos de la luz» Hoy, el Evangelio nos presenta una cuestión sorp..."
+2025-11-08," Lc 16,9-15","«El que es fiel en lo mínimo, lo es también en lo mucho» Hoy, Jesús habla de nuevo con autoridad: usa el «Yo os digo», q..."
+2025-11-09," Lc 20,27-38","«No es un Dios de muertos, sino de vivos, porque para Él todos viven» Hoy, Jesús hace una clara afirmación de la resurre..."
+2025-11-10," Lc 17,1-6","«Si peca contra ti siete veces al día (...), le perdonarás» Hoy, el Evangelio nos habla de tres temas importantes. En pr..."
+2025-11-11," Lc 17,7-10","«Hemos hecho lo que debíamos hacer» Hoy, la atención del Evangelio no se dirige a la actitud del amo, sino a la de los s..."
+2025-11-12," Lc 17,11-19","«Postrándose rostro en tierra a los pies de Jesús, le daba gracias» Hoy, Jesús pasa cerca de nosotros para hacernos vivi..."
+2025-11-13," Lc 17,20-25","«El Reino de Dios ya está entre vosotros» Hoy, los fariseos preguntan a Jesús una cosa que ha interesado siempre con una..."
+2025-11-14," Lc 17,26-37","«Comían, bebían, compraban, vendían, plantaban, construían» Hoy, en el texto del Evangelio son remarcados el final de lo..."
+2025-11-15," Lc 18,1-8","«Es preciso orar siempre sin desfallecer» Hoy, en los últimos días del año litúrgico, Jesús nos exhorta a orar, a dirigi..."
+2025-11-16," Lc 21,5-19","«Mirad, no os dejéis engañar» Hoy, el Evangelio nos habla de la última venida del Hijo del hombre. Se acerca el final de..."
+2025-11-17," Lc 18,35-43","«Tu fe te ha salvado» Hoy, el ciego Bartimeo (cf. Mc 10,46) nos provee toda una lección de fe, manifestada con franca se..."
+2025-11-18," Lc 19,1-10","«El Hijo del hombre ha venido a buscar y salvar lo que estaba perdido» Hoy, Zaqueo soy yo. Este personaje era rico y jef..."
+2025-11-19," Lc 19,11-28","«Negociad hasta que vuelva» Hoy, el Evangelio nos propone la parábola de las minas: una cantidad de dinero que aquel nob..."
+2025-11-20," Lc 19,41-44","«¡Si (...) tú conocieras en este día el mensaje de paz!» Hoy, la imagen que nos presenta el Evangelio es la de un Jesús ..."
+2025-11-21," Lc 19,45-48","«Mi casa será casa de oración» Hoy, el gesto de Jesús es profético. A la manera de los antiguos profetas, realiza una ac..."
+2025-11-22," Lc 20,27-40","«No es un Dios de muertos, sino de vivos, porque para Él todos viven» Hoy, la Palabra de Dios nos habla del tema capital..."
+2025-11-23," Lc 23,35-43","«Éste es el Rey de los judíos» Hoy, el Evangelio nos hace elevar los ojos hacia la cruz donde Cristo agoniza en el Calva..."
+2025-11-24," Lc 21,1-4","«Ha echado de lo que necesitaba, todo cuanto tenía para vivir» Hoy, como casi siempre, las cosas pequeñas pasan desaperc..."
+2025-11-25," Lc 21,5-11","«No quedará piedra sobre piedra» Hoy escuchamos asombrados la severa advertencia del Señor: «Esto que veis, llegarán día..."
+2025-11-26," Lc 21,12-19",«Con vuestra perseverancia salvaréis vuestras almas» Hoy ponemos atención en esta sentencia breve e incisiva de nuestro ..."
+2025-11-27," Lc 21,20-28","«Cobrad ánimo y levantad la cabeza porque se acerca vuestra liberación» Hoy al leer este santo Evangelio, ¿cómo no ver r..."
+2025-11-28," Lc 21,29-33","«Cuando veáis que sucede esto, sabed que el Reino de Dios está cerca» Hoy somos invitados por Jesús a ver las señales qu..."
+2025-11-29," Lc 21,34-36","«Estad en vela (...) orando en todo tiempo» Hoy, último día del tiempo ordinario, Jesús nos advierte con meridiana clari..."
+2025-11-30," Mt 24, 37-44","«Velad (...) porque no sabéis qué día vendrá vuestro Señor» Hoy, «como en los días de Noé», la gente come, bebe, toma ma..."
+2025-12-01," Mt 8,5-11","«Os aseguro que en Israel no he encontrado en nadie una fe tan grande» Hoy, Cafarnaúm es nuestra ciudad y nuestro pueblo..."
+2025-12-02," Lc 10,21-24","«Te bendigo, Padre» Hoy leemos un extracto del capítulo 10 del Evangelio según san Lucas. El Señor ha enviado a setenta ..."
+2025-12-03," Mt 15,29-37","«‘¿Cuántos panes tenéis?’. Ellos dijeron: ‘Siete, y unos pocos pececillos’» Hoy contemplamos en el Evangelio la multipli..."
+2025-12-04," Mt 7,21.24-27","«No todo el que me diga: ‘Señor, Señor’, entrará en el Reino de los cielos» Hoy, el Señor pronuncia estas palabras al fi..."
+2025-12-05," Mt 9,27-31","«Jesús les dice: ‘¿Creéis que puedo hacer eso?’. Dícenle: ‘Sí, Señor’» Hoy, en este primer viernes de Adviento, el Evang..."
+2025-12-06," Mt 9,35-10,1.6-8","«Rogad (...) al Dueño de la mies que envíe obreros a su mies» Hoy, cuando ya llevamos una semana dentro del itinerario d..."
+2025-12-07," Mt 3,1-12","«Dad fruto digno de conversión» Hoy, el Evangelio de san Mateo nos presenta a Juan el Bautista invitándonos a la convers..."
+2025-12-08," Lc 1,26-38","«Y entrando, le dijo: ‘Alégrate, llena de gracia, el Señor está contigo’» Hoy, el Evangelio toca un acorde compuesto por..."
+2025-12-09," Mt 18,12-14","«No es voluntad de vuestro Padre celestial que se pierda uno solo de estos pequeños» Hoy, Jesús nos lanza un reto: «¿Qué..."
+2025-12-10," Mt 11,28-30","«Mi yugo es suave y mi carga ligera» Hoy, Jesús nos conduce al reposo en Dios. Él es, ciertamente, un Padre exigente, po..."
+2025-12-11," Mt 11,11-15","«El Reino de los Cielos sufre violencia, y los violentos lo arrebatan» Hoy, el Evangelio nos habla de san Juan Bautista, ..."
+2025-12-12," Mt 11,16-19",«¿Con quién compararé a esta generación?» Hoy debiéramos removernos ante el suspiro del Señor: «Con quién compararé a es..."
+2025-12-13," Mt 17,10-13","«Elías vino ya, pero no le reconocieron, sino que hicieron con él cuanto quisieron» Hoy, Jesús conversa con los discípul..."
+2025-12-14," Mt 11,2-11","«No ha surgido entre los nacidos de mujer uno mayor que Juan el Bautista» Hoy, como el domingo anterior, la Iglesia nos ..."
+2025-12-15," Mt 21,23-27","«¿Con qué autoridad haces esto? ¿Y quién te ha dado tal autoridad?» Hoy, el Evangelio nos invita a contemplar dos aspect..."
+2025-12-16," Mt 21,28-32","‘No quiero’, pero después se arrepintió y fue» Hoy contemplamos al padre que tiene dos hijos y dice al primero: «Hijo, ..."
+2025-12-17," Mt 1,1-17","«Libro de la generación de Jesucristo, hijo de David, hijo de Abraham» Hoy, en la liturgia de la misa leemos la genealog..."
+2025-12-18," Mt 1,18-24","«José, hijo de David, no temas tomar contigo a María tu mujer» Hoy, la liturgia de la palabra nos invita a considerar el..."
+2025-12-19," Lc 1,5-25","«El ángel le dijo: ‘No temas, Zacarías, porque tu petición ha sido escuchada; Isabel, tu mujer, te dará a luz un hijo’» ..."
+2025-12-20," Lc 1,26-38","«He aquí la esclava del Señor; hágase en mí según tu palabra» Hoy contemplamos, una vez más, esta escena impresionante d..."
+2025-12-21," Mt 1,18-24","«Despertado José del sueño, hizo como el Ángel del Señor le había mandado» Hoy, la liturgia de la Palabra nos invita a c..."
+2025-12-22," Lc 1,46-56","«Engrandece mi alma al Señor y mi espíritu se alegra en Dios mi salvador» Hoy, el Evangelio de la Misa nos presenta a nu..."
+2025-12-23," Lc 1,57-66","‘¿Qué será este niño?’. Porque, en efecto, la mano del Señor estaba con él» Hoy, en la primera lectura leemos: «Esto di..."
+2025-12-24," Lc 1,67-79","«Harán que nos visite una Luz de la altura, a fin de iluminar a los que habitan en tinieblas» Hoy, el Evangelio recoge e..."
+2025-12-25," Lc 2,1-14","«Os ha nacido hoy, en la ciudad de David, un salvador, que es el Cristo Señor» Hoy, nos ha nacido el Salvador. Ésta es l..."
+2025-12-26," Mt 10,17-22","«Os entregarán a los tribunales y os azotarán» Hoy, recién saboreada la profunda experiencia del Nacimiento del Niño Jes..."
+2025-12-27," Jn 20,2-8","«Vio y creyó» Hoy, la liturgia celebra la fiesta de san Juan, apóstol y evangelista. Al siguiente día de Navidad, la Igl..."
+2025-12-28," Mt 2,13-15.19-23","«Levántate, toma contigo al niño y a su madre, y ponte en camino de la tierra de Israel» Hoy contemplamos el misterio de..."
+2025-12-29," Lc 2,22-35","«Ahora, Señor, puedes (...) dejar que tu siervo se vaya en paz; porque han visto mis ojos tu salvación» Hoy, 29 de dicie..."
+2025-12-30," Lc 2,36-40","«Alababa a Dios y hablaba del Niño a todos» Hoy, José y María acaban de celebrar el rito de la presentación del primogén..."
+2025-12-31," Jn 1,1-18","«Y la Palabra se hizo carne» Hoy es el último día del año. Frecuentemente, una mezcla de sentimientos —incluso contradic..."
+    `;
+
+    // Variable para almacenar los datos del evangelio
+    let evangelioData = [];
+    
+    // Funcionalidad de las pestañas
+    evangelioTab.addEventListener('click', function() {
+        evangelioTab.classList.add('active');
+        instruccionesTab.classList.remove('active');
+        evangelioContent.classList.add('active');
+        instruccionesContent.classList.remove('active');
+    });
+    
+    instruccionesTab.addEventListener('click', function() {
+        instruccionesTab.classList.add('active');
+        evangelioTab.classList.remove('active');
+        instruccionesContent.classList.add('active');
+        evangelioContent.classList.remove('active');
+    });
+    
+    // Establecer la fecha de hoy inicialmente
+    const today = new Date();
+    const formattedToday = formatDate(today);
+    dateInput.value = formattedToday;
+    updateCurrentDate(today);
+    
+    // Cargar los datos embebidos al iniciar
+    loadEmbeddedData();
+
+    function loadEmbeddedData() {
+        try {
+            evangelioData = parseCSV(embeddedCSVData);
+            if (evangelioData.length > 0) {
+                processEvangelioData();
+                showMessage(`Se cargaron ${evangelioData.length} días del evangelio correctamente.`, 'success');
+            } else {
+                throw new Error('No se encontraron datos válidos en los datos embebidos.');
+            }
+        } catch (error) {
+            console.error('Error al procesar los datos embebidos:', error);
+            gospelContentElement.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar los datos del evangelio.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Event listener para cargar el archivo CSV manualmente
+    csvFileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    evangelioData = parseCSV(csvData);
+                    
+                    if (evangelioData.length > 0) {
+                        processEvangelioData();
+                        showMessage(`Se cargaron ${evangelioData.length} días del evangelio desde el archivo.`, 'success');
+                        evangelioTab.click();
+                    } else {
+                        showMessage('No se encontraron datos válidos en el archivo CSV.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al procesar el archivo CSV:', error);
+                    showMessage('Error al procesar el archivo CSV. Por favor, verifica el formato.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    function processEvangelioData() {
+        const availableDates = evangelioData.map(item => item.fecha);
+        configureDateInput(availableDates);
+        dateInput.disabled = false;
+        todayButton.disabled = false;
+        
+        const todayInData = evangelioData.some(item => item.fecha === formattedToday);
+        
+        if (todayInData) {
+            loadGospel(formattedToday);
+        } else {
+            const closestDate = getClosestDate(availableDates);
+            dateInput.value = closestDate;
+            updateCurrentDate(new Date(closestDate));
+            loadGospel(closestDate);
+            showMessage('No hay evangelio disponible para hoy. Se muestra la fecha más cercana.', 'info');
+        }
+    }
+
+    // Event listeners
+    dateInput.addEventListener('change', function() {
+        const selectedDate = this.value;
+        updateCurrentDate(new Date(selectedDate));
+        loadGospel(selectedDate);
+    });
+
+    todayButton.addEventListener('click', function() {
+        const today = new Date();
+        const formattedToday = formatDate(today);
+        
+        const todayInData = evangelioData.some(item => item.fecha === formattedToday);
+        
+        if (todayInData) {
+            dateInput.value = formattedToday;
+            updateCurrentDate(today);
+            loadGospel(formattedToday);
+        } else {
+            showMessage('No hay evangelio disponible para hoy. Por favor, selecciona otra fecha.', 'error');
+        }
+    });
+
+    function parseCSV(csvData) {
+        const lines = csvData.split('\n');
+        const result = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line) {
+                const regex = /(?:^|,)(?:"([^"]*(?:""[^"']*")*)"|([^,]*))/g;
+                const row = [];
+                let match;
+                
+                while ((match = regex.exec(line)) !== null) {
+                    row.push(match[1] ? match[1].replace(/""/g, '"') : match[2]);
+                }
+                
+                if (row.length >= 3) {
+                    result.push({
+                        fecha: row[0].trim(),
+                        cita: row[1].trim(),
+                        resumen: row[2].trim()
+                    });
+                }
+            }
+        }
+        
+        return result;
+    }
+
+    function configureDateInput(dates) {
+        const availableDates = {};
+        dates.forEach(date => {
+            availableDates[date] = true;
+        });
+        
+        dateInput.addEventListener('input', function() {
+            const selectedDate = this.value;
+            if (!availableDates[selectedDate]) {
+                this.setCustomValidity('Por favor selecciona una fecha disponible');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    }
+
+    function getClosestDate(dates) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dateObjects = dates.map(date => new Date(date));
+        dateObjects.sort((a, b) => a - b);
+        
+        let closestDate = dateObjects[0];
+        let minDiff = Math.abs(today - closestDate);
+        
+        for (let i = 1; i < dateObjects.length; i++) {
+            const diff = Math.abs(today - dateObjects[i]);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestDate = dateObjects[i];
+            }
+        }
+        
+        return formatDate(closestDate);
+    }
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function updateCurrentDate(date) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateElement.textContent = date.toLocaleDateString('es-ES', options);
+    }
+
+    function loadGospel(date) {
+        gospelContentElement.innerHTML = `
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+            </div>
+        `;
+
+        setTimeout(() => {
+            const gospel = evangelioData.find(item => item.fecha === date);
+            
+            if (gospel) {
+                displayGospel(gospel);
+            } else {
+                gospelContentElement.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>No se encontró el evangelio para la fecha seleccionada.</p>
+                    </div>
+                `;
+            }
+        }, 500);
+    }
+
+    function displayGospel(gospel) {
+        gospelContentElement.innerHTML = `
+            <div class="gospel-citation">${gospel.cita}</div>
+            <div class="gospel-text">${gospel.resumen}</div>
+        `;
+    }
+
+    function showMessage(message, type) {
+        let messageClass, icon;
+        
+        switch(type) {
+            case 'success':
+                messageClass = 'success-message';
+                icon = 'fa-check-circle';
+                break;
+            case 'error':
+                messageClass = 'error-message';
+                icon = 'fa-exclamation-triangle';
+                break;
+            case 'info':
+                messageClass = 'info-message';
+                icon = 'fa-info-circle';
+                break;
+            default:
+                messageClass = 'info-message';
+                icon = 'fa-info-circle';
+        }
+        
+        const messageElement = document.createElement('div');
+        messageElement.className = messageClass;
+        messageElement.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <p>${message}</p>
+        `;
+        
+        const header = document.querySelector('header');
+        header.insertAdjacentElement('afterend', messageElement);
+        
+        setTimeout(() => {
+            messageElement.remove();
+        }, 5000);
+    }
+});
+
+

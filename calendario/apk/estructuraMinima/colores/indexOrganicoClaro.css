@@ -1,0 +1,111 @@
+/* --- VARIANTE 3A: ORGÁNICO - TEMA CLARO --- */
+/* Sugerencia: Importa una fuente con serifa como 'Lora' o 'Merriweather' desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Lora', serif;
+    line-height: 1.7;
+    color: #5d4037; /* Marrón tierra para el texto */
+    background-color: #f5f5dc; /* Color beige (llamado 'wheat') */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+header {
+    background-color: #8d6e63; /* Marrón claro */
+    color: #f5f5dc;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(93, 64, 55, 0.2);
+}
+
+header h1 {
+    font-size: 2.6rem;
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Contenido principal */
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 3rem 2rem;
+    gap: 2rem;
+}
+
+/* Áreas de contenido */
+.area {
+    background-color: #fff8e1; /* Un amarillo crema muy suave */
+    border-radius: 15px;
+    padding: 2rem;
+    width: 300px;
+    box-shadow: 0 6px 18px rgba(141, 110, 99, 0.15); /* Sombra suave y cálida */
+    border: 1px solid #d7ccc8; /* Borde en un tono rosado tierra */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.area:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(141, 110, 99, 0.25);
+}
+
+.area h2 {
+    color: #3e2723; /* Marrón oscuro */
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.area p {
+    font-size: 1rem;
+    color: #6d4c41; /* Marrón medio */
+    margin-bottom: 1.5rem;
+}
+
+.area-btn {
+    background-color: #a1887f; /* Un gris rosado suave */
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
+    font-family: 'Lora', serif;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 600;
+}
+
+.area-btn:hover {
+    background-color: #8d6e63; /* Marrón más oscuro al hover */
+}
+
+/* Pie de página */
+footer {
+    background-color: #3e2723; /* Marrón oscuro */
+    color: #d7ccc8;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+footer p {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .area {
+        width: 100%;
+        max-width: 400px;
+    }
+}

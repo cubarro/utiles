@@ -1,0 +1,107 @@
+/* --- VARIANTE 1B: MINIMALISTA - TEMA OSCURO --- */
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #e0e0e0; /* Texto gris claro */
+    background-color: #1a1a1a; /* Fondo negro suave */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+header {
+    background-color: #2a2a2a; /* Gris oscuro */
+    color: #f0f0f0;
+    padding: 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+/* Contenido principal */
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 3rem 2rem;
+    gap: 2rem;
+}
+
+/* Áreas de contenido */
+.area {
+    background-color: #252525;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 2rem;
+    width: 300px;
+    transition: border-color 0.3s ease;
+}
+
+.area:hover {
+    border-color: #666;
+}
+
+.area h2 {
+    color: #f0f0f0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.area p {
+    font-size: 1rem;
+    color: #b0b0b0;
+    margin-bottom: 1.5rem;
+}
+
+.area-btn {
+    background-color: transparent;
+    color: #a0a0a0;
+    border: 1px solid #909090;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.area-btn:hover {
+    background-color: #e0e0e0;
+    color: #1a1a1a;
+}
+
+/* Pie de página */
+footer {
+    background-color: #2a2a2a;
+    color: #888;
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid #444;
+}
+
+footer p {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .area {
+        width: 100%;
+        max-width: 400px;
+    }
+} 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Invertir colores por área</title>
+  <style>
+    .area {
+      background-color: white;
+      color: black;
+      padding: 20px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="area1" class="area">Área 1
+    <button onclick="invertirColores('area1')">Invertir Área 1</button>
+  </div>
+
+  <div id="area2" class="area">Área 2
+    <button onclick="invertirColores('area2')">Invertir Área 2</button>
+  </div>
+
+  <div id="area3" class="area">Área 3
+    <button onclick="invertirColores('area3')">Invertir Área 3</button>
+  </div>
+
+  <script>
+    function invertirColores(idArea) {
+      const area = document.getElementById(idArea);
+      if (!area) return;
+
+      const estilo = getComputedStyle(area);
+      const fondoActual = estilo.backgroundColor;
+      const textoActual = estilo.color;
+
+      area.style.backgroundColor = textoActual;
+      area.style.color = fondoActual;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+/* --- VARIANTE 1A: MINIMALISTA - TEMA CLARO --- */
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #333; /* Gris oscuro para el texto */
+    background-color: #fff; /* Fondo blanco puro */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+header {
+    background-color: #f7f7f7; /* Gris muy claro */
+    color: #333;
+    padding: 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0; /* Línea sutil en lugar de sombra */
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+/* Contenido principal */
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 3rem 2rem;
+    gap: 2rem;
+}
+
+/* Áreas de contenido */
+.area {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Borde sutil para definir el área */
+    border-radius: 4px; /* Bordes apenas redondeados */
+    padding: 2rem;
+    width: 300px;
+    transition: border-color 0.3s ease;
+}
+
+.area:hover {
+    border-color: #bbb; /* El borde se oscurece al hover */
+}
+
+.area h2 {
+    color: #111;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.area p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.area-btn {
+    background-color: transparent;
+    color: #888;
+    border: 1px solid #888;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.area-btn:hover {
+    background-color: #666;
+    color: #ccc;
+}
+
+/* Pie de página */
+footer {
+    background-color: #f7f7f7;
+    color: #777;
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+footer p {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .area {
+        width: 100%;
+        max-width: 400px;
+    }
+} 

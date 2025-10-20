@@ -1,0 +1,115 @@
+/* --- VARIANTE 2A: VISTOSO - TEMA CLARO --- */
+/* Sugerencia: Importa una fuente moderna como 'Poppins' o 'Montserrat' desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Degradado de fondo */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+header {
+    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%); /* Degradado vibrante */
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Contenido principal */
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 3rem 2rem;
+    gap: 2rem;
+}
+
+/* Áreas de contenido */
+.area {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 2rem;
+    width: 300px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 5px solid #3F5EFB; /* Acento de color en la parte superior */
+}
+
+.area:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+.area h2 {
+    color: #3F5EFB;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.area p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.area-btn {
+    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 50px; /* Botón de píldora */
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 600;
+}
+
+.area-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(63, 94, 251, 0.4);
+}
+
+/* Pie de página */
+footer {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    text-align: center;
+    padding: 1.5rem;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.2rem;
+    }
+    .area {
+        width: 100%;
+        max-width: 400px;
+    }
+} 
