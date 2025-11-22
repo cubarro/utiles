@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Descargas de software para Windows</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f7f7f7; color: #222; }
+    h1 { margin: 24px 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .download-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 26px 24px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    .download-btn {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px 20px;
+      font-size: 18px;
+      text-decoration: none;
+      color: #fff;
+      background: #0078d7;
+      border-radius: 12px;
+      width: 100%;
+      transition: background 0.25s ease;
+    }
+    .download-btn:hover { background: #005a9e; }
+    .download-btn i { font-size: 52px; }
+    .meta { margin-top: 12px; font-size: 14px; color: #555; }
+    .fail-tip { font-size: 13px; color: #666; margin-top: 8px; }
+  </style>
+  <!-- Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <h1>Descargas recientes para Windows</h1>
+  
+  22 de Noviembre de 2025
+
+  <div class="grid">
+    <!-- QGIS -->
+    <div class="download-card">
+      <a class="download-btn" href="https://download.qgis.org/downloads/QGIS-OSGeo4W-3.40.9-1.msi" target="_blank">
+        <i class="fa-solid fa-map"></i>
+        <span>QGIS (OSGeo4W) 3.40.9-1</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://qgis.org/download/" target="_blank">QGIS Download</a></div>
+    </div>
+
+    <!-- SAGA GIS -->
+    <div class="download-card">
+      <a class="download-btn" href="https://sourceforge.net/projects/saga-gis/files/latest/download" target="_blank">
+        <i class="fa-solid fa-mountain"></i>
+        <span>SAGA GIS 9.9.1 x64</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://saga-gis.sourceforge.io/en/index.html" target="_blank">SAGA GIS</a></div>
+    </div>
+
+    <!-- R -->
+    <div class="download-card">
+      <a class="download-btn" href="https://cran.r-project.org/bin/windows/base/R-4.5.1-win.exe" target="_blank">
+        <i class="fa-brands fa-r-project"></i>
+        <span>R 4.5.1</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://cran.r-project.org/bin/windows/base/" target="_blank">CRAN R</a></div>
+    </div>
+
+    <!-- RStudio -->
+    <div class="download-card">
+      <a class="download-btn" href="https://download1.rstudio.org/electron/windows/RStudio-2025.09.2-418.exe" target="_blank">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>RStudio 2025.09.2-418</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://posit.co/download/rstudio-desktop/" target="_blank">Posit RStudio</a></div>
+    </div>
+
+    <!-- Python -->
+    <div class="download-card">
+      <a class="download-btn" href="https://www.python.org/ftp/python/3.13.5/python-3.13.5-amd64.exe" target="_blank">
+        <i class="fa-brands fa-python"></i>
+        <span>Python 3.13.5 (amd64)</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://www.python.org/downloads/windows/" target="_blank">Python</a></div>
+    </div>
+
+    <!-- Miniconda -->
+    <div class="download-card">
+      <a class="download-btn" href="https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe" target="_blank">
+        <i class="fa-solid fa-cubes"></i>
+        <span>Miniconda3 (latest)</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://www.anaconda.com/download" target="_blank">Anaconda</a></div>
+    </div>
+
+    <!-- Visual Studio Code -->
+    <div class="download-card">
+      <a class="download-btn" href="https://update.code.visualstudio.com/latest/win32-x64-user/stable" target="_blank">
+        <i class="fa-solid fa-code"></i>
+        <span>VSCode User Setup x64 (stable)</span>
+      </a>
+      <div class="meta">Si falla, usa el portal oficial: <a href="https://code.visualstudio.com/download" target="_blank">VS Code</a></div>
+    </div>
+  </div>
+
+</body>
+</html>
