@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Precios de los huevos en Bs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    label, input {
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #2ecc71;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Precios</h1>
+  <label for="dolar">Precio del dólar (Bs):</label>
+  <input type="number" id="dolar" value="294.9699" step="0.0001" onchange="actualizarPrecios()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Cartón ($)</th>
+        <th>½ ($)</th>
+        <th>Cartón (Bs)</th>
+        <th>½ (Bs)</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-precios">
+      <!-- Los precios se llenan dinámicamente -->
+    </tbody>
+  </table>
+
+  <script>
+    const preciosUSD = [
+      { tipo: "Tipo C", carton: 5.40, medio: 2.70 },
+      { tipo: "Tipo A", carton: 6.80, medio: 3.40 },
+      { tipo: "Tipo AA", carton: 7.60, medio: 3.80 },
+      { tipo: "Extra", carton: 8.00, medio: 4.00 },
+      { tipo: "Jumbo", carton: 8.50, medio: 4.25 }
+    ];
+
+    function actualizarPrecios() {
+      const dolar = parseFloat(document.getElementById("dolar").value);
+      const tabla = document.getElementById("tabla-precios");
+      tabla.innerHTML = "";
+
+      preciosUSD.forEach(item => {
+        const cartonBs = (item.carton * dolar).toFixed(2);
+        const medioBs = (item.medio * dolar).toFixed(2);
+        tabla.innerHTML += `
+          <tr>
+            <td>${item.tipo}</td>
+            <td>$${item.carton.toFixed(2)}</td>
+            <td>$${item.medio.toFixed(2)}</td>
+            <td>${cartonBs} Bs</td>
+            <td>${medioBs} Bs</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Inicializar tabla al cargar
+    actualizarPrecios();
+  </script>
+</body>
+</html>
+ 
