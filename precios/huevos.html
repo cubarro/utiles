@@ -1,58 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Precios de los huevos en Bs</title>
+  <meta charset="UTF-8" />
+  <title>Lista de Precios en Bs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background-color: #f4f4f4;
+    :root{
+      --bg:#eef5f9;
+      --text:#2c3e50;
+      --tab:#27ae60;
+      --tab-inactive:#bdc3c7;
+      --card:#ffffff;
+      --table-head:#ecf0f1;
+      --shadow:0 2px 6px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #2c3e50;
+    body{
+      font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      margin:0; padding:20px;
+      color:var(--text);
     }
-    label, input {
-      font-size: 16px;
+    h1{ text-align:center; margin:0 0 10px; }
+    .formulario{
+      display:flex; gap:10px; justify-content:center; align-items:center;
+      margin:20px 0 24px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #fff;
+    .formulario label{ font-size:16px; }
+    .formulario input{
+      font-size:16px; padding:6px 10px; width:170px;
+      border:1px solid #ccc; border-radius:6px; background:#fff;
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
+
+    .tabs{ display:flex; justify-content:center; gap:8px; margin-bottom:0; }
+    .tab-button{
+      background:var(--tab-inactive); color:#fff; border:none;
+      padding:10px 16px; border-radius:8px 8px 0 0; cursor:pointer;
+      font-size:15px; transition:filter .2s;
     }
-    th {
-      background-color: #2ecc71;
-      color: white;
+    .tab-button.active{ background:var(--tab); }
+    .tab-button:hover{ filter:brightness(0.95); }
+
+    .tab-content{
+      display:none; max-width:720px; margin:0 auto 24px;
+      background:var(--card); border-radius:0 8px 8px 8px;
+      box-shadow:var(--shadow); padding:16px;
+    }
+    .tab-content.active{ display:block; }
+
+    table{ width:100%; border-collapse:collapse; }
+    thead th{
+      background:var(--table-head); font-weight:600; padding:10px;
+      border-bottom:1px solid #ddd;
+    }
+    tbody td{ padding:10px; border-bottom:1px solid #eee; }
+    tbody tr:last-child td{ border-bottom:none; }
+
+    /* Alinear números a la derecha para lectura más clara */
+    .num{ text-align:right; font-variant-numeric: tabular-nums; }
+    .tipo{ text-align:left; }
+    .tasa{
+      text-align:center; font-size:14px; margin-top:-10px; color:#516171;
     }
   </style>
 </head>
 <body>
   <h1>Lista de Precios</h1>
-  <label for="dolar">Precio del dólar (Bs):</label>
-  <input type="number" id="dolar" value="294.9699" step="0.0001" onchange="actualizarPrecios()">
+  <div class="tasa" id="tasa"></div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Tipo</th>
-        <th>Cartón ($)</th>
-        <th>½ ($)</th>
-        <th>Cartón (Bs)</th>
-        <th>½ (Bs)</th>
-      </tr>
-    </thead>
-    <tbody id="tabla-precios">
-      <!-- Los precios se llenan dinámicamente -->
-    </tbody>
-  </table>
+  <div class="formulario">
+    <label for="dolar">Precio del dólar (Bs):</label>
+    <input type="number" id="dolar" value="294.9699" step="0.0001" />
+  </div>
+
+  <div class="tabs">
+    <button class="tab-button active" data-tab="carton">Cartón completo</button>
+    <button class="tab-button" data-tab="medio">½ cartón</button>
+  </div>
+
+  <div id="carton" class="tab-content active">
+    <table>
+      <thead>
+        <tr>
+          <th class="tipo">Tipo</th>
+          <th class="num">USD</th>
+          <th class="num">Bs</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-carton"></tbody>
+    </table>
+  </div>
+
+  <div id="medio" class="tab-content">
+    <table>
+      <thead>
+        <tr>
+          <th class="tipo">Tipo</th>
+          <th class="num">USD</th>
+          <th class="num">Bs</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-medio"></tbody>
+    </table>
+  </div>
 
   <script>
+    // Datos base en USD (según tu lista)
     const preciosUSD = [
       { tipo: "Tipo C", carton: 5.40, medio: 2.70 },
       { tipo: "Tipo A", carton: 6.80, medio: 3.40 },
@@ -61,29 +113,67 @@
       { tipo: "Jumbo", carton: 8.50, medio: 4.25 }
     ];
 
+    // Formateadores fijos para asegurar coma decimal y punto de millares
+    const fmt2 = new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     function actualizarPrecios() {
-      const dolar = parseFloat(document.getElementById("dolar").value);
-      const tabla = document.getElementById("tabla-precios");
-      tabla.innerHTML = "";
+      const dolarInput = document.getElementById('dolar').value;
+      const dolar = Number(dolarInput);
+      const tablaCarton = document.getElementById('tabla-carton');
+      const tablaMedio = document.getElementById('tabla-medio');
+      const tasa = document.getElementById('tasa');
+
+      // Mostrar tasa vigente arriba
+      tasa.textContent = `Tasa aplicada: ${fmt2.format(dolar)} Bs por USD`;
+
+      tablaCarton.innerHTML = '';
+      tablaMedio.innerHTML = '';
 
       preciosUSD.forEach(item => {
-        const cartonBs = (item.carton * dolar).toFixed(2);
-        const medioBs = (item.medio * dolar).toFixed(2);
-        tabla.innerHTML += `
+        const usdCarton = fmt2.format(item.carton);
+        const usdMedio  = fmt2.format(item.medio);
+        const bsCarton  = fmt2.format(item.carton * dolar);
+        const bsMedio   = fmt2.format(item.medio  * dolar);
+
+        tablaCarton.insertAdjacentHTML('beforeend', `
           <tr>
-            <td>${item.tipo}</td>
-            <td>$${item.carton.toFixed(2)}</td>
-            <td>$${item.medio.toFixed(2)}</td>
-            <td>${cartonBs} Bs</td>
-            <td>${medioBs} Bs</td>
+            <td class="tipo">${item.tipo}</td>
+            <td class="num">${usdCarton}</td>
+            <td class="num">${bsCarton}</td>
           </tr>
-        `;
+        `);
+
+        tablaMedio.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td class="tipo">${item.tipo}</td>
+            <td class="num">${usdMedio}</td>
+            <td class="num">${bsMedio}</td>
+          </tr>
+        `);
       });
     }
 
-    // Inicializar tabla al cargar
+    function wireTabs() {
+      const buttons = document.querySelectorAll('.tab-button');
+      const contents = document.querySelectorAll('.tab-content');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab');
+          buttons.forEach(b => b.classList.remove('active'));
+          contents.forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(target).classList.add('active');
+        });
+      });
+    }
+
+    // Eventos
+    document.getElementById('dolar').addEventListener('input', actualizarPrecios);
+    document.getElementById('dolar').addEventListener('change', actualizarPrecios);
+
+    // Inicialización
+    wireTabs();
     actualizarPrecios();
   </script>
 </body>
 </html>
- 
