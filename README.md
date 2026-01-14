@@ -28,8 +28,7 @@ Repositorio central de herramientas, aplicaciones y documentación técnica.
 ### ⛽ Control de Gas
 Despliegue de versiones de desarrollo:
 
-<details>
-<summary>▶️ Click para ver todas las versiones (Alfa y Beta)</summary>
+<summary>Versiones (Alfa y Beta)</summary>
 
 | Versión | Enlace de Acceso |
 | :--- | :--- |
@@ -39,6 +38,5 @@ Despliegue de versiones de desarrollo:
 | **Beta 3** | [Ver Beta 3](https://xj3c4amz4mq6.space.minimax.io) |
 | **Beta 4** | [Ver Beta 4](https://zxxdrre7czno.space.minimax.io) |
 
-</details>
 
 ---
