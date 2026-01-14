@@ -1,45 +1,35 @@
-# 🛠️ 
+# 🛠️ Útiles
 
-Repositorio central de herramientas, aplicaciones y documentación técnica. Organizado por categorías para facilitar el acceso a espejos y versiones de desarrollo.
+Repositorio central de herramientas, aplicaciones y documentación técnica.
 
 ---
 
-## 📂 Documentación y Notas
-Recursos educativos y guías técnicas.
+## 📂 Recursos y Documentación
 
-* **[Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)**: Repositorio de conocimientos sobre tratamiento y análisis de imágenes.
-* **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos. Son ejercicios de programación de html, css y js que pueden ser útiles.
+* **[Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)**  
+* * **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos. Son ejercicios de programación de html, css y js que pueden ser útiles.  
+* **[Calendario litúrgico](calendario)**
 
 ---
 
 ## 🎨 Herramientas Multimedia
-Aplicaciones para edición de imagen y captura de video sin instalación.
 
-### 🖼️ Posterizar
-Permite convertir imágenes complejas en formatos vectoriales o de mapa de bits simplificados (PNG/SVG).
-* **[Acceso Principal](posterizar)**
-* **[Espejo en Gemini](https://gemini.google.com/share/cf97223afd03)**
-
-### 📹 Grabación de Pantalla (Windyrec)
-Herramienta para guardar video de hasta 10 minutos directamente desde el navegador.
-* **[Acceso Principal](windyrec)** (falterweg22)
-* **[Espejo en Minimax](https://7gpmq0nhe5iw.space.minimax.io)**
+* **[Posterizar](posterizar)**: Para convertir imágenes complejas en png y svg.
+  * [Espejo en Gemini](https://gemini.google.com/share/cf97223afd03)
+* **[Windyrec](windyrec)**: Guardar video de hasta 10 minutos (falterweg22).
+  * [Espejo en Minimax](https://7gpmq0nhe5iw.space.minimax.io)
 
 ---
 
-## 💼 Gestión y Finanzas
-Proyectos enfocados en la administración y control de datos.
+## 💼 Finanzas y Gestión
 
-* **[Finanzas Personales](https://cy7t0ywmwzmg.space.minimax.io/)**: Aplicación para pruebas de enlaces a backend con interfaces administrativas. (SantiagoDeLaPunta)
-* **[Calendario Litúrgico](calendario)**: Consulta de fechas y festividades.
+* **[Finanzas personales](https://cy7t0ywmwzmg.space.minimax.io/)**: Enlaces a backend con aplicaciones administrativas (SantiagoDeLaPunta).
 
----
-
-## ⛽ Control de Gas (Versiones)
-Despliegue de las distintas etapas de desarrollo para el módulo de Gas. Códigos de prueba.
+### ⛽ Control de Gas
+Despliegue de versiones de desarrollo:
 
 <details>
-<summary><b>▶️ Ver todas las versiones disponibles</b></summary>
+<summary>▶️ Click para ver todas las versiones (Alfa y Beta)</summary>
 
 | Versión | Enlace de Acceso |
 | :--- | :--- |
