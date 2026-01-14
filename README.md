@@ -8,7 +8,7 @@ Repositorio central de herramientas, aplicaciones y documentación técnica. Org
 Recursos educativos y guías técnicas.
 
 * **[Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)**: Repositorio de conocimientos sobre tratamiento y análisis de imágenes.
-* **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos.
+* **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos. Son ejercicios de programación de html, css y js que pueden ser útiles.
 
 ---
 
