@@ -7,7 +7,7 @@ Repositorio central de herramientas, aplicaciones y documentación técnica.
 ## 📂 Recursos y Documentación
 
 * **[Apuntes de Procesamiento Digital de Imágenes](apuntes/PDI)**  
-  * **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos. Son ejercicios de programación de html, css y js que pueden ser útiles.  
+* **[Precios](precios)**: Directorio de seguimiento y consulta de precios de artículos para alimentos como las carnes y los huevos. Son ejercicios de programación de html, css y js que pueden ser útiles.  
 * **[Calendario litúrgico](calendario)**
 
 ---
