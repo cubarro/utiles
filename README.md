@@ -3,6 +3,13 @@
 Repositorio central de herramientas, aplicaciones y documentación técnica.
 
 ---
+## 📌 Ejercicios de programación
+
+* 📈 [Tamaños para FishNet](geo/red.html)
+
+---
+
+
 
 ## 📂 Recursos y Documentación
 
