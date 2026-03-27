@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Dinámica de Precios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc; /* Fondo gris muy claro */
+        }
+
+        /* Ocultar las flechas del input number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
+
+    <div class="w-full max-w-6xl">
+        <!-- Encabezado y Control -->
+        <div class="bg-white rounded-3xl p-8 shadow-sm mb-10 border border-slate-100">
+            <h1 class="text-3xl font-bold text-center mb-2 text-slate-700">Ajuste Dinámico de Precios</h1>
+            <p class="text-center text-slate-500 mb-8 text-sm sm:text-base">
+                Tasa histórica base (19.03.2026): <span class="font-semibold text-slate-700">$3,692.48 COP</span>
+            </p>
+
+            <div class="max-w-md mx-auto bg-indigo-50 rounded-2xl p-6 shadow-inner border border-indigo-100 transition-all focus-within:ring-2 focus-within:ring-indigo-200">
+                <label for="currentRate" class="block text-sm font-medium text-indigo-900 mb-2">
+                    Ingresa la Tasa de Cambio Actual (COP/USD):
+                </label>
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                        <span class="text-indigo-400 sm:text-lg">$</span>
+                    </div>
+                    <input type="number" name="currentRate" id="currentRate" step="0.01" value="3692.48"
+                        class="block w-full rounded-xl border-0 py-3 pl-8 pr-4 text-indigo-900 ring-1 ring-inset ring-indigo-200 placeholder:text-indigo-300 focus:ring-2 focus:ring-inset focus:ring-indigo-400 sm:text-lg sm:leading-6 bg-white transition-shadow outline-none"
+                        placeholder="Ej. 3900">
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuadrícula de Productos -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Los productos se inyectarán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        // Tasa base proporcionada
+        const BASE_RATE = 3692.48;
+
+        // Lista de artículos extraída de los recibos
+        const products = [
+            { name: "Shampoo H&S 650ml", originalCop: 32990, icon: "🧴", color: "bg-blue-100", text: "text-blue-900" },
+            { name: "Cereza Marrasquino", originalCop: 25350, icon: "🍒", color: "bg-red-100", text: "text-red-900" },
+            { name: "Jabón Dove Leche Coco", originalCop: 14990, icon: "🧼", color: "bg-pink-100", text: "text-pink-900" },
+            { name: "Chocolate Luker S/A 224g", originalCop: 17200, icon: "🍫", color: "bg-amber-100", text: "text-amber-900" },
+            { name: "Galleta Saltin Roja", originalCop: 9270, icon: "🍪", color: "bg-orange-100", text: "text-orange-900" },
+            { name: "Palmito Mar Pesque", originalCop: 14595, icon: "🥫", color: "bg-rose-100", text: "text-rose-900" },
+            { name: "Papel Higiénico", originalCop: 21250, icon: "🧻", color: "bg-teal-100", text: "text-teal-900" },
+            { name: "Aceite de Oliva", originalCop: 34950, icon: "🫒", color: "bg-green-100", text: "text-green-900" },
+            { name: "Aceite de Girasol", originalCop: 18950, icon: "🌻", color: "bg-yellow-100", text: "text-yellow-900" },
+            { name: "Detergente Polvo", originalCop: 13350, icon: "🫧", color: "bg-cyan-100", text: "text-cyan-900" },
+            { name: "Atún en Agua", originalCop: 4450, icon: "🐟", color: "bg-sky-100", text: "text-sky-900" },
+            { name: "Alimento Húmedo (Mascotas)", originalCop: 2750, icon: "🐶", color: "bg-fuchsia-100", text: "text-fuchsia-900" }
+        ];
+
+        // Formateadores de moneda
+        const formatCOP = (value) => {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        };
+
+        const formatUSD = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        };
+
+        const productsGrid = document.getElementById('products-grid');
+        const rateInput = document.getElementById('currentRate');
+
+        // Función para renderizar los productos
+        function renderProducts(currentRate) {
+            productsGrid.innerHTML = ''; // Limpiar grilla
+
+            products.forEach(product => {
+                // Calcular precio base en USD
+                const usdPrice = product.originalCop / BASE_RATE;
+
+                // Calcular nuevo precio en COP basado en la tasa actual
+                const currentCopPrice = usdPrice * currentRate;
+
+                // Crear tarjeta
+                const card = document.createElement('div');
+                card.className = `${product.color} rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="text-4xl mb-4">${product.icon}</div>
+                        <h3 class="font-semibold text-lg ${product.text} mb-1 leading-tight">${product.name}</h3>
+                        <p class="text-sm opacity-70 ${product.text} mb-4">Valor Base: ${formatCOP(product.originalCop)}</p>
+                    </div>
+
+                    <div class="bg-white/60 rounded-2xl p-4 backdrop-blur-sm border border-white/40">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-medium ${product.text} opacity-80">Valor en USD</span>
+                            <span class="text-sm font-bold ${product.text}">${formatUSD(usdPrice)}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-2 pt-2 border-t border-${product.color.replace('bg-', '')}/20">
+                            <span class="text-xs font-medium ${product.text}">Precio Actualizado</span>
+                            <span class="text-xl font-black ${product.text}">${formatCOP(currentCopPrice)}</span>
+                        </div>
+                    </div>
+                `;
+
+                productsGrid.appendChild(card);
+            });
+        }
+
+        // Escuchar cambios en el input
+        rateInput.addEventListener('input', (e) => {
+            let newRate = parseFloat(e.target.value);
+            // Si el input está vacío o es inválido, usar la tasa base para no romper la UI
+            if (isNaN(newRate) || newRate <= 0) {
+                newRate = BASE_RATE;
+            }
+            renderProducts(newRate);
+        });
+
+        // Renderizado inicial
+        renderProducts(BASE_RATE);
+    </script>
+</body>
+</html>
