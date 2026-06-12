@@ -244,7 +244,7 @@ Letra del segundo canto...</div>
         const sections = text.split('---').map(s => s.trim()).filter(s => s.length > 0);
 
         if (sections.length < 2) {
-            alert('El archivo no tiene el formato correcto. Asegúrate de usar "---" como separadores.');
+            alert('El archivo no tiene el formato correcto. Asegúrate de usar "---" como segregadores.');
             return;
         }
 
@@ -375,8 +375,8 @@ Letra del segundo canto...</div>
         <div class="bg-watermark"><i class="fa-solid fa-church"></i></div>
         <div class="slide-content" style="justify-content: center; text-align: center;">
             <div>
-                <h1>\${eventTitle}</h1>
-                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">\${eventSubtitle}</p>
+                <h1>${eventTitle}</h1>
+                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">${eventSubtitle}</p>
             </div>
             <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
         </div>
@@ -388,18 +388,18 @@ Letra del segundo canto...</div>
             <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
             <div class="index-container">
                 <ul class="index-list">
-                    \${indexListHTML}
+                    ${indexListHTML}
                 </ul>
             </div>
             <div class="footer">Presiona para ir directo al canto</div>
         </div>
     </div>
 
-    \${slidesHTML}
+    ${slidesHTML}
 
     <div class="nav-overlay">
         <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / \${songs.length + 2}</div>
+        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / ${songs.length + 2}</div>
         <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </div>
@@ -483,7 +483,7 @@ Letra del segundo canto...</div>
         if (touchstartX - touchendX > 60) nextSlide();
         if (touchendX - touchstartX > 60) prevSlide();
     });
-<\/script>
+</script>
 </body>
 </html>`;
 
@@ -516,7 +516,7 @@ Letra del segundo canto...</div>
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             navigator.share({
                 files: [file],
-                title: 'Cancionero Generado',
+                title: 'Cancionero Generated',
                 text: 'Aquí tienes el cancionero interactivo.',
             }).catch((error) => console.log('Error compartiendo:', error));
         } else {
