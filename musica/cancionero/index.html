@@ -99,7 +99,7 @@
         .upload-area:hover { border-color: var(--primary); }
         .upload-area i { font-size: 40px; color: #94a3b8; margin-bottom: 15px; }
         .upload-area input { display: none; }
-        
+
         .file-name {
             margin-top: 10px;
             font-weight: 700;
@@ -131,10 +131,10 @@
         }
 
         .btn:active { transform: scale(0.98); }
-        
+
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: var(--primary-hover); }
-        
+
         .btn-secondary { background-color: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
         .btn-secondary:hover { background-color: #e2e8f0; }
 
@@ -170,7 +170,6 @@
         <button class="tab-btn" onclick="switchTab('instructions')"><i class="fa-solid fa-circle-info"></i> Formato .txt</button>
     </div>
 
-    <!-- Pestaña Generador -->
     <div id="generator" class="tab-content active">
         <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <i class="fa-solid fa-file-lines"></i>
@@ -187,11 +186,10 @@
         </div>
     </div>
 
-    <!-- Pestaña Instrucciones -->
     <div id="instructions" class="tab-content instructions">
         <h3>Estructura del Archivo</h3>
         <p>Crea un archivo de texto plano (<b>.txt</b>) respetando este formato. Usa <b>---</b> para separar la cabecera de las canciones y cada canción entre sí.</p>
-        
+
         <div class="instructions-box">Título del Evento (Ej: Retiro de Jóvenes)
 Subtítulo (Ej: Parroquia San José)
 ---
@@ -200,8 +198,9 @@ Categoría (Ej: Animación, Entrada...)
 Tono (Ej: Re M)
 Letra del canto aquí...
 Puedes usar varias líneas.
-Para repetir, pon un guión al inicio:
-- Se repite esta parte...
+
+Las líneas en blanco se respetarán para separar las estrofas.
+- Las líneas con guión inicial se renderizan como repeticiones.
 ---
 Nombre del Canto 2
 Categoría
@@ -211,12 +210,10 @@ Letra del segundo canto...</div>
 </div>
 
 <script>
-    // Variables globales
     let generatedHTML = '';
     let outputFileName = 'Cantos_Generados.html';
     let generatedBlob = null;
 
-    // Cambiar Pestañas
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -224,7 +221,6 @@ Letra del segundo canto...</div>
         event.currentTarget.classList.add('active');
     }
 
-    // Manejo de carga de archivos
     const fileInput = document.getElementById('fileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
     const actionButtons = document.getElementById('actionButtons');
@@ -235,7 +231,7 @@ Letra del segundo canto...</div>
             fileNameDisplay.textContent = file.name;
             const originalName = file.name.replace('.txt', '');
             outputFileName = `Cantos_${originalName}.html`;
-            
+
             const reader = new FileReader();
             reader.onload = function(evt) {
                 processTextFile(evt.target.result);
@@ -244,37 +240,45 @@ Letra del segundo canto...</div>
         }
     });
 
-    // Procesar el texto y generar el HTML
     function processTextFile(text) {
         const sections = text.split('---').map(s => s.trim()).filter(s => s.length > 0);
-        
+
         if (sections.length < 2) {
             alert('El archivo no tiene el formato correcto. Asegúrate de usar "---" como separadores.');
             return;
         }
 
-        // 1. Parsear Cabecera
-        const headerLines = sections[0].split('\n').map(l => l.trim());
+        const headerLines = sections[0].split('\n').map(l => l.trim()).filter(l => l !== '');
         const eventTitle = headerLines[0] || "Cancionero";
         const eventSubtitle = headerLines[1] || "Comunidad Católica";
 
-        // 2. Parsear Cantos
         const songs = [];
         for (let i = 1; i < sections.length; i++) {
-            const lines = sections[i].split('\n').map(l => l.trim()).filter(l => l !== '');
-            if(lines.length >= 4) {
-                const title = lines[0];
-                const category = lines[1];
-                const tone = lines[2];
-                // Formatear letras (detectar repeticiones con "- ")
-                const lyricsLines = lines.slice(3).map(l => {
-                    if (l.startsWith('-')) {
-                        return `<span class="repeat">${l.replace('-', '').trim()}</span>`;
-                    }
-                    return l;
-                });
-                const lyrics = lyricsLines.join('\n');
+            const lines = sections[i].split('\n').map(l => l.trim());
 
+            let metadata = [];
+            let lyricsLines = [];
+
+            for (let j = 0; j < lines.length; j++) {
+                if (metadata.length < 3) {
+                    if (lines[j] !== '') {
+                        metadata.push(lines[j]);
+                    }
+                } else {
+                    let l = lines[j];
+                    if (l.startsWith('-')) {
+                        lyricsLines.push(`<span class="repeat">${l.replace(/^-+/, '').trim()}</span>`);
+                    } else {
+                        lyricsLines.push(l);
+                    }
+                }
+            }
+
+            if (metadata.length >= 3) {
+                const title = metadata[0];
+                const category = metadata[1];
+                const tone = metadata[2];
+                const lyrics = lyricsLines.join('\n').trim();
                 songs.push({ title, category, tone, lyrics });
             }
         }
@@ -282,24 +286,21 @@ Letra del segundo canto...</div>
         buildHTML(eventTitle, eventSubtitle, songs);
     }
 
-    // Construir la plantilla completa
     function buildHTML(eventTitle, eventSubtitle, songs) {
         const bgColors = ['bg-sky', 'bg-rose', 'bg-mint', 'bg-peach', 'bg-lavender', 'bg-cream'];
         const icons = ['fa-music', 'fa-guitar', 'fa-hands-praying', 'fa-dove', 'fa-heart', 'fa-sun'];
 
-        // Construir Índice
         let indexListHTML = '';
         songs.forEach((song, i) => {
             indexListHTML += `<li onclick="goToSlide(${i + 2})">${i + 1}. ${song.category}: ${song.title} <span class="tone">${song.tone}</span></li>\n`;
         });
 
-        // Construir Slides de Canciones
         let slidesHTML = '';
         songs.forEach((song, i) => {
             const bgColor = bgColors[i % bgColors.length];
             const icon = icons[i % icons.length];
             const slideIndex = i + 1;
-            
+
             slidesHTML += `
     <div class="slide ${bgColor}">
         <div class="bg-watermark"><i class="fa-solid ${icon}"></i></div>
@@ -312,7 +313,6 @@ Letra del segundo canto...</div>
     </div>`;
         });
 
-        // Ensamblar todo el archivo
         generatedHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -371,38 +371,35 @@ Letra del segundo canto...</div>
         </div>
     </div>
 
-    <!-- Portada -->
     <div class="slide bg-cream active">
         <div class="bg-watermark"><i class="fa-solid fa-church"></i></div>
         <div class="slide-content" style="justify-content: center; text-align: center;">
             <div>
-                <h1>${eventTitle}</h1>
-                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">${eventSubtitle}</p>
+                <h1>\${eventTitle}</h1>
+                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">\${eventSubtitle}</p>
             </div>
             <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
         </div>
     </div>
 
-    <!-- Índice -->
     <div class="slide bg-lavender">
         <div class="bg-watermark"><i class="fa-solid fa-book"></i></div>
         <div class="slide-content">
             <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
             <div class="index-container">
                 <ul class="index-list">
-                    ${indexListHTML}
+                    \${indexListHTML}
                 </ul>
             </div>
             <div class="footer">Presiona para ir directo al canto</div>
         </div>
     </div>
 
-    <!-- Canciones -->
-    ${slidesHTML}
+    \${slidesHTML}
 
     <div class="nav-overlay">
         <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / ${songs.length + 2}</div>
+        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / \${songs.length + 2}</div>
         <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </div>
@@ -447,7 +444,7 @@ Letra del segundo canto...</div>
     }
 
     function toggleMaximize() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {    
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             if (appFrame.requestFullscreen) appFrame.requestFullscreen();
             else if (appFrame.webkitRequestFullscreen) appFrame.webkitRequestFullscreen();
             else if (appFrame.msRequestFullscreen) appFrame.msRequestFullscreen();
@@ -494,7 +491,6 @@ Letra del segundo canto...</div>
         actionButtons.style.display = 'flex';
     }
 
-    // Funciones de los botones
     function previewHTML() {
         if (!generatedBlob) return;
         const url = URL.createObjectURL(generatedBlob);
@@ -515,7 +511,7 @@ Letra del segundo canto...</div>
 
     function shareHTML() {
         if (!generatedBlob) return;
-        
+
         const file = new File([generatedBlob], outputFileName, { type: "text/html" });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             navigator.share({
