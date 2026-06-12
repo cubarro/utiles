@@ -84,7 +84,6 @@
 
         .tab-content.active { display: block; }
 
-        /* Generador Area */
         .upload-area {
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
@@ -141,7 +140,6 @@
         .btn-success { background-color: #10b981; color: white; }
         .btn-success:hover { background-color: #059669; }
 
-        /* Instrucciones Area */
         .instructions h3 { margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-size: 16px; }
         .instructions p { margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
         .instructions-box {
@@ -167,7 +165,7 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i> Generador</button>
-        <button class="tab-btn" onclick="switchTab('instructions')"><i class="fa-solid fa-circle-info"></i> Formato .txt</button>
+        <button class="tab-btn" onclick="switchTab('instructions')"><i class="fa-solid fa-circle-info"></i> Ver Formato .txt</button>
     </div>
 
     <div id="generator" class="tab-content active">
@@ -180,7 +178,7 @@
         </div>
 
         <div class="actions" id="actionButtons">
-            <button class="btn btn-primary" onclick="previewHTML()"><i class="fa-solid fa-eye"></i> Previsualizar App</button>
+            <button class="btn btn-primary" onclick="verVistaPrevia()"><i class="fa-solid fa-eye"></i> Ver Vista Previa</button>
             <button class="btn btn-success" onclick="downloadHTML()"><i class="fa-solid fa-download"></i> Descargar HTML</button>
             <button class="btn btn-secondary" onclick="shareHTML()"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
         </div>
@@ -190,14 +188,13 @@
         <h3>Estructura del Archivo</h3>
         <p>Crea un archivo de texto plano (<b>.txt</b>) respetando este formato. Usa <b>---</b> para separar la cabecera de las canciones y cada canción entre sí.</p>
 
-        <div class="instructions-box">Título del Evento (Ej: Retiro de Jóvenes)
-Subtítulo (Ej: Parroquia San José)
+        <div class="instructions-box">Título del Evento
+Subtítulo o Parroquia
 ---
 Nombre del Canto 1
-Categoría (Ej: Animación, Entrada...)
-Tono (Ej: Re M)
+Categoría
+Tono
 Letra del canto aquí...
-Puedes usar varias líneas.
 
 Las líneas en blanco se respetarán para separar las estrofas.
 - Las líneas con guión inicial se renderizan como repeticiones.
@@ -210,6 +207,12 @@ Letra del segundo canto...</div>
 </div>
 
 <script>
+    /**
+     * @file GeneradorCancioneros.html
+     * @description Herramienta de automatización para la generación de cancioneros interactivos web.
+     * @author Juan López
+     */
+
     let generatedHTML = '';
     let outputFileName = 'Cantos_Generados.html';
     let generatedBlob = null;
@@ -241,7 +244,10 @@ Letra del segundo canto...</div>
     });
 
     function processTextFile(text) {
-        const sections = text.split('---').map(s => s.trim()).filter(s => s.length > 0);
+        // Limpieza predictiva de posibles metadatos de origen
+        let cleanText = text.replace(/\/g, '');
+
+        const sections = cleanText.split('---').map(s => s.trim()).filter(s => s.length > 0);
 
         if (sections.length < 2) {
             alert('El archivo no tiene el formato correcto. Asegúrate de usar "---" como segregadores.');
@@ -250,7 +256,7 @@ Letra del segundo canto...</div>
 
         const headerLines = sections[0].split('\n').map(l => l.trim()).filter(l => l !== '');
         const eventTitle = headerLines[0] || "Cancionero";
-        const eventSubtitle = headerLines[1] || "Comunidad Católica";
+        const eventSubtitle = headerLines[1] || "";
 
         const songs = [];
         for (let i = 1; i < sections.length; i++) {
@@ -267,7 +273,7 @@ Letra del segundo canto...</div>
                 } else {
                     let l = lines[j];
                     if (l.startsWith('-')) {
-                        lyricsLines.push(`<span class="repeat">${l.replace(/^-+/, '').trim()}</span>`);
+                        lyricsLines.push('<span class="repeat">' + l.replace(/^-+/, '').trim() + '</span>');
                     } else {
                         lyricsLines.push(l);
                     }
@@ -292,7 +298,7 @@ Letra del segundo canto...</div>
 
         let indexListHTML = '';
         songs.forEach((song, i) => {
-            indexListHTML += `<li onclick="goToSlide(${i + 2})">${i + 1}. ${song.category}: ${song.title} <span class="tone">${song.tone}</span></li>\n`;
+            indexListHTML += '<li onclick="goToSlide(' + (i + 2) + ')">' + (i + 1) + '. ' + song.category + ': ' + song.title + ' <span class="tone">' + song.tone + '</span></li>\n';
         });
 
         let slidesHTML = '';
@@ -301,35 +307,34 @@ Letra del segundo canto...</div>
             const icon = icons[i % icons.length];
             const slideIndex = i + 1;
 
-            slidesHTML += `
-    <div class="slide ${bgColor}">
-        <div class="bg-watermark"><i class="fa-solid ${icon}"></i></div>
-        <div class="slide-content">
-            <h2 class="song-title">${song.category}</h2>
-            <div class="tone-badge">Tono: ${song.tone}</div>
-            <div class="lyrics">${song.lyrics}</div>
-            <div class="footer">${song.title} - Pág. ${slideIndex}</div>
-        </div>
-    </div>`;
+            slidesHTML += '\n<div class="slide ' + bgColor + '">';
+            slidesHTML += '\n    <div class="bg-watermark"><i class="fa-solid ' + icon + '"></i></div>';
+            slidesHTML += '\n    <div class="slide-content">';
+            slidesHTML += '\n        <h2 class="song-title">' + song.category + '</h2>';
+            slidesHTML += '\n        <div class="tone-badge">Tono: ' + song.tone + '</div>';
+            slidesHTML += '\n        <div class="lyrics">' + song.lyrics + '</div>';
+            slidesHTML += '\n        <div class="footer">' + song.title + ' - Pág. ' + slideIndex + '</div>';
+            slidesHTML += '\n    </div>';
+            slidesHTML += '\n</div>';
         });
 
-        generatedHTML = `<!DOCTYPE html>
+        // Uso de marcadores planos e inmunes a errores de escape nativos de JS
+        let htmlTemplate = `<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>${eventTitle}</title>
+    <title>__EVENT_TITLE__</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --base-lyrics-size: 15px; }
+        :root { --base-lyrics-size: 18px; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; }
         .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; }
-        .app-container:fullscreen { width: 100vw; height: 100vh; background-color: #fff; }
-        :-webkit-full-screen #appFrame { width: 100vw; height: 100vh; background-color: #fff; }
+        .app-container.windowed { width: 405px; height: 720px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 75px 24px 90px 24px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1; overflow: hidden; }
         .slide-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; max-width: 450px; margin: 0 auto; width: 100%; overflow: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 2; }
@@ -367,7 +372,7 @@ Letra del segundo canto...</div>
         </div>
         <div class="action-group">
             <button class="action-btn" onclick="goToSlide(1)" title="Ir al Índice"><i class="fa-solid fa-list"></i></button>
-            <button class="action-btn" onclick="toggleMaximize()" id="maxBtn" title="Pantalla Completa"><i class="fa-solid fa-expand"></i></button>
+            <button class="action-btn" onclick="toggleMaximize()" id="maxBtn" title="Vista de Ventana"><i class="fa-solid fa-compress"></i></button>
         </div>
     </div>
 
@@ -375,8 +380,8 @@ Letra del segundo canto...</div>
         <div class="bg-watermark"><i class="fa-solid fa-church"></i></div>
         <div class="slide-content" style="justify-content: center; text-align: center;">
             <div>
-                <h1>${eventTitle}</h1>
-                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">${eventSubtitle}</p>
+                <h1>__EVENT_TITLE__</h1>
+                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">__EVENT_SUBTITLE__</p>
             </div>
             <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
         </div>
@@ -388,27 +393,27 @@ Letra del segundo canto...</div>
             <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
             <div class="index-container">
                 <ul class="index-list">
-                    ${indexListHTML}
+                    __INDEX_LIST__
                 </ul>
             </div>
             <div class="footer">Presiona para ir directo al canto</div>
         </div>
     </div>
 
-    ${slidesHTML}
+    __SLIDES_HTML__
 
     <div class="nav-overlay">
         <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / ${songs.length + 2}</div>
+        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / __TOTAL_PAGES__</div>
         <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </div>
 
 <script>
     let currentSlide = 0;
-    let currentFontSize = 15;
+    let currentFontSize = 18;
     const maxFontSize = 36;
-    const minFontSize = 12;
+    const minFontSize = 14;
 
     const slides = document.querySelectorAll('.slide');
     const pageIndicator = document.getElementById('pageIndicator');
@@ -444,30 +449,15 @@ Letra del segundo canto...</div>
     }
 
     function toggleMaximize() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-            if (appFrame.requestFullscreen) appFrame.requestFullscreen();
-            else if (appFrame.webkitRequestFullscreen) appFrame.webkitRequestFullscreen();
-            else if (appFrame.msRequestFullscreen) appFrame.msRequestFullscreen();
-            maxBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            else if (document.msExitFullscreen) document.msExitFullscreen();
+        appFrame.classList.toggle('windowed');
+        if(appFrame.classList.contains('windowed')) {
             maxBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
-        }
-    }
-
-    function handleFullscreenChange() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-            maxBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+            maxBtn.title = "Maximizar";
         } else {
             maxBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+            maxBtn.title = "Vista de Ventana";
         }
     }
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', handleFullscreenChange);
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight') nextSlide();
@@ -487,11 +477,20 @@ Letra del segundo canto...</div>
 </body>
 </html>`;
 
+        // Reemplazo explícito y seguro mediante cadenas estáticas
+        generatedHTML = htmlTemplate
+            .replace('__EVENT_TITLE__', eventTitle)
+            .replace('__EVENT_TITLE__', eventTitle)
+            .replace('__EVENT_SUBTITLE__', eventSubtitle)
+            .replace('__INDEX_LIST__', indexListHTML)
+            .replace('__SLIDES_HTML__', slidesHTML)
+            .replace('__TOTAL_PAGES__', songs.length + 2);
+
         generatedBlob = new Blob([generatedHTML], { type: 'text/html' });
         actionButtons.style.display = 'flex';
     }
 
-    function previewHTML() {
+    function verVistaPrevia() {
         if (!generatedBlob) return;
         const url = URL.createObjectURL(generatedBlob);
         window.open(url, '_blank');
@@ -516,7 +515,7 @@ Letra del segundo canto...</div>
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             navigator.share({
                 files: [file],
-                title: 'Cancionero Generated',
+                title: 'Cancionero Generado',
                 text: 'Aquí tienes el cancionero interactivo.',
             }).catch((error) => console.log('Error compartiendo:', error));
         } else {
