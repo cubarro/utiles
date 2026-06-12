@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Cancioneros Interactivos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--surface);
+            max-width: 600px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #0f172a;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 { font-family: 'Poppins', sans-serif; font-size: 24px; margin-bottom: 5px; }
+        .header p { font-size: 14px; color: #cbd5e1; }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f1f5f9;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+            flex-grow: 1;
+        }
+
+        .tab-content.active { display: block; }
+
+        /* Generador Area */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover { border-color: var(--primary); }
+        .upload-area i { font-size: 40px; color: #94a3b8; margin-bottom: 15px; }
+        .upload-area input { display: none; }
+        
+        .file-name {
+            margin-top: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            word-break: break-all;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        
+        .btn-secondary { background-color: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
+
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+
+        /* Instrucciones Area */
+        .instructions h3 { margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-size: 16px; }
+        .instructions p { margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
+        .instructions-box {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Generador de Cancioneros</h1>
+        <p>Convierte archivos de texto a Web Apps interactivas</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i> Generador</button>
+        <button class="tab-btn" onclick="switchTab('instructions')"><i class="fa-solid fa-circle-info"></i> Formato .txt</button>
+    </div>
+
+    <!-- Pestaña Generador -->
+    <div id="generator" class="tab-content active">
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-file-lines"></i>
+            <h3 style="font-family: 'Poppins', sans-serif; color: #475569;">Cargar Archivo de Texto</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-top: 5px;">Presiona aquí o arrastra tu archivo .txt</p>
+            <div id="fileNameDisplay" class="file-name"></div>
+            <input type="file" id="fileInput" accept=".txt">
+        </div>
+
+        <div class="actions" id="actionButtons">
+            <button class="btn btn-primary" onclick="previewHTML()"><i class="fa-solid fa-eye"></i> Previsualizar App</button>
+            <button class="btn btn-success" onclick="downloadHTML()"><i class="fa-solid fa-download"></i> Descargar HTML</button>
+            <button class="btn btn-secondary" onclick="shareHTML()"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
+        </div>
+    </div>
+
+    <!-- Pestaña Instrucciones -->
+    <div id="instructions" class="tab-content instructions">
+        <h3>Estructura del Archivo</h3>
+        <p>Crea un archivo de texto plano (<b>.txt</b>) respetando este formato. Usa <b>---</b> para separar la cabecera de las canciones y cada canción entre sí.</p>
+        
+        <div class="instructions-box">Título del Evento (Ej: Retiro de Jóvenes)
+Subtítulo (Ej: Parroquia San José)
+---
+Nombre del Canto 1
+Categoría (Ej: Animación, Entrada...)
+Tono (Ej: Re M)
+Letra del canto aquí...
+Puedes usar varias líneas.
+Para repetir, pon un guión al inicio:
+- Se repite esta parte...
+---
+Nombre del Canto 2
+Categoría
+Tono
+Letra del segundo canto...</div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    let generatedHTML = '';
+    let outputFileName = 'Cantos_Generados.html';
+    let generatedBlob = null;
+
+    // Cambiar Pestañas
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // Manejo de carga de archivos
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const actionButtons = document.getElementById('actionButtons');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileNameDisplay.textContent = file.name;
+            const originalName = file.name.replace('.txt', '');
+            outputFileName = `Cantos_${originalName}.html`;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                processTextFile(evt.target.result);
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Procesar el texto y generar el HTML
+    function processTextFile(text) {
+        const sections = text.split('---').map(s => s.trim()).filter(s => s.length > 0);
+        
+        if (sections.length < 2) {
+            alert('El archivo no tiene el formato correcto. Asegúrate de usar "---" como separadores.');
+            return;
+        }
+
+        // 1. Parsear Cabecera
+        const headerLines = sections[0].split('\n').map(l => l.trim());
+        const eventTitle = headerLines[0] || "Cancionero";
+        const eventSubtitle = headerLines[1] || "Comunidad Católica";
+
+        // 2. Parsear Cantos
+        const songs = [];
+        for (let i = 1; i < sections.length; i++) {
+            const lines = sections[i].split('\n').map(l => l.trim()).filter(l => l !== '');
+            if(lines.length >= 4) {
+                const title = lines[0];
+                const category = lines[1];
+                const tone = lines[2];
+                // Formatear letras (detectar repeticiones con "- ")
+                const lyricsLines = lines.slice(3).map(l => {
+                    if (l.startsWith('-')) {
+                        return `<span class="repeat">${l.replace('-', '').trim()}</span>`;
+                    }
+                    return l;
+                });
+                const lyrics = lyricsLines.join('\n');
+
+                songs.push({ title, category, tone, lyrics });
+            }
+        }
+
+        buildHTML(eventTitle, eventSubtitle, songs);
+    }
+
+    // Construir la plantilla completa
+    function buildHTML(eventTitle, eventSubtitle, songs) {
+        const bgColors = ['bg-sky', 'bg-rose', 'bg-mint', 'bg-peach', 'bg-lavender', 'bg-cream'];
+        const icons = ['fa-music', 'fa-guitar', 'fa-hands-praying', 'fa-dove', 'fa-heart', 'fa-sun'];
+
+        // Construir Índice
+        let indexListHTML = '';
+        songs.forEach((song, i) => {
+            indexListHTML += `<li onclick="goToSlide(${i + 2})">${i + 1}. ${song.category}: ${song.title} <span class="tone">${song.tone}</span></li>\n`;
+        });
+
+        // Construir Slides de Canciones
+        let slidesHTML = '';
+        songs.forEach((song, i) => {
+            const bgColor = bgColors[i % bgColors.length];
+            const icon = icons[i % icons.length];
+            const slideIndex = i + 1;
+            
+            slidesHTML += `
+    <div class="slide ${bgColor}">
+        <div class="bg-watermark"><i class="fa-solid ${icon}"></i></div>
+        <div class="slide-content">
+            <h2 class="song-title">${song.category}</h2>
+            <div class="tone-badge">Tono: ${song.tone}</div>
+            <div class="lyrics">${song.lyrics}</div>
+            <div class="footer">${song.title} - Pág. ${slideIndex}</div>
+        </div>
+    </div>`;
+        });
+
+        // Ensamblar todo el archivo
+        generatedHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>${eventTitle}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --base-lyrics-size: 15px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; }
+        .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; }
+        .app-container:fullscreen { width: 100vw; height: 100vh; background-color: #fff; }
+        :-webkit-full-screen #appFrame { width: 100vw; height: 100vh; background-color: #fff; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 75px 24px 90px 24px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1; overflow: hidden; }
+        .slide-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; max-width: 450px; margin: 0 auto; width: 100%; overflow: hidden; }
+        .slide.active { opacity: 1; visibility: visible; z-index: 2; }
+        .bg-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; z-index: 0; pointer-events: none; }
+        .bg-watermark i { font-size: 450px; color: #000; }
+        .bg-cream { background-color: #fffaf0; } .bg-mint { background-color: #f4fff8; } .bg-sky { background-color: #f0f7ff; } .bg-rose { background-color: #fff5f7; } .bg-lavender { background-color: #f9f8ff; } .bg-peach { background-color: #fff5ea; }
+        h1 { font-family: 'Poppins', sans-serif; font-size: 28px; color: #0f172a; margin-top: 10px; }
+        h2.song-title { font-family: 'Poppins', sans-serif; font-size: 22px; color: #334155; text-transform: uppercase; flex-shrink: 0; margin-top: 10px; }
+        .tone-badge { align-self: center; background-color: rgba(0, 0, 0, 0.06); padding: 4px 14px; border-radius: 50px; font-size: 12px; font-weight: 700; color: #475569; margin: 6px 0 12px 0; flex-shrink: 0; }
+        .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; overflow-y: auto; padding: 0 4px; flex-grow: 1; max-height: 100%; text-align: left; }
+        .repeat { color: #94a3b8; font-style: italic; font-weight: 150; font-size: 0.9em; display: block; margin-top: 2px; }
+        .footer { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 8px; flex-shrink: 0; text-align: center; }
+        .index-container { overflow-y: auto; flex-grow: 1; width: 100%; padding-right: 5px; margin-bottom: 5px; }
+        .index-list { list-style: none; width: 100%; text-align: left; }
+        .index-list li { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: calc(var(--base-lyrics-size) * 0.75); font-weight: 700; color: #334155; transition: font-size 0.15s ease; }
+        .index-list li:hover { background-color: rgba(0,0,0,0.03); }
+        .index-list li span.tone { color: #64748b; font-size: 0.75em; background: rgba(0,0,0,0.04); padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+        .nav-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 0 24px env(safe-area-inset-bottom, 12px) 24px; background: linear-gradient(to top, rgba(255,255,255,1) 40%, rgba(255,255,255,0.8) 70%, transparent 100%); pointer-events: none; }
+        .nav-btn { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(0,0,0,0.08); width: 48px; height: 48px; border-radius: 50px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); cursor: pointer; display: flex; justify-content: center; align-items: center; color: #475569; font-size: 18px; pointer-events: auto; }
+        .nav-btn:active { transform: scale(0.9); }
+        .top-actions { position: absolute; top: 15px; left: 0; width: 100%; padding: 0 20px; z-index: 101; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+        .action-group { display: flex; gap: 8px; pointer-events: auto; }
+        .action-btn { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(0,0,0,0.05); backdrop-filter: blur(4px); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; color: #475569; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 15px; }
+        .action-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="appFrame">
+    <div class="top-actions">
+        <div class="action-group">
+            <button class="action-btn" onclick="changeFontSize(-2)" title="Reducir Letra"><i class="fa-solid fa-minus"></i></button>
+            <button class="action-btn" onclick="changeFontSize(2)" title="Aumentar Letra"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="action-group">
+            <button class="action-btn" onclick="goToSlide(1)" title="Ir al Índice"><i class="fa-solid fa-list"></i></button>
+            <button class="action-btn" onclick="toggleMaximize()" id="maxBtn" title="Pantalla Completa"><i class="fa-solid fa-expand"></i></button>
+        </div>
+    </div>
+
+    <!-- Portada -->
+    <div class="slide bg-cream active">
+        <div class="bg-watermark"><i class="fa-solid fa-church"></i></div>
+        <div class="slide-content" style="justify-content: center; text-align: center;">
+            <div>
+                <h1>${eventTitle}</h1>
+                <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">${eventSubtitle}</p>
+            </div>
+            <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
+        </div>
+    </div>
+
+    <!-- Índice -->
+    <div class="slide bg-lavender">
+        <div class="bg-watermark"><i class="fa-solid fa-book"></i></div>
+        <div class="slide-content">
+            <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
+            <div class="index-container">
+                <ul class="index-list">
+                    ${indexListHTML}
+                </ul>
+            </div>
+            <div class="footer">Presiona para ir directo al canto</div>
+        </div>
+    </div>
+
+    <!-- Canciones -->
+    ${slidesHTML}
+
+    <div class="nav-overlay">
+        <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div id="pageIndicator" style="font-size: 14px; font-weight: 700; color: #64748b;">1 / ${songs.length + 2}</div>
+        <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    let currentFontSize = 15;
+    const maxFontSize = 36;
+    const minFontSize = 12;
+
+    const slides = document.querySelectorAll('.slide');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const appFrame = document.getElementById('appFrame');
+    const maxBtn = document.getElementById('maxBtn');
+
+    function updateSlideVisibility() {
+        slides.forEach((slide, index) => {
+            if(index === currentSlide) {
+                slide.classList.add('active');
+                slide.scrollTop = 0;
+                const innerLyrics = slide.querySelector('.lyrics');
+                if (innerLyrics) innerLyrics.scrollTop = 0;
+                const innerIndex = slide.querySelector('.index-container');
+                if (innerIndex) innerIndex.scrollTop = 0;
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        pageIndicator.innerText = (currentSlide + 1) + ' / ' + slides.length;
+    }
+
+    function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; updateSlideVisibility(); } }
+    function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlideVisibility(); } }
+    function goToSlide(index) { if (index >= 0 && index < slides.length) { currentSlide = index; updateSlideVisibility(); } }
+
+    function changeFontSize(amount) {
+        let newSize = currentFontSize + amount;
+        if (newSize >= minFontSize && newSize <= maxFontSize) {
+            currentFontSize = newSize;
+            document.documentElement.style.setProperty('--base-lyrics-size', currentFontSize + 'px');
+        }
+    }
+
+    function toggleMaximize() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {    
+            if (appFrame.requestFullscreen) appFrame.requestFullscreen();
+            else if (appFrame.webkitRequestFullscreen) appFrame.webkitRequestFullscreen();
+            else if (appFrame.msRequestFullscreen) appFrame.msRequestFullscreen();
+            maxBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+            maxBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        }
+    }
+
+    function handleFullscreenChange() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            maxBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        } else {
+            maxBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+        }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+        if (e.key === '+') changeFontSize(2);
+        if (e.key === '-') changeFontSize(-2);
+    });
+
+    let touchstartX = 0, touchendX = 0;
+    appFrame.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX);
+    appFrame.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        if (touchstartX - touchendX > 60) nextSlide();
+        if (touchendX - touchstartX > 60) prevSlide();
+    });
+<\/script>
+</body>
+</html>`;
+
+        generatedBlob = new Blob([generatedHTML], { type: 'text/html' });
+        actionButtons.style.display = 'flex';
+    }
+
+    // Funciones de los botones
+    function previewHTML() {
+        if (!generatedBlob) return;
+        const url = URL.createObjectURL(generatedBlob);
+        window.open(url, '_blank');
+    }
+
+    function downloadHTML() {
+        if (!generatedBlob) return;
+        const url = URL.createObjectURL(generatedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = outputFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function shareHTML() {
+        if (!generatedBlob) return;
+        
+        const file = new File([generatedBlob], outputFileName, { type: "text/html" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+                files: [file],
+                title: 'Cancionero Generado',
+                text: 'Aquí tienes el cancionero interactivo.',
+            }).catch((error) => console.log('Error compartiendo:', error));
+        } else {
+            alert('Tu navegador no soporta compartir archivos directamente. Por favor, descárgalo.');
+            downloadHTML();
+        }
+    }
+</script>
+
+</body>
+</html>
