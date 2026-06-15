@@ -2,115 +2,71 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inyector de Cintillo Profesional</title>
+    <title>Inyector de Cintillo</title>
     <style>
-        :root { --color-primary: #102e52; --color-disabled: #e0e6ed; --color-accent: #c9a86a; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; padding: 40px; display: flex; justify-content: center; }
-        .tool-container { width: 100%; max-width: 700px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: var(--color-primary); text-align: center; }
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; display: flex; justify-content: center; padding-top: 50px; color: #334155; }
+        .card { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { margin: 0 0 1.5rem 0; font-size: 1.25rem; text-align: center; }
 
-        .drop-zone {
-            border: 2px dashed var(--color-disabled);
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            margin: 20px 0;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-        }
-        .drop-zone:hover { border-color: var(--color-primary); background: #f9fbff; }
-        .drop-zone.drag-over { border-color: var(--color-primary); background: #f0f7ff; }
+        .zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; margin-bottom: 1rem; }
+        .zone:hover { border-color: #3b82f6; background: #f1f5f9; }
+        .zone.active { border-color: #22c55e; border-style: solid; background: #f0fdf4; }
+        .zone.disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .disabled { opacity: 0.5; pointer-events: none; border-color: #ccc; }
-        .btn-action {
-            width: 100%; padding: 15px; background: var(--color-primary); color: white;
-            border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem;
-        }
-        .btn-action:disabled { background: var(--color-disabled); cursor: not-allowed; }
-
-        #cintilloPreview { max-width: 100%; height: auto; margin-top: 15px; border: 1px solid #ddd; display: none; }
+        .icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+        button { width: 100%; padding: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+        button:disabled { background: #94a3b8; }
+        #preview { max-width: 100%; margin-top: 10px; display: none; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="tool-container">
-    <h2>Inyector de Cintillo</h2>
+<div class="card">
+    <h2>Cintillo Automático</h2>
 
-    <div id="zone1" class="drop-zone"
-         onclick="document.getElementById('pngInput').click()"
-         ondrop="handleDrop(event, 'png')"
-         ondragover="handleDragOver(event)"
-         ondragleave="handleDragLeave(event)">
-        <p>Paso 1: Arrastra aquí o <b>haz clic</b> para seleccionar el <b>PNG</b></p>
-        <input type="file" id="pngInput" hidden accept="image/png" onchange="handleFiles(this.files, 'png')">
-        <img id="cintilloPreview" src="">
+    <div class="zone" id="z1" onclick="document.getElementById('i1').click()" ondrop="drop(event, 'png')" ondragover="event.preventDefault()">
+        <span class="icon">🖼️</span>
+        <span id="t1">Seleccionar o soltar <b>PNG</b></span>
+        <input type="file" id="i1" hidden accept="image/png" onchange="file(this.files, 'png')">
+        <img id="preview">
     </div>
 
-    <div id="zone2" class="drop-zone disabled"
-         onclick="document.getElementById('htmlInput').click()"
-         ondrop="handleDrop(event, 'html')"
-         ondragover="handleDragOver(event)"
-         ondragleave="handleDragLeave(event)">
-        <p>Paso 2: Arrastra aquí o <b>haz clic</b> para seleccionar el <b>HTML</b></p>
-        <input type="file" id="htmlInput" hidden accept=".html" onchange="handleFiles(this.files, 'html')">
+    <div class="zone disabled" id="z2" onclick="document.getElementById('i2').click()" ondrop="drop(event, 'html')" ondragover="event.preventDefault()">
+        <span class="icon">📄</span>
+        <span id="t2">Seleccionar o soltar <b>HTML</b></span>
+        <input type="file" id="i2" hidden accept=".html" onchange="file(this.files, 'html')">
     </div>
 
-    <button id="btnProcesar" class="btn-action" disabled onclick="procesar()">Procesar y Descargar</button>
+    <button id="btn" disabled onclick="run()">🚀 Procesar y Descargar</button>
 </div>
 
 <script>
-    let pngBase64 = null, htmlContent = null, htmlName = "";
-
-    // Evitar que el navegador abra el archivo al soltarlo
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.currentTarget.classList.add('drag-over');
-    }
-
-    function handleDragLeave(e) {
-        e.currentTarget.classList.remove('drag-over');
-    }
-
-    function handleDrop(e, type) {
-        e.preventDefault();
-        e.stopPropagation(); // Evita propagación extra
-        e.currentTarget.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files, type);
-    }
-
-    function handleFiles(files, type) {
-        if (!files.length) return;
-        const file = files[0];
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            if (type === 'png') {
-                pngBase64 = e.target.result;
-                const img = document.getElementById('cintilloPreview');
-                img.src = pngBase64;
-                img.style.display = 'block';
-                document.getElementById('zone2').classList.remove('disabled');
+    let png, html, name;
+    function drop(e, t) { e.preventDefault(); file(e.dataTransfer.files, t); }
+    function file(f, t) {
+        if(!f.length) return;
+        let r = new FileReader();
+        r.onload = (e) => {
+            if(t == 'png') {
+                png = e.target.result;
+                document.getElementById('preview').src = png;
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('z1').classList.add('active');
+                document.getElementById('z2').classList.remove('disabled');
             } else {
-                htmlContent = e.target.result;
-                htmlName = file.name;
-                document.getElementById('btnProcesar').disabled = false;
+                html = e.target.result;
+                name = f[0].name;
+                document.getElementById('z2').classList.add('active');
+                document.getElementById('btn').disabled = false;
             }
         };
-        type === 'png' ? reader.readAsDataURL(file) : reader.readAsText(file);
+        t == 'png' ? r.readAsDataURL(f[0]) : r.readAsText(f[0]);
     }
-
-    function procesar() {
-        if (!pngBase64 || !htmlContent) return;
-
-        const tag = `<img src="${pngBase64}" style="width:100%; display:block;">`;
-        const nuevoHtml = htmlContent.replace(/<body[^>]*>/, (match) => `${match}\n${tag}`);
-
-        const blob = new Blob([nuevoHtml], {type: 'text/html'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = htmlName.replace('.html', '') + '_cintillo.html';
+    function run() {
+        let blob = new Blob([html.replace(/<body[^>]*>/, (m) => `${m}\n<img src="${png}" style="width:100%">`)], {type: 'text/html'});
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name.replace('.html', '_cintillo.html');
         a.click();
     }
 </script>
