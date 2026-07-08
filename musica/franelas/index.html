@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero de Control de Franelas</title>
+    <!-- Tailwind CSS para el diseño ágil -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos base para coincidir exactamente con image_104cbd.png */
+        .board-container {
+            max-width: 420px;
+            width: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .header-gray {
+            background-color: #f4f4f4;
+        }
+        .header-blue {
+            background-color: #245d97;
+        }
+        .text-light-gray {
+            color: #a3a3a3;
+        }
+        .text-dark-gray {
+            color: #1a1a1a;
+        }
+        
+        /* Remover flechas por defecto de los inputs numéricos */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        /* Transiciones suaves */
+        .transition-all-custom {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md flex flex-col items-center space-y-6">
+        
+        <!-- Tarjeta Informativa e Indicador del Estado del API -->
+        <div class="w-full bg-white rounded-xl p-4 shadow-sm border border-slate-100 text-center space-y-2">
+            <h1 class="text-lg font-semibold text-slate-800">Tablero Interactivo</h1>
+            <p class="text-xs text-slate-500">
+                Toca cualquier valor numérico dentro del tablero para modificarlo. Los cálculos se procesan automáticamente.
+            </p>
+            
+            <!-- Estado de la Tasa BCV Oficial -->
+            <div class="flex items-center justify-center space-x-2 text-xs pt-1">
+                <span id="api-status-badge" class="px-2.5 py-0.5 rounded-full font-medium bg-amber-100 text-amber-800 flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
+                    Obteniendo tasa...
+                </span>
+                <button 
+                    id="btn-refresh" 
+                    title="Actualizar Tasa desde el Portal Oficial" 
+                    class="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.228 10H18.22M15 15l3-3 3 3"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tablero Principal (Emulación de la Imagen) -->
+        <div class="board-container">
+            
+            <!-- Fila 1: Título Principal -->
+            <div class="header-gray py-2.5 text-center border-b border-gray-200">
+                <span class="text-2xl font-normal text-black tracking-wide">Franelas</span>
+            </div>
+
+            <!-- Fila 2: Equivalencia en USD (Editable) -->
+            <div class="grid grid-cols-2 py-3 text-center border-b border-gray-200 bg-white items-center hover:bg-slate-50/50 transition-all-custom">
+                <div class="text-xl font-normal text-black pl-5 text-left flex items-center">
+                    <span>1 franela = $</span>
+                </div>
+                <div class="pr-5 flex justify-end items-center">
+                    <input 
+                        type="number" 
+                        id="board-precio" 
+                        value="12" 
+                        step="1"
+                        min="0"
+                        class="text-xl font-normal text-black text-right bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 focus:outline-none w-24 px-1 py-0.5 transition-all-custom hover:bg-slate-100 rounded"
+                    >
+                </div>
+            </div>
+
+            <!-- Fila 3: Tasa de Referencia BCV (Editable & Autocargada) -->
+            <div class="grid grid-cols-2 py-3 text-center header-gray border-b border-gray-200 items-center hover:bg-slate-200/50 transition-all-custom">
+                <div class="text-xl font-normal text-black pl-5 text-left">BCV</div>
+                <div class="pr-5 flex justify-end items-center">
+                    <input 
+                        type="number" 
+                        id="board-bcv" 
+                        value="685.9427" 
+                        step="0.0001"
+                        min="0"
+                        class="text-xl font-normal text-black text-right bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 focus:outline-none w-32 px-1 py-0.5 transition-all-custom hover:bg-slate-300/40 rounded"
+                    >
+                </div>
+            </div>
+
+            <!-- Fila 4: Encabezados del Estado de Pago -->
+            <div class="grid grid-cols-2 header-blue py-2.5 text-center text-white font-medium">
+                <div class="text-xl">Pagas</div>
+                <div class="text-xl">Pendientes</div>
+            </div>
+
+            <!-- Fila 5: Cantidades con Ajustadores Incorporados -->
+            <div class="grid grid-cols-2 py-2 text-center bg-white border-b border-slate-100">
+                <!-- Columna Pagas -->
+                <div class="flex flex-col items-center justify-center p-2 relative group">
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="changeQty('board-cant-pagas', -1)" class="w-6 h-6 text-xs font-bold text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">-</button>
+                        <input 
+                            type="number" 
+                            id="board-cant-pagas" 
+                            value="9" 
+                            min="0"
+                            class="text-5xl font-light text-black text-center bg-transparent border-b border-transparent focus:border-blue-400 focus:outline-none w-20 py-1"
+                        >
+                        <button onclick="changeQty('board-cant-pagas', 1)" class="w-6 h-6 text-xs font-bold text-slate-400 hover:text-green-600 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">+</button>
+                    </div>
+                </div>
+                
+                <!-- Columna Pendientes -->
+                <div class="flex flex-col items-center justify-center p-2 relative group">
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="changeQty('board-cant-pendientes', -1)" class="w-6 h-6 text-xs font-bold text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">-</button>
+                        <input 
+                            type="number" 
+                            id="board-cant-pendientes" 
+                            value="8" 
+                            min="0"
+                            class="text-5xl font-light text-black text-center bg-transparent border-b border-transparent focus:border-blue-400 focus:outline-none w-20 py-1"
+                        >
+                        <button onclick="changeQty('board-cant-pendientes', 1)" class="w-6 h-6 text-xs font-bold text-slate-400 hover:text-green-600 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila 6: Totales Calculados en Bs. -->
+            <div class="grid grid-cols-2 pb-5 pt-3 text-center bg-white">
+                <!-- Total Pagas en Bs. -->
+                <div class="flex flex-col items-center justify-center px-2">
+                    <span class="text-2xl font-normal text-light-gray break-all transition-all" id="board-total-pagas-bs">
+                        74.081,81
+                    </span>
+                    <span id="label-sub-pagas" class="text-[10px] text-slate-400 mt-1">Calculando...</span>
+                </div>
+                <!-- Total Pendientes en Bs. -->
+                <div class="flex flex-col items-center justify-center px-2">
+                    <span class="text-2xl font-normal text-dark-gray break-all transition-all" id="board-total-pendientes-bs">
+                        65.850,50
+                    </span>
+                    <span id="label-sub-pendientes" class="text-[10px] text-slate-500 font-medium mt-1">Calculando...</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Leyenda explicativa -->
+        <div class="text-center text-xs text-slate-400">
+            Fórmula: Cantidad × Precio ($) × BCV (Bs.) = Total en Bs.
+        </div>
+
+    </div>
+
+    <script>
+        // Referencias a los inputs en el tablero
+        const boardPrecio = document.getElementById('board-precio');
+        const boardBCV = document.getElementById('board-bcv');
+        const boardCantPagas = document.getElementById('board-cant-pagas');
+        const boardCantPendientes = document.getElementById('board-cant-pendientes');
+
+        // Referencias a las zonas de resultados en el tablero
+        const boardTotalPagasBs = document.getElementById('board-total-pagas-bs');
+        const boardTotalPendientesBs = document.getElementById('board-total-pendientes-bs');
+        const labelSubPagas = document.getElementById('label-sub-pagas');
+        const labelSubPendientes = document.getElementById('label-sub-pendientes');
+        
+        // Elementos del estado del API
+        const apiStatusBadge = document.getElementById('api-status-badge');
+        const btnRefresh = document.getElementById('btn-refresh');
+
+        // Función para formatear con la nomenclatura de divisas de Venezuela (puntos de miles y comas de decimales)
+        function formatearMoneda(valor, decimales = 2) {
+            if (isNaN(valor)) return "0,00";
+            const parteDecimalEfectiva = valor.toFixed(decimales);
+            const partes = parteDecimalEfectiva.split('.');
+            partes[0] = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return partes.join(',');
+        }
+
+        // Función para cambiar las cantidades con los botones + y -
+        function changeQty(inputId, delta) {
+            const input = document.getElementById(inputId);
+            let val = parseInt(input.value) || 0;
+            val = Math.max(0, val + delta);
+            input.value = val;
+            calcularTablero();
+        }
+
+        // Función de cálculo principal
+        function calcularTablero() {
+            const precioUSD = parseFloat(boardPrecio.value) || 0;
+            const tasaBCV = parseFloat(boardBCV.value) || 0;
+            const cantPagas = parseInt(boardCantPagas.value) || 0;
+            const cantPendientes = parseInt(boardCantPendientes.value) || 0;
+
+            // Totales en USD
+            const totalPagasUSD = cantPagas * precioUSD;
+            const totalPendientesUSD = cantPendientes * precioUSD;
+
+            // Totales en Bs
+            const totalPagasBs = totalPagasUSD * tasaBCV;
+            const totalPendientesBs = totalPendientesUSD * tasaBCV;
+
+            // Actualizar textos en el tablero
+            boardTotalPagasBs.textContent = formatearMoneda(totalPagasBs);
+            boardTotalPendientesBs.textContent = formatearMoneda(totalPendientesBs);
+
+            // Actualizar etiquetas aclaratorias (subtexto)
+            labelSubPagas.textContent = `${cantPagas} × $${precioUSD} ($${totalPagasUSD})`;
+            labelSubPendientes.textContent = `${cantPendientes} × $${precioUSD} ($${totalPendientesUSD})`;
+        }
+
+        // Función para obtener la tasa del BCV en tiempo real mediante API
+        async function fetchTasaBCV() {
+            apiStatusBadge.className = "px-2.5 py-0.5 rounded-full font-medium bg-amber-100 text-amber-800 flex items-center";
+            apiStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>Obteniendo tasa...`;
+            
+            try {
+                // Consultamos el portal oficial utilizando dolarapi (que hace scraping del BCV libre de CORS)
+                const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                if (!response.ok) {
+                    throw new Error('Respuesta de red no satisfactoria');
+                }
+                const data = await response.json();
+                
+                if (data && data.promedio) {
+                    // Actualizar el input con la tasa oficial obtenida
+                    boardBCV.value = parseFloat(data.promedio).toFixed(4);
+                    
+                    // Actualizar UI del Badge a Conectado
+                    apiStatusBadge.className = "px-2.5 py-0.5 rounded-full font-medium bg-green-100 text-green-800 flex items-center";
+                    apiStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>BCV En vivo`;
+                } else {
+                    throw new Error('Estructura de datos inesperada');
+                }
+            } catch (error) {
+                console.warn('No se pudo obtener la tasa en tiempo real de forma directa, se mantiene tasa preestablecida:', error);
+                
+                // Mostrar estado offline/alternativo
+                apiStatusBadge.className = "px-2.5 py-0.5 rounded-full font-medium bg-slate-200 text-slate-700 flex items-center";
+                apiStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>Tasa Manual (Offline)`;
+            }
+            
+            // Forzar recálculo
+            calcularTablero();
+        }
+
+        // Registrar Eventos de Cambio
+        boardPrecio.addEventListener('input', calcularTablero);
+        boardBCV.addEventListener('input', calcularTablero);
+        boardCantPagas.addEventListener('input', calcularTablero);
+        boardCantPendientes.addEventListener('input', calcularTablero);
+        btnRefresh.addEventListener('click', fetchTasaBCV);
+
+        // Inicializar
+        window.addEventListener('DOMContentLoaded', () => {
+            // Cargar tasa del BCV oficial al arrancar
+            fetchTasaBCV();
+        });
+    </script>
+</body>
+</html>
