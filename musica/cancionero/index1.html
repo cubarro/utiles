@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <style>
         :root {
             --primary: #3b82f6;
@@ -17,25 +16,6 @@
             --surface: #ffffff;
             --text: #1e293b;
             --text-light: #64748b;
-            --border: #e2e8f0;
-            --tab-bg: #f1f5f9;
-            --card-bg: #f8fafc;
-            --header-bg: #0f172a;
-            --code-bg: #1e293b;
-            --code-text: #e2e8f0;
-        }
-
-        body.dark-mode {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-light: #94a3b8;
-            --border: #334155;
-            --tab-bg: #0f172a;
-            --card-bg: #0f172a;
-            --header-bg: #020617;
-            --code-bg: #020617;
-            --code-text: #f1f5f9;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,28 +28,24 @@
             justify-content: center;
             padding: 20px;
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
             background-color: var(--surface);
-            max-width: 650px;
+            max-width: 600px;
             width: 100%;
             border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            border: 1px solid var(--border);
         }
 
         .header {
-            background-color: var(--header-bg);
+            background-color: #0f172a;
             color: white;
             padding: 30px 20px;
             text-align: center;
-            transition: background-color 0.3s ease;
         }
 
         .header h1 { font-family: 'Poppins', sans-serif; font-size: 24px; margin-bottom: 5px; }
@@ -77,25 +53,20 @@
 
         .tabs {
             display: flex;
-            border-bottom: 1px solid var(--border);
-            background: var(--tab-bg);
-            transition: background 0.3s ease, border-color 0.3s ease;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f1f5f9;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 15px 10px;
+            padding: 15px;
             border: none;
             background: none;
             font-family: 'Poppins', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-light);
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
         }
 
         .tab-btn.active {
@@ -106,7 +77,7 @@
         }
 
         .tab-content {
-            padding: 25px;
+            padding: 30px;
             display: none;
             flex-grow: 1;
         }
@@ -114,13 +85,13 @@
         .tab-content.active { display: block; }
 
         .upload-area {
-            border: 2px dashed var(--border);
+            border: 2px dashed #cbd5e1;
             border-radius: 12px;
             padding: 40px 20px;
             text-align: center;
-            background-color: var(--card-bg);
+            background-color: #f8fafc;
             cursor: pointer;
-            transition: border-color 0.3s, background-color 0.3s;
+            transition: border-color 0.3s;
             margin-bottom: 20px;
         }
 
@@ -155,8 +126,7 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
-            text-decoration: none;
-            transition: transform 0.1s, background-color 0.2s, color 0.2s;
+            transition: transform 0.1s, background-color 0.2s;
         }
 
         .btn:active { transform: scale(0.98); }
@@ -164,17 +134,17 @@
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: var(--primary-hover); }
 
-        .btn-secondary { background-color: var(--tab-bg); color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover { opacity: 0.9; }
+        .btn-secondary { background-color: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
 
         .btn-success { background-color: #10b981; color: white; }
         .btn-success:hover { background-color: #059669; }
 
-        .instructions h3 { margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-size: 16px; color: var(--text); }
-        .instructions p { margin-bottom: 15px; font-size: 14px; line-height: 1.5; color: var(--text-light); }
+        .instructions h3 { margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-size: 16px; }
+        .instructions p { margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
         .instructions-box {
-            background-color: var(--code-bg);
-            color: var(--code-text);
+            background-color: #1e293b;
+            color: #e2e8f0;
             padding: 15px;
             border-radius: 8px;
             font-family: monospace;
@@ -182,69 +152,6 @@
             line-height: 1.5;
             white-space: pre-wrap;
             overflow-x: auto;
-            border: 1px solid var(--border);
-        }
-
-        .sources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-        }
-
-        .source-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .source-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .source-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .source-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .source-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            color: var(--text);
-        }
-
-        .source-desc {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-bottom: 16px;
-            line-height: 1.4;
-            word-break: break-all;
-        }
-
-        .toggle-theme-card {
-            cursor: pointer;
-            border: 2px solid var(--primary);
         }
     </style>
 </head>
@@ -257,16 +164,15 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('generator', this)"><i class="fa-solid fa-wand-magic-sparkles"></i> Generador</button>
-        <button class="tab-btn" onclick="switchTab('instructions', this)"><i class="fa-solid fa-circle-info"></i> Ver Formato</button>
-        <button class="tab-btn" onclick="switchTab('sources', this)"><i class="fa-solid fa-book-bookmark"></i> Fuentes</button>
+        <button class="tab-btn active" onclick="switchTab('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i> Generador</button>
+        <button class="tab-btn" onclick="switchTab('instructions')"><i class="fa-solid fa-circle-info"></i> Ver Formato .txt</button>
     </div>
 
     <div id="generator" class="tab-content active">
         <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <i class="fa-solid fa-file-lines"></i>
-            <h3 style="font-family: 'Poppins', sans-serif; color: var(--text);">Cargar Archivo de Texto</h3>
-            <p style="font-size: 13px; color: var(--text-light); margin-top: 5px;">Presiona aquí o arrastra tu archivo .txt</p>
+            <h3 style="font-family: 'Poppins', sans-serif; color: #475569;">Cargar Archivo de Texto</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-top: 5px;">Presiona aquí o arrastra tu archivo .txt</p>
             <div id="fileNameDisplay" class="file-name"></div>
             <input type="file" id="fileInput" accept=".txt">
         </div>
@@ -301,52 +207,6 @@ Mi
 
 Señor, ten piedad de nosotros...</div>
     </div>
-
-    <div id="sources" class="tab-content">
-        <div class="sources-grid">
-            <!-- Tarjeta 1: Diarias -->
-            <div class="source-card">
-                <div>
-                    <div class="source-header">
-                        <div class="source-icon"><i class="fa-solid fa-calendar-day"></i></div>
-                        <h3 class="source-title">Diarias</h3>
-                    </div>
-                    <p class="source-desc">Accede a las lecturas y recursos diarios en la aplicación Breviarium.</p>
-                </div>
-                <a href="https://app.breviarium.es" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanzar
-                </a>
-            </div>
-
-            <!-- Tarjeta 2: Dominicales -->
-            <div class="source-card">
-                <div>
-                    <div class="source-header">
-                        <div class="source-icon"><i class="fa-solid fa-church"></i></div>
-                        <h3 class="source-title">Dominicales</h3>
-                    </div>
-                    <p class="source-desc">Partituras y recursos de música litúrgica para los domingos.</p>
-                </div>
-                <a href="https://partiturasymusicaliturgica.blogspot.com/2026/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanzar
-                </a>
-            </div>
-
-            <!-- Tarjeta 3: Colores (Tema Claro / Oscuro) -->
-            <div class="source-card toggle-theme-card" onclick="toggleTheme()">
-                <div>
-                    <div class="source-header">
-                        <div class="source-icon" id="themeIconContainer"><i class="fa-solid fa-moon" id="themeIcon"></i></div>
-                        <h3 class="source-title">Colores</h3>
-                    </div>
-                    <p class="source-desc" id="themeDesc">Alterna toda la página entre Fondo blanco (Claro) y Fondo oscuro (Noche).</p>
-                </div>
-                <button class="btn btn-secondary" id="themeBtn" style="width: 100%; pointer-events: none;">
-                    <i class="fa-solid fa-circle-half-stroke"></i> Cambiar Fondo
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -354,42 +214,11 @@ Señor, ten piedad de nosotros...</div>
     let outputFileName = 'Cantos_Generados.html';
     let generatedBlob = null;
 
-    function switchTab(tabId, btnElement) {
+    function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        if (btnElement) {
-            btnElement.classList.add('active');
-        }
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('theme_mode', isDark ? 'dark' : 'light');
-        updateThemeUI(isDark);
-    }
-
-    function updateThemeUI(isDark) {
-        const themeIcon = document.getElementById('themeIcon');
-        const themeDesc = document.getElementById('themeDesc');
-        const themeBtn = document.getElementById('themeBtn');
-
-        if (isDark) {
-            if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
-            if (themeDesc) themeDesc.textContent = 'Modo Oscuro activo. Haz clic para cambiar a Fondo Blanco (Modo Claro).';
-            if (themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> Usar Fondo Claro';
-        } else {
-            if (themeIcon) themeIcon.className = 'fa-solid fa-moon';
-            if (themeDesc) themeDesc.textContent = 'Modo Claro activo. Haz clic para cambiar a Fondo Oscuro (Modo Noche).';
-            if (themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Usar Fondo Oscuro';
-        }
-    }
-
-    // Cargar preferencia guardada del tema si existe
-    if (localStorage.getItem('theme_mode') === 'dark') {
-        document.body.classList.add('dark-mode');
-        updateThemeUI(true);
+        event.currentTarget.classList.add('active');
     }
 
     const fileInput = document.getElementById('fileInput');
@@ -398,10 +227,10 @@ Señor, ten piedad de nosotros...</div>
 
     const dropZone = document.getElementById('dropZone');
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
-    dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; });
+    dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#cbd5e1'; });
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = 'var(--border)';
+        dropZone.style.borderColor = '#cbd5e1';
         if(e.dataTransfer.files.length > 0) {
             fileInput.files = e.dataTransfer.files;
             handleFileSelection(e.dataTransfer.files[0]);
@@ -507,7 +336,7 @@ Señor, ten piedad de nosotros...</div>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --base-lyrics-size: 22px; }
+        :root { --base-lyrics-size: 22px; } /* Ajustado a 22px para sincronía exacta */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; }
         .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; }
@@ -589,9 +418,10 @@ __INTERNAL_SCRIPT__
 </body>
 </html>`;
 
+        // Lógica interna modificada con Fullscreen API nativa dentro del motor del generador
         let appScript = '<script>' + `
             let currentSlide = 0;
-            let currentFontSize = 22;
+            let currentFontSize = 22; // Sincronizado a 22 por defecto
             const slides = document.querySelectorAll('.slide');
             const pageIndicator = document.getElementById('pageIndicator');
             const appFrame = document.getElementById('appFrame');
@@ -619,6 +449,7 @@ __INTERNAL_SCRIPT__
                 if (n >= 14 && n <= 36) { currentFontSize = n; document.documentElement.style.setProperty('--base-lyrics-size', n + 'px'); }
             }
 
+            // Integración de API HTML5 Fullscreen para expandir a despliegue completo
             function toggleMaximize() {
                 appFrame.classList.toggle('windowed');
                 if (appFrame.classList.contains('windowed')) {
@@ -638,6 +469,7 @@ __INTERNAL_SCRIPT__
                 }
             }
 
+            // Escucha cambios directos del navegador (Tecla Esc o gestos del sistema)
             document.addEventListener('fullscreenchange', () => {
                 if (!document.fullscreenElement) {
                     appFrame.classList.add('windowed');
@@ -668,7 +500,7 @@ __INTERNAL_SCRIPT__
             .replace('__SUBTITLE__', eventSubtitle)
             .replace('__INDEX__', indexListHTML)
             .replace('__SLIDES__', slidesHTML)
-            .replace('__TOTAL__', totalSlidesCalculated)
+            .replace('__TOTAL__', totalSlidesCalculated) // Sincronizado dinámicamente desde el HTML inicial
             .replace('__INTERNAL_SCRIPT__', appScript);
 
         generatedBlob = new Blob([generatedHTML], { type: 'text/html' });
