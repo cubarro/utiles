@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esquema de Cantos para Misa</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- html2canvas CDN for PNG rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Cinzel', 'serif'],
+          },
+          colors: {
+            liturgical: {
+              gold: '#C5A059',
+              darkgold: '#9A7B38',
+              navy: '#1A2B4C',
+              cream: '#FAF8F5',
+              burgundy: '#6B1D2F',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .song-card {
+      transition: all 0.2s ease-in-out;
+    }
+    .song-card:hover {
+      box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    }
+    /* Estilos de impresión */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #export-area, #export-area * {
+        visibility: visible;
+      }
+      #export-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-amber-200">
+
+  <!-- Header -->
+  <header class="bg-liturgical-navy text-white shadow-lg sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-liturgical-gold flex items-center justify-center text-liturgical-navy font-bold text-xl shadow-inner">
+          <i class="fa-solid fa-music"></i>
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-xl sm:text-2xl text-amber-100 leading-tight">Esquema de Cantos Litúrgicos</h1>
+          <p class="text-xs text-slate-300">Organizador con tonalidades y exportación PNG / HTML</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT COLUMN: Selection Form -->
+    <section class="lg:col-span-7 space-y-6 no-print">
+      
+      <!-- Metadata Box -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <h2 class="font-serif text-lg font-bold text-liturgical-navy mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-liturgical-gold"></i>
+          Información del Esquema
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="misa-name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nombre o Celebración</label>
+            <input type="text" id="misa-name" placeholder="Esquema para la próxima misa" 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-liturgical-gold focus:border-liturgical-gold text-sm outline-none transition">
+            <p class="text-[11px] text-slate-400 mt-1">Por defecto: <i>Esquema para la próxima misa</i></p>
+          </div>
+          <div>
+            <label for="misa-date" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Fecha / Hora (Opcional)</label>
+            <input type="text" id="misa-date" placeholder="Ej. Domingo XX del Tiempo Ordinario" 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-liturgical-gold focus:border-liturgical-gold text-sm outline-none transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions Banner -->
+      <div class="flex justify-between items-center bg-amber-50/80 border border-amber-200/60 p-3.5 rounded-xl text-xs sm:text-sm text-amber-900">
+        <span class="flex items-center gap-2 font-medium">
+          <i class="fa-solid fa-sliders text-liturgical-gold text-base"></i>
+          Selecciona los cantos y asigna opcionalmente su tono musical.
+        </span>
+        <button onclick="resetSelections()" class="text-xs text-red-600 hover:text-red-800 font-semibold underline flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Limpiar
+        </button>
+      </div>
+
+      <!-- Categories Container -->
+      <div id="categories-container" class="space-y-5">
+        <!-- Dynamic JS Injected Categories -->
+      </div>
+
+    </section>
+
+
+    <!-- RIGHT COLUMN: Preview & Render Output -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Control Bar for Render/Export -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 sticky top-20 z-20 space-y-3 no-print">
+        <h3 class="font-serif font-bold text-liturgical-navy text-base flex items-center gap-2">
+          <i class="fa-solid fa-file-export text-liturgical-gold"></i> Renderizar / Exportar
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button onclick="exportToPNG()" id="btn-png" class="flex items-center justify-center gap-2 bg-liturgical-navy hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl transition shadow hover:shadow-md text-sm">
+            <i class="fa-solid fa-file-image text-amber-400"></i> Generar PNG
+          </button>
+          
+          <button onclick="exportToHTML()" id="btn-html" class="flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-xl transition shadow hover:shadow-md text-sm">
+            <i class="fa-solid fa-code text-emerald-200"></i> Descargar HTML
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <button onclick="copyToClipboard()" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-3 rounded-xl transition text-xs">
+            <i class="fa-solid fa-copy"></i> Copiar Texto
+          </button>
+          
+          <button onclick="window.print()" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-3 rounded-xl transition text-xs">
+            <i class="fa-solid fa-print"></i> Imprimir / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Sheet Card -->
+      <div class="bg-slate-200/60 p-2 sm:p-4 rounded-2xl border border-slate-300">
+        <div id="export-area" class="bg-liturgical-cream text-slate-800 p-6 sm:p-8 rounded-xl shadow-md border border-amber-900/10 max-w-xl mx-auto min-h-[550px] flex flex-col justify-between relative overflow-hidden">
+          
+          <!-- Decorative Background Elements -->
+          <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-200/30 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-amber-900/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div>
+            <!-- Header section of the sheet -->
+            <div class="text-center border-b-2 border-liturgical-gold/40 pb-4 mb-6">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-liturgical-navy text-amber-300 mb-2 shadow-sm">
+                <i class="fa-solid fa-church text-xl"></i>
+              </div>
+              <h2 id="preview-title" class="font-serif font-extrabold text-2xl text-liturgical-navy tracking-tight uppercase px-2">
+                Esquema para la próxima misa
+              </h2>
+              <p id="preview-date" class="text-xs font-medium text-amber-900/80 mt-1 italic hidden"></p>
+            </div>
+
+            <!-- Cantos Litúrgicos Table/List -->
+            <div id="preview-list" class="space-y-3.5 text-sm">
+              <!-- Rendered songs list via JS -->
+            </div>
+          </div>
+
+          <!-- Footer section of the sheet -->
+          <div class="mt-8 pt-4 border-t border-amber-900/20 flex justify-between items-center text-[10px] text-slate-500 font-sans">
+            <span class="italic">Servicio de Música Litúrgica</span>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Toast Notification System -->
+  <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50">
+    <i id="toast-icon" class="fa-solid fa-check-circle text-emerald-400"></i>
+    <span id="toast-message" class="text-sm">Notificación</span>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // Shared list for Entrada and Salida
+    const entradaSalidaOptions = [
+      'Juntos como hermanos',
+      'Cuando comienza la misa',
+      'Tomado de la mano con Jesús yo voy',
+      'Danos un corazón',
+      'A edificar la iglesia',
+      'Den al Señor sus alabanzas'
+    ];
+
+    // Database of options extracted directly from notes
+    const songData = [
+      {
+        id: 'entrada',
+        title: 'Entrada',
+        icon: 'fa-door-open',
+        multiple: false,
+        options: entradaSalidaOptions
+      },
+      {
+        id: 'penitencial',
+        title: 'Acto Penitencial',
+        icon: 'fa-hands-praying',
+        multiple: false,
+        options: [
+          'Señor ten piedad',
+          'Señor ten piedad de nosotros',
+          'Señor, Señor, piedad, piedad',
+          'Ten piedad, ten piedad, Ten piedad'
+        ]
+      },
+      {
+        id: 'gloria',
+        title: 'Gloria',
+        icon: 'fa-sun',
+        multiple: false,
+        options: [
+          'Galindo',
+          'Gloooria a Dios',
+          'Catecúmeno'
+        ]
+      },
+      {
+        id: 'lecturas',
+        title: 'Lecturas',
+        icon: 'fa-book-bible',
+        multiple: false,
+        options: [
+          'Queremos escuchar tu voz',
+          'Canta alma mía',
+          'Busca primero',
+          'Tu palabra me da vida',
+          'Aleluya - -',
+          'Danos oh Señor',
+          'Si escuchas la voz'
+        ]
+      },
+      {
+        id: 'ofertorio',
+        title: 'Ofertorio',
+        icon: 'fa-bread-slice',
+        multiple: false,
+        options: [
+          'Queremos ofrecerte',
+          'Sobre tu altar',
+          'Como lo hizo María',
+          'Este pan y vino',
+          'Recibe el don del vino',
+          'Ante tu altar',
+          'Aquí estamos Señor',
+          'El Señor Dios nos amó',
+          'Por los niños',
+          'Una espiga'
+        ]
+      },
+      {
+        id: 'santo',
+        title: 'Santo',
+        icon: 'fa-crown',
+        multiple: false,
+        options: [
+          'Flamenco Mi-',
+          'Santo, Santo, Santooo, Santo es el Señor',
+          'Saaanto, Saaanto'
+        ]
+      },
+      {
+        id: 'padre_nuestro',
+        title: 'Padre Nuestro',
+        icon: 'fa-heart',
+        multiple: false,
+        options: [
+          'Padre Nuestro',
+          'Estación Ø'
+        ]
+      },
+      {
+        id: 'paz',
+        title: 'Paz',
+        icon: 'fa-dove',
+        multiple: false,
+        options: [
+          'Paz en la tierra',
+          'La paz esté con nosotros',
+          'Mi paz te doy',
+          'Dame la mano'
+        ]
+      },
+      {
+        id: 'comunion',
+        title: 'Comunión',
+        icon: 'fa-wine-glass-empty',
+        multiple: true, // Multi-selection allowed for Communion
+        options: [
+          'Tan cerca de mí',
+          'Alma de Cristo',
+          'Yo no canto sólo por cantar',
+          'Jesucristo me dejó inquieto',
+          'Jesús amigo',
+          'Quebrántame',
+          'Dios está aquí',
+          'Como no creer en tí',
+          'Con vosotros está',
+          'Cristo nos da la libertad',
+          'Cuando escuchas la voz del Señor',
+          'Dame un nuevo corazón',
+          'Desde que voy',
+          'Dichoso el que confía',
+          'Ese es Jesús',
+          'Estando junto a Ti',
+          'Yo creo en las promesas de Dios',
+          'Tu amor está aquí'
+        ]
+      },
+      {
+        id: 'salida',
+        title: 'Salida',
+        icon: 'fa-walking',
+        multiple: false,
+        options: entradaSalidaOptions
+      }
+    ];
+
+    // Musical Keys: Major keys without 'M', Minor keys with '-'
+    const musicalKeys = [
+      '', 
+      'Do', 'Do-', 
+      'Do#', 'Do#-',
+      'Re', 'Re-', 
+      'Mi♭', 'Mi♭-',
+      'Mi', 'Mi-', 
+      'Fa', 'Fa-', 
+      'Fa#', 'Fa#-',
+      'Sol', 'Sol-', 
+      'Sol#', 'Sol#-',
+      'La♭', 'La♭-',
+      'La', 'La-', 
+      'Si♭', 'Si♭-',
+      'Si', 'Si-'
+    ];
+
+    // Global State for selections & keys
+    const selections = {};
+
+    // DOM Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategoryForms();
+      setupTitleListeners();
+      updatePreview();
+    });
+
+    // Render category selectors dynamically with maximum 2 columns
+    function renderCategoryForms() {
+      const container = document.getElementById('categories-container');
+      container.innerHTML = '';
+
+      songData.forEach(cat => {
+        // Initialize state
+        selections[cat.id] = { selected: [], keys: {}, custom: '', customKey: '' };
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200 song-card space-y-4';
+
+        // Build 2-column grid for predefined songs
+        const optionsHtml = cat.options.map((opt) => {
+          const inputType = cat.multiple ? 'checkbox' : 'radio';
+          return `
+            <div class="flex items-center justify-between p-2 rounded-xl border border-slate-100 hover:bg-slate-50 transition text-xs sm:text-sm">
+              <label class="flex items-center flex-grow cursor-pointer pr-2 truncate">
+                <input type="${inputType}" name="cat_${cat.id}" value="${escapeQuotes(opt)}" 
+                       onchange="handleSelectionChange('${cat.id}', '${escapeQuotes(opt)}', ${cat.multiple}, this.checked)" 
+                       class="w-4 h-4 text-liturgical-gold focus:ring-liturgical-gold border-slate-300 rounded-${cat.multiple ? 'md' : 'full'} flex-shrink-0">
+                <span class="ml-2 text-slate-700 font-medium truncate">${opt}</span>
+              </label>
+              
+              <!-- Key Select for each song -->
+              <select onchange="handleKeyChange('${cat.id}', '${escapeQuotes(opt)}', this.value)" 
+                      title="Tono del canto"
+                      class="text-[11px] bg-slate-100 border border-slate-200 rounded-lg px-1.5 py-1 text-slate-600 focus:outline-none focus:ring-1 focus:ring-liturgical-gold flex-shrink-0">
+                <option value="">Tono...</option>
+                ${musicalKeys.filter(k => k !== '').map(k => `<option value="${k}">${k}</option>`).join('')}
+              </select>
+            </div>
+          `;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <h3 class="font-serif font-bold text-liturgical-navy flex items-center gap-2 text-base">
+              <i class="fa-solid ${cat.icon} text-liturgical-gold text-sm"></i>
+              ${cat.title}
+            </h3>
+            <span class="text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full">
+              ${cat.multiple ? 'Selección Múltiple' : 'Selección Única'}
+            </span>
+          </div>
+
+          <!-- Strictly Maximum 2 Columns Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            ${optionsHtml}
+          </div>
+
+          <!-- Custom Song Input & Key -->
+          <div class="pt-2 border-t border-slate-100">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-grow">
+                <input type="text" id="custom_${cat.id}" placeholder="${cat.multiple ? 'Otros cantos (separados por coma)...' : 'Otro canto (personalizado)...'}" 
+                       oninput="handleCustomInput('${cat.id}', this.value)"
+                       class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-liturgical-gold outline-none">
+                <i class="fa-solid fa-pen text-slate-400 text-[10px] absolute left-2.5 top-2.5"></i>
+              </div>
+              <select onchange="handleCustomKey('${cat.id}', this.value)" 
+                      title="Tono para canto personalizado"
+                      class="text-[11px] bg-slate-100 border border-slate-200 rounded-lg px-2 py-1.5 text-slate-600 focus:outline-none focus:ring-1 focus:ring-liturgical-gold">
+                <option value="">Tono...</option>
+                ${musicalKeys.filter(k => k !== '').map(k => `<option value="${k}">${k}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Escape quotes
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // Handle Selection (Radio or Checkbox)
+    function handleSelectionChange(catId, value, isMultiple, isChecked) {
+      if (isMultiple) {
+        if (isChecked) {
+          if (!selections[catId].selected.includes(value)) {
+            selections[catId].selected.push(value);
+          }
+        } else {
+          selections[catId].selected = selections[catId].selected.filter(item => item !== value);
+        }
+      } else {
+        selections[catId].selected = isChecked ? [value] : [];
+      }
+      updatePreview();
+    }
+
+    // Handle Musical Key Selection
+    function handleKeyChange(catId, songValue, key) {
+      selections[catId].keys[songValue] = key;
+      updatePreview();
+    }
+
+    // Handle Custom Input
+    function handleCustomInput(catId, value) {
+      selections[catId].custom = value;
+      updatePreview();
+    }
+
+    // Handle Custom Song Key
+    function handleCustomKey(catId, key) {
+      selections[catId].customKey = key;
+      updatePreview();
+    }
+
+    // Setup input listeners for title & date
+    function setupTitleListeners() {
+      document.getElementById('misa-name').addEventListener('input', updatePreview);
+      document.getElementById('misa-date').addEventListener('input', updatePreview);
+    }
+
+    // Reset Form
+    function resetSelections() {
+      songData.forEach(cat => {
+        selections[cat.id] = { selected: [], keys: {}, custom: '', customKey: '' };
+        const inputs = document.getElementsByName(`cat_${cat.id}`);
+        inputs.forEach(i => {
+          if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+        });
+        const customInput = document.getElementById(`custom_${cat.id}`);
+        if (customInput) customInput.value = '';
+      });
+      document.getElementById('misa-name').value = '';
+      document.getElementById('misa-date').value = '';
+      updatePreview();
+      showToast('Se han limpiado todas las selecciones.', 'fa-rotate-left');
+    }
+
+    // Update Live Preview Render Area
+    function updatePreview() {
+      const rawTitle = document.getElementById('misa-name').value.trim();
+      const rawDate = document.getElementById('misa-date').value.trim();
+
+      const previewTitle = document.getElementById('preview-title');
+      const previewDate = document.getElementById('preview-date');
+
+      // Title Requirement: If empty, display "Esquema para la próxima misa"
+      previewTitle.innerText = rawTitle === '' ? 'Esquema para la próxima misa' : rawTitle;
+
+      if (rawDate !== '') {
+        previewDate.innerText = rawDate;
+        previewDate.classList.remove('hidden');
+      } else {
+        previewDate.innerText = '';
+        previewDate.classList.add('hidden');
+      }
+
+      // Render Songs List
+      const previewList = document.getElementById('preview-list');
+      previewList.innerHTML = '';
+
+      let totalSelected = 0;
+
+      songData.forEach(cat => {
+        const catState = selections[cat.id];
+        const selectedSongs = [...catState.selected];
+        
+        // Add custom text if entered
+        if (catState.custom.trim() !== '') {
+          const customItems = catState.custom.split(',').map(s => s.trim()).filter(s => s !== '');
+          customItems.forEach(item => {
+            selectedSongs.push(item + (catState.customKey ? `_KEY_${catState.customKey}` : ''));
+          });
+        }
+
+        if (selectedSongs.length > 0) {
+          totalSelected += selectedSongs.length;
+          
+          const item = document.createElement('div');
+          item.className = 'flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-dashed border-amber-900/20 pb-2.5 pt-1 gap-1';
+
+          // Format songs text with key badges
+          const songsFormatted = selectedSongs.map(songName => {
+            let key = '';
+            let name = songName;
+
+            if (songName.includes('_KEY_')) {
+              const parts = songName.split('_KEY_');
+              name = parts[0];
+              key = parts[1];
+            } else {
+              key = catState.keys[songName] || '';
+            }
+
+            return `<span class="inline-block font-medium text-slate-800">
+                      ${name} ${key ? `<span class="text-xs font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded ml-1">(${key})</span>` : ''}
+                    </span>`;
+          }).join('<span class="text-slate-400 mx-1">•</span>');
+
+          item.innerHTML = `
+            <div class="flex items-center gap-2 font-serif font-bold text-liturgical-navy min-w-[160px]">
+              <i class="fa-solid ${cat.icon} text-liturgical-gold text-xs"></i>
+              <span>${cat.title}:</span>
+            </div>
+            <div class="sm:text-right text-slate-800">
+              ${songsFormatted}
+            </div>
+          `;
+          previewList.appendChild(item);
+        }
+      });
+
+      if (totalSelected === 0) {
+        previewList.innerHTML = `
+          <div class="text-center py-12 text-slate-400 italic">
+            <i class="fa-solid fa-music text-3xl mb-2 text-slate-300 block"></i>
+            Aún no has seleccionado ningún canto.<br>Selecciona los cantos y sus tonos en la izquierda.
+          </div>
+        `;
+      }
+    }
+
+    // Export to PNG function using html2canvas
+    function exportToPNG() {
+      const exportArea = document.getElementById('export-area');
+      const btn = document.getElementById('btn-png');
+      const originalText = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generando...`;
+
+      showToast('Generando imagen del esquema...', 'fa-file-image');
+
+      html2canvas(exportArea, {
+        scale: 2,
+        backgroundColor: '#FAF8F5',
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        const rawTitle = document.getElementById('misa-name').value.trim();
+        const fileName = (rawTitle || 'Esquema_para_la_proxima_misa').replace(/[^a-zA-Z0-9]/g, '_');
+        
+        link.download = `${fileName}.png`;
+        link.href = image;
+        link.click();
+
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        showToast('Imagen PNG descargada con éxito.', 'fa-circle-check');
+      }).catch(err => {
+        console.error(err);
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        showToast('Error al generar la imagen.', 'fa-triangle-exclamation');
+      });
+    }
+
+    // Export to Standalone HTML file
+    function exportToHTML() {
+      const title = document.getElementById('preview-title').innerText;
+      const date = document.getElementById('preview-date').innerText;
+      
+      let songRows = '';
+      songData.forEach(cat => {
+        const catState = selections[cat.id];
+        const selectedSongs = [...catState.selected];
+        
+        if (catState.custom.trim() !== '') {
+          const customItems = catState.custom.split(',').map(s => s.trim()).filter(s => s !== '');
+          customItems.forEach(item => {
+            selectedSongs.push(item + (catState.customKey ? `_KEY_${catState.customKey}` : ''));
+          });
+        }
+
+        if (selectedSongs.length > 0) {
+          const formattedSongs = selectedSongs.map(songName => {
+            let key = '', name = songName;
+            if (songName.includes('_KEY_')) {
+              const parts = songName.split('_KEY_');
+              name = parts[0]; key = parts[1];
+            } else {
+              key = catState.keys[songName] || '';
+            }
+            return `${name} ${key ? `(${key})` : ''}`;
+          }).join(', ');
+
+          songRows += `
+            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #c5a059; padding: 10px 0;">
+              <strong style="color:#1A2B4C;">${cat.title}:</strong>
+              <span style="color:#333;">${formattedSongs}</span>
+            </div>
+          `;
+        }
+      });
+
+      if (!songRows) {
+        showToast('Por favor selecciona al menos un canto.', 'fa-circle-info');
+        return;
+      }
+
+      const htmlContent = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <style>
+    body { font-family: 'Georgia', serif; background-color: #FAF8F5; color: #1A2B4C; padding: 40px; max-width: 650px; margin: auto; }
+    h1 { text-align: center; border-bottom: 2px solid #C5A059; padding-bottom: 15px; margin-bottom: 5px; text-transform: uppercase; }
+    .date { text-align: center; font-style: italic; color: #888; font-size: 14px; margin-bottom: 30px; }
+    .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; border-top: 1px solid #ddd; padding-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>${title}</h1>
+  ${date ? `<div class="date">${date}</div>` : ''}
+  <div>
+    ${songRows}
+  </div>
+  <div class="footer">
+    Servicio de Música Litúrgica
+  </div>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const fileName = title.replace(/[^a-zA-Z0-9]/g, '_');
+      link.href = url;
+      link.download = `${fileName}.html`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showToast('Archivo HTML descargado.', 'fa-code');
+    }
+
+    // Copy formatted text to clipboard
+    function copyToClipboard() {
+      const title = document.getElementById('preview-title').innerText;
+      const date = document.getElementById('preview-date').innerText;
+
+      let text = `🎶 *${title}* 🎶\n`;
+      if (date) text += `📅 ${date}\n`;
+      text += `-----------------------------------\n`;
+
+      let hasItems = false;
+      songData.forEach(cat => {
+        const catState = selections[cat.id];
+        const selectedSongs = [...catState.selected];
+
+        if (catState.custom.trim() !== '') {
+          const customItems = catState.custom.split(',').map(s => s.trim()).filter(s => s !== '');
+          customItems.forEach(item => {
+            selectedSongs.push(item + (catState.customKey ? `_KEY_${catState.customKey}` : ''));
+          });
+        }
+
+        if (selectedSongs.length > 0) {
+          hasItems = true;
+          const formattedSongs = selectedSongs.map(songName => {
+            let key = '', name = songName;
+            if (songName.includes('_KEY_')) {
+              const parts = songName.split('_KEY_');
+              name = parts[0]; key = parts[1];
+            } else {
+              key = catState.keys[songName] || '';
+            }
+            return `${name}${key ? ` [${key}]` : ''}`;
+          }).join(', ');
+
+          text += `• *${cat.title}:* ${formattedSongs}\n`;
+        }
+      });
+
+      if (!hasItems) {
+        showToast('Selecciona cantos para poder copiar.', 'fa-circle-info');
+        return;
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Esquema copiado al portapapeles.', 'fa-copy');
+        }).catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Esquema copiado al portapapeles.', 'fa-copy');
+      } catch (err) {
+        showToast('Error al copiar el texto.', 'fa-triangle-exclamation');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    // Toast alert
+    function showToast(message, iconClass = 'fa-check-circle') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = message;
+      toastIcon.className = `fa-solid ${iconClass} text-emerald-400`;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
