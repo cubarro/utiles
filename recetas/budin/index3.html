@@ -197,10 +197,10 @@
                     <span class="font-bold text-sm flex items-center gap-2">
                         <i class="fa-solid fa-stopwatch"></i> Temporizador de Horno
                     </span>
-                    <span id="timer-display" class="font-mono text-2xl font-bold bg-black/20 px-3 py-1 rounded-lg tracking-wider transition-colors">40:00</span>
+                    <span id="timer-display" class="font-mono text-2xl font-bold bg-black/20 px-3 py-1 rounded-lg tracking-wider transition-colors">35:00</span>
                 </div>
 
-                <!-- Time Adjustment Controls (5 to 50 mins in 5 min steps) -->
+                <!-- Time Adjustment Controls (10 to 50 mins in 5 min steps) -->
                 <div class="flex items-center justify-between bg-black/15 rounded-xl p-2 mb-3 text-xs">
                     <span class="font-medium text-amber-100 flex items-center gap-1">
                         <i class="fa-solid fa-sliders"></i> Ajustar:
@@ -209,7 +209,7 @@
                         <button onclick="changeTimerPreset(-5)" class="px-2.5 py-1 bg-white/20 hover:bg-white/30 active:scale-95 rounded-lg font-bold transition flex items-center gap-1">
                             <i class="fa-solid fa-minus text-[10px]"></i> 5m
                         </button>
-                        <span id="preset-label" class="font-bold px-2 text-amber-100 min-w-[3.5rem] text-center">40 min</span>
+                        <span id="preset-label" class="font-bold px-2 text-amber-100 min-w-[3.5rem] text-center">35 min</span>
                         <button onclick="changeTimerPreset(5)" class="px-2.5 py-1 bg-white/20 hover:bg-white/30 active:scale-95 rounded-lg font-bold transition flex items-center gap-1">
                             <i class="fa-solid fa-plus text-[10px]"></i> 5m
                         </button>
@@ -218,7 +218,7 @@
 
                 <div class="flex gap-2">
                     <button id="start-btn" onclick="toggleTimer()" class="flex-1 py-2.5 bg-white text-amber-800 font-bold rounded-xl text-xs hover:bg-amber-50 active:scale-95 transition shadow">
-                        Iniciar 40 min
+                        Iniciar 35 min
                     </button>
                     <button onclick="resetTimer()" class="px-3.5 py-2.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white rounded-xl text-xs transition" title="Reiniciar temporizador">
                         <i class="fa-solid fa-rotate-right"></i>
@@ -343,19 +343,6 @@
                             </p>
                         </div>
                     </div>
-
-                    <!-- Step 8 -->
-                    <div class="step-card flex gap-4 group">
-                        <div class="flex-shrink-0 w-9 h-9 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-sm group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                            8
-                        </div>
-                        <div class="space-y-1 pt-1">
-                            <h3 class="font-bold text-base text-warm-900">Desmoldado y Enfriado</h3>
-                            <p class="text-sm text-stone-600 leading-relaxed">
-                                El budín se retira del molde después de 10 minutos de salir del horno. Se ubica sobre una rejilla para evitar que se humedezca.
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -378,8 +365,6 @@
 
         // Global Audio Context initialized on user interaction to prevent browser autoplay block
         let audioCtx = null;
-        let alarmLoopInterval = null; // Controls continuous repeating alarm
-        let isAlarmRinging = false;
 
         function initAudioContext() {
             if (!audioCtx) {
@@ -397,15 +382,15 @@
         document.addEventListener('click', initAudioContext);
         document.addEventListener('touchstart', initAudioContext);
 
-        // Plays a single sharp piezo beep in note 'La' (1760 Hz - A6 pitch)
-        function playSingleBeep(startTime, duration = 0.055, freq = 1760) {
+        // Plays a single sharp piezo beep (2048 Hz - classic Casio watch frequency)
+        function playSingleBeep(startTime, duration = 0.055, freq = 2048) {
             initAudioContext();
             if (!audioCtx) return;
             
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             
-            osc.type = 'sine'; // Classic high Casio piezo tone
+            osc.type = 'sine'; // High crisp piezo tone
             osc.frequency.setValueAtTime(freq, startTime);
             
             gain.gain.setValueAtTime(0.25, startTime);
@@ -418,40 +403,30 @@
             osc.stop(startTime + duration);
         }
 
-        // Plays a pair of beeps: "Bip bip" followed by silence
-        function playCasioBeepPair() {
+        // Plays pattern: Bip bip. Bip bip. Bip bip... (Classic Casio F-91W style alarm)
+        function playAlarmSound() {
             initAudioContext();
             if (!audioCtx) return;
             
             const now = audioCtx.currentTime;
-            const freq = 1760; // Pitch of "La" (A6 note)
-            const beepDur = 0.055;
+            const freq = 2048; // Casio piezo buzzer frequency
+            const beepDur = 0.055; // 55ms crisp pulse
             
-            playSingleBeep(now, beepDur, freq);
-            playSingleBeep(now + 0.09, beepDur, freq);
-        }
+            // Time offsets for Bip bip pairs
+            const offsets = [
+                0.00, 0.09, // Bip bip
+                0.38, 0.47, // Bip bip
+                0.76, 0.85, // Bip bip
+                1.14, 1.23, // Bip bip
+                1.70, 1.79, // Bip bip
+                2.08, 2.17, // Bip bip
+                2.46, 2.55, // Bip bip
+                2.84, 2.93  // Bip bip
+            ];
 
-        // Starts the continuous looping alarm (Bip bip ... silence ... Bip bip ...)
-        function startContinuousAlarm() {
-            if (isAlarmRinging) return;
-            isAlarmRinging = true;
-            
-            // Play first double beep immediately
-            playCasioBeepPair();
-            
-            // Repeat every 1.5 seconds until stopped
-            alarmLoopInterval = setInterval(() => {
-                playCasioBeepPair();
-            }, 1500);
-        }
-
-        // Stops the ringing alarm
-        function stopAlarm() {
-            if (alarmLoopInterval) {
-                clearInterval(alarmLoopInterval);
-                alarmLoopInterval = null;
-            }
-            isAlarmRinging = false;
+            offsets.forEach(offset => {
+                playSingleBeep(now + offset, beepDur, freq);
+            });
         }
 
         // Function to toggle checklist style
@@ -488,8 +463,9 @@
             });
         }
 
+        // Timer State & Logic
         let timerInterval = null;
-        let selectedMinutes = 40; // Default starts at 40 minutes
+        let selectedMinutes = 35; // Default starts at 35 minutes
         let totalSeconds = selectedMinutes * 60;
         let isRunning = false;
 
@@ -500,12 +476,12 @@
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Adjust timer limit: 5 to 50 min, steps of 5 min
+        // Adjust timer limit: 10 to 50 min, steps of 5 min
         function changeTimerPreset(delta) {
-            if (isRunning || isAlarmRinging) return; // Lock adjustment while running or ringing
+            if (isRunning) return; // Lock adjustment while running
             
             const newMinutes = selectedMinutes + delta;
-            if (newMinutes >= 5 && newMinutes <= 50) {
+            if (newMinutes >= 10 && newMinutes <= 50) {
                 selectedMinutes = newMinutes;
                 totalSeconds = selectedMinutes * 60;
                 document.getElementById('preset-label').innerText = `${selectedMinutes} min`;
@@ -517,21 +493,9 @@
         }
 
         function toggleTimer() {
-            initAudioContext(); // Unlocks audio context when user clicks button
+            initAudioContext(); // Unlocks audio context when user clicks start/pause button
             const startBtn = document.getElementById('start-btn');
             const display = document.getElementById('timer-display');
-
-            // If the alarm is currently ringing, clicking this button stops it
-            if (isAlarmRinging) {
-                stopAlarm();
-                display.classList.remove('animate-pulse', 'bg-red-900/80');
-                startBtn.innerText = `Iniciar ${selectedMinutes} min`;
-                startBtn.classList.remove('bg-red-600', 'text-white', 'bg-amber-900');
-                startBtn.classList.add('bg-white', 'text-amber-800');
-                totalSeconds = selectedMinutes * 60;
-                updateTimerDisplay();
-                return;
-            }
 
             if (isRunning) {
                 clearInterval(timerInterval);
@@ -557,11 +521,11 @@
                     } else {
                         clearInterval(timerInterval);
                         isRunning = false;
-                        startBtn.innerText = 'Detener Alarma';
-                        startBtn.classList.remove('bg-amber-900', 'bg-white', 'text-amber-800');
-                        startBtn.classList.add('bg-red-600', 'text-white');
+                        startBtn.innerText = '¡Horneado Listo!';
+                        startBtn.classList.remove('bg-amber-900', 'text-white');
+                        startBtn.classList.add('bg-white', 'text-amber-800');
                         display.classList.add('animate-pulse', 'bg-red-900/80');
-                        startContinuousAlarm();
+                        playAlarmSound();
                     }
                 }, 1000);
             }
@@ -569,7 +533,6 @@
 
         function resetTimer() {
             clearInterval(timerInterval);
-            stopAlarm();
             isRunning = false;
             totalSeconds = selectedMinutes * 60;
             updateTimerDisplay();
@@ -579,7 +542,7 @@
             
             display.classList.remove('animate-pulse', 'bg-red-900/80');
             startBtn.innerText = `Iniciar ${selectedMinutes} min`;
-            startBtn.classList.remove('bg-amber-900', 'bg-red-600', 'text-white');
+            startBtn.classList.remove('bg-amber-900', 'text-white');
             startBtn.classList.add('bg-white', 'text-amber-800');
         }
 
