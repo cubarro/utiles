@@ -370,99 +370,83 @@
     <script>
         let currentMultiplier = 1;
 
-        // Clase de sonido estilo Casio 80s con sintetizador de onda cuadrada
-        class CasioSound {
-            constructor() {
-                this.audioCtx = null;
-                this.alarmInterval = null;
-                // 2048 Hz es la frecuencia clásica del beeper piezoeléctrico
-                this.freq = 2048; 
-                this.repeatCount = 0;
-                this.maxRepeats = 1000; // Repetir hasta 1000 veces o hasta que el usuario lo detenga
-            }
+        // Global Audio Context initialized on user interaction to prevent browser autoplay block
+        let audioCtx = null;
+        let alarmLoopInterval = null; // Controls continuous repeating alarm
+        let isAlarmRinging = false;
 
-            initAudio() {
-                if (!this.audioCtx) {
-                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContextClass) {
-                        this.audioCtx = new AudioContextClass();
-                    }
-                }
-                if (this.audioCtx && this.audioCtx.state === 'suspended') {
-                    this.audioCtx.resume();
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
                 }
             }
-
-            // Reproduce un único pulso piezoeléctrico de onda cuadrada
-            tocarTono(tiempoInicio, duracion) {
-                if (!this.audioCtx) return;
-                const osc = this.audioCtx.createOscillator();
-                const gain = this.audioCtx.createGain();
-
-                // Onda cuadrada = sonido digital retro de los 80
-                osc.type = 'square'; 
-                osc.frequency.setValueAtTime(this.freq, tiempoInicio);
-
-                // Volumen
-                gain.gain.setValueAtTime(0.15, tiempoInicio);
-                gain.gain.setValueAtTime(0, tiempoInicio + duracion);
-
-                osc.connect(gain);
-                gain.connect(this.audioCtx.destination);
-
-                osc.start(tiempoInicio);
-                osc.stop(tiempoInicio + duracion);
-            }
-
-            // El clásico "Bip - Bip"
-            bipHorario() {
-                this.initAudio();
-                if (!this.audioCtx) return;
-                const ahora = this.audioCtx.currentTime;
-                const duracionPulso = 0.05; // 50 milisegundos
-                const espacio = 0.07; // Espacio entre bips
-
-                this.tocarTono(ahora, duracionPulso);
-                this.tocarTono(ahora + duracionPulso + espacio, duracionPulso);
-            }
-
-            iniciarAlarma() {
-                this.initAudio();
-                if (this.alarmInterval) return;
-
-                this.repeatCount = 0;
-                this.bipHorario();
-                this.repeatCount++;
-
-                // Se repite cada 1 segundo hasta 1000 veces o hasta detenerla
-                this.alarmInterval = setInterval(() => {
-                    if (this.repeatCount >= this.maxRepeats) {
-                        this.detenerAlarma();
-                        return;
-                    }
-                    this.bipHorario();
-                    this.repeatCount++;
-                }, 1000);
-            }
-
-            detenerAlarma() {
-                if (this.alarmInterval) {
-                    clearInterval(this.alarmInterval);
-                    this.alarmInterval = null;
-                }
-                this.repeatCount = 0;
-            }
-
-            isRinging() {
-                return this.alarmInterval !== null;
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
         }
 
-        const sonidoCasio = new CasioSound();
-
         // Unlock audio on any user tap or click anywhere on the document
-        document.addEventListener('click', () => sonidoCasio.initAudio());
-        document.addEventListener('touchstart', () => sonidoCasio.initAudio());
+        document.addEventListener('click', initAudioContext);
+        document.addEventListener('touchstart', initAudioContext);
+
+        // Plays a single sharp piezo beep in note 'La' (1760 Hz - A6 pitch)
+        function playSingleBeep(startTime, duration = 0.055, freq = 1760) {
+            initAudioContext();
+            if (!audioCtx) return;
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine'; // Classic high Casio piezo tone
+            osc.frequency.setValueAtTime(freq, startTime);
+            
+            gain.gain.setValueAtTime(0.25, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+
+        // Plays a pair of beeps: "Bip bip" followed by silence
+        function playCasioBeepPair() {
+            initAudioContext();
+            if (!audioCtx) return;
+            
+            const now = audioCtx.currentTime;
+            const freq = 1760; // Pitch of "La" (A6 note)
+            const beepDur = 0.055;
+            
+            playSingleBeep(now, beepDur, freq);
+            playSingleBeep(now + 0.09, beepDur, freq);
+        }
+
+        // Starts the continuous looping alarm (Bip bip ... silence ... Bip bip ...)
+        function startContinuousAlarm() {
+            if (isAlarmRinging) return;
+            isAlarmRinging = true;
+            
+            // Play first double beep immediately
+            playCasioBeepPair();
+            
+            // Repeat every 1.5 seconds until stopped
+            alarmLoopInterval = setInterval(() => {
+                playCasioBeepPair();
+            }, 1500);
+        }
+
+        // Stops the ringing alarm
+        function stopAlarm() {
+            if (alarmLoopInterval) {
+                clearInterval(alarmLoopInterval);
+                alarmLoopInterval = null;
+            }
+            isAlarmRinging = false;
+        }
 
         // Function to toggle checklist style
         function toggleCheck(element) {
@@ -512,7 +496,7 @@
 
         // Adjust timer limit: 5 to 50 min, steps of 5 min
         function changeTimerPreset(delta) {
-            if (isRunning || sonidoCasio.isRinging()) return; // Lock adjustment while running or ringing
+            if (isRunning || isAlarmRinging) return; // Lock adjustment while running or ringing
             
             const newMinutes = selectedMinutes + delta;
             if (newMinutes >= 5 && newMinutes <= 50) {
@@ -527,13 +511,13 @@
         }
 
         function toggleTimer() {
-            sonidoCasio.initAudio(); // Unlocks audio context when user clicks button
+            initAudioContext(); // Unlocks audio context when user clicks button
             const startBtn = document.getElementById('start-btn');
             const display = document.getElementById('timer-display');
 
             // If the alarm is currently ringing, clicking this button stops it
-            if (sonidoCasio.isRinging()) {
-                sonidoCasio.detenerAlarma();
+            if (isAlarmRinging) {
+                stopAlarm();
                 display.classList.remove('animate-pulse', 'bg-red-900/80');
                 startBtn.innerText = `Iniciar ${selectedMinutes} min`;
                 startBtn.classList.remove('bg-red-600', 'text-white', 'bg-amber-900');
@@ -571,9 +555,7 @@
                         startBtn.classList.remove('bg-amber-900', 'bg-white', 'text-amber-800');
                         startBtn.classList.add('bg-red-600', 'text-white');
                         display.classList.add('animate-pulse', 'bg-red-900/80');
-                        
-                        // Dispara la alarma con el patrón de onda cuadrada a 2048 Hz
-                        sonidoCasio.iniciarAlarma();
+                        startContinuousAlarm();
                     }
                 }, 1000);
             }
@@ -581,7 +563,7 @@
 
         function resetTimer() {
             clearInterval(timerInterval);
-            sonidoCasio.detenerAlarma();
+            stopAlarm();
             isRunning = false;
             totalSeconds = selectedMinutes * 60;
             updateTimerDisplay();
