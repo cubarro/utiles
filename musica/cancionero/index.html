@@ -488,10 +488,12 @@ Señor, ten piedad de nosotros...</div>
     <div class="slide ${bgColor}">
         <div class="bg-watermark"><i class="fa-solid ${icon}"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">${song.category}</h2>
-            <div class="tone-badge">Tono: ${song.tone}</div>
-            <div class="lyrics">${song.lyrics}</div>
-            <div class="footer">${song.title} - Pág. ${i + 1}</div>
+            <div class="scroll-area">
+                <div class="moment-label">${song.title}</div>
+                <h2 class="song-title">${song.category}</h2>
+                <div class="tone-badge">${song.tone}</div>
+                <div class="lyrics">${song.lyrics}</div>
+            </div>
         </div>
     </div>`;
         });
@@ -523,6 +525,7 @@ Señor, ten piedad de nosotros...</div>
         h1 { font-family: 'Poppins', sans-serif; font-size: 28px; color: #0f172a; margin-top: 10px; }
         h2.song-title { font-family: 'Poppins', sans-serif; font-size: 22px; color: #334155; text-transform: uppercase; flex-shrink: 0; margin-top: 10px; }
         .tone-badge { align-self: center; background-color: rgba(0, 0, 0, 0.06); padding: 4px 14px; border-radius: 50px; font-size: 12px; font-weight: 700; color: #475569; margin: 6px 0 12px 0; flex-shrink: 0; }
+        .moment-label { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 10px; margin-bottom: 2px; flex-shrink: 0; }
         .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; padding: 0 4px; text-align: left; }
         .repeat { color: #94a3b8; font-style: italic; font-weight: bold; font-size: 0.9em; display: block; margin-top: 2px; }
         .footer { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 8px; flex-shrink: 0; text-align: center; }
