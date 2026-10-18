@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AC Terrazas del Sol · Cantidades estimadas</title>
+<style>
+  :root{
+    --bg:#ececec;
+    --panel:#ffffff;
+    --border:#c9c9c9;
+    --banner:#7d7d7d;
+    --ink:#1d1d1d;
+    --accent:#2e6da4;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+
+  /* ---------- Encabezado de la página ---------- */
+  header{ text-align:center; padding:26px 16px 6px; }
+  header h1{
+    margin:0;
+    font-size:clamp(1.5rem, 4vw, 2.2rem);
+    letter-spacing:.5px;
+  }
+  header .subtitle{
+    margin:4px 0 0;
+    font-size:clamp(1rem, 2.5vw, 1.25rem);
+    font-weight:400;
+    color:#555;
+  }
+
+  /* ---------- Paneles ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid #ddd;
+    border-radius:12px;
+    max-width:960px;
+    margin:14px auto;
+    padding:18px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);
+  }
+  .panel h2{
+    margin:0 0 12px;
+    font-size:1.05rem;
+    font-weight:600;
+    text-align:center;
+    color:#444;
+  }
+
+  /* ---------- Editor de cantidades ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    gap:12px;
+  }
+  .field label{
+    display:block;
+    font-weight:700;
+    margin-bottom:6px;
+    text-align:center;
+  }
+  .field input{
+    width:100%;
+    padding:10px 8px;
+    font-size:1.15rem;
+    text-align:center;
+    border:1px solid #bbb;
+    border-radius:8px;
+    background:#fafafa;
+  }
+  .field input:focus{ outline:2px solid var(--accent); background:#fff; }
+
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-top:16px;
+  }
+  .actions button{
+    padding:12px 26px;
+    font-size:1rem;
+    font-weight:600;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    color:#fff;
+    transition:filter .15s;
+  }
+  .actions button:hover:not(:disabled){ filter:brightness(1.12); }
+  .actions button:disabled{ opacity:.45; cursor:not-allowed; }
+  #btnRender{ background:var(--accent); }
+  #btnDownload{ background:#666; }
+
+  .hint{
+    text-align:center;
+    font-size:.85rem;
+    color:#777;
+    margin:12px 0 0;
+  }
+
+  /* ---------- Hoja de vista previa (mismo formato que el PNG) ---------- */
+  .sheet{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    max-width:920px;
+    margin:0 auto;
+    padding:22px 20px 14px;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+  }
+  .sheet-title{
+    margin:0;
+    font-size:30px;
+    font-weight:700;
+    text-align:center;
+    color:var(--ink);
+  }
+  .sheet-sub{
+    margin:2px 0 24px;
+    font-size:18px;
+    font-weight:400;
+    text-align:center;
+    color:#666;
+  }
+  .sheet-date{
+    margin:20px 0 0;
+    font-size:14px;
+    text-align:center;
+    color:#777;
+  }
+
+  .board{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    justify-content:center;
+  }
+  .card{
+    width:200px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:8px;
+    box-shadow:0 2px 5px rgba(0,0,0,.14);
+    text-align:center;
+    padding:16px 14px 12px;
+  }
+  .card .qty{
+    font-size:44px;
+    line-height:1.15;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .card .tag{
+    margin-top:12px;
+    background:var(--banner);
+    color:#fff;
+    font-weight:700;
+    font-size:17px;
+    padding:3px 0;
+    border-radius:3px;
+  }
+  .empty-note{ color:#888; font-size:.95rem; text-align:center; margin:40px 0; }
+
+  /* ---------- Salida PNG ---------- */
+  .png-wrap{ text-align:center; }
+  #pngPreview{
+    max-width:100%;
+    height:auto;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+    border-radius:4px;
+  }
+  .placeholder{
+    text-align:center;
+    color:#999;
+    font-size:.95rem;
+  }
+  .hidden{ display:none !important; }
+  #pngCanvas{ display:none; }
+
+  @media (max-width:480px){
+    .panel{ margin:10px; padding:14px; }
+    .actions button{ flex:1 1 100%; }
+    .sheet-title{ font-size:24px; }
+    .sheet-sub{ font-size:16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AC Terrazas del Sol</h1>
+  <p class="subtitle">Cantidades estimadas</p>
+</header>
+
+<main>
+  <!-- Editor -->
+  <section class="panel">
+    <h2>Editar cantidades</h2>
+    <div class="grid" id="fields"></div>
+    <div class="actions">
+      <button id="btnRender">Renderizar PNG</button>
+      <button id="btnDownload" disabled>Descargar PNG</button>
+    </div>
+    <p class="hint">Las partidas con cantidad <strong>0</strong> no aparecen en la figura generada.</p>
+  </section>
+
+  <!-- Vista previa en vivo (idéntica al PNG) -->
+  <section class="panel">
+    <h2>Vista previa en el navegador</h2>
+    <div id="board"></div>
+  </section>
+
+  <!-- Salida PNG -->
+  <section class="panel">
+    <h2>Figura renderizada (PNG)</h2>
+    <div class="png-wrap">
+      <p id="placeholder" class="placeholder">Pulsa «Renderizar PNG» para generar la figura.</p>
+      <img id="pngPreview" class="hidden" alt="Figura PNG con las cantidades estimadas">
+    </div>
+  </section>
+</main>
+
+<!-- Lienzo oculto usado para generar el PNG -->
+<canvas id="pngCanvas"></canvas>
+
+<script>
+(function(){
+  'use strict';
+
+  const WEIGHTS  = [10, 18, 27, 43];
+  const DEFAULTS = {10:15, 18:17, 27:0, 43:3};  // ejemplo inicial (27 kg = 0 → no aparece)
+  const SCALE    = 2;                            // resolución 2x para un PNG nítido
+  const FONT     = "'Segoe UI', Roboto, Arial, sans-serif";
+
+  const fieldsEl    = document.getElementById('fields');
+  const boardEl     = document.getElementById('board');
+  const btnRender   = document.getElementById('btnRender');
+  const btnDownload = document.getElementById('btnDownload');
+  const canvas      = document.getElementById('pngCanvas');
+  const ctx         = canvas.getContext('2d');
+  const img         = document.getElementById('pngPreview');
+  const placeholder = document.getElementById('placeholder');
+
+  /* ---------- Crear campos de edición ---------- */
+  WEIGHTS.forEach((w, i) => {
+    const div = document.createElement('div');
+    div.className = 'field';
+    div.innerHTML =
+      '<label for="qty-' + i + '">' + w + ' kg</label>' +
+      '<input type="number" id="qty-' + i + '" inputmode="numeric" ' +
+      'min="0" step="1" value="' + (DEFAULTS[w] || 0) + '">';
+    fieldsEl.appendChild(div);
+  });
+
+  /* ---------- Leer datos (filtra los 0) ---------- */
+  function getData(){
+    return WEIGHTS
+      .map((w, i) => ({ w: w, qty: parseInt(document.getElementById('qty-'+i).value, 10) || 0 }))
+      .filter(d => d.qty > 0);
+  }
+
+  /* ---------- Fecha actual en español ---------- */
+  function formatDate(){
+    return new Date().toLocaleDateString('es-ES', {
+      day:'numeric', month:'long', year:'numeric'
+    });
+  }
+
+  /* ---------- Tarjeta redondeada (helper) ---------- */
+  function rr(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y,     x + w, y + h, r);
+    c.arcTo(x + w, y + h, x,     y + h, r);
+    c.arcTo(x,     y + h, x,     y,     r);
+    c.arcTo(x,     y,     x + w, y,     r);
+    c.closePath();
+  }
+
+  /* ---------- Dibuja una tarjeta igual a la referencia ---------- */
+  function drawCard(c, x, y, d){
+    const W = 200, H = 112;
+    c.save();
+    c.translate(x, y);
+
+    // fondo + sombra sutil
+    c.shadowColor = 'rgba(0,0,0,.18)';
+    c.shadowBlur = 6;
+    c.shadowOffsetY = 2;
+    c.fillStyle = '#ffffff';
+    rr(c, 0, 0, W, H, 8);
+    c.fill();
+    c.shadowColor = 'transparent';
+
+    // borde
+    c.lineWidth = 1;
+    c.strokeStyle = '#c9c9c9';
+    rr(c, 0, 0, W, H, 8);
+    c.stroke();
+
+    // número grande
+    c.fillStyle = '#1d1d1d';
+    c.font = "600 44px " + FONT;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(d.qty, W / 2, 45);
+
+    // banda gris con los kg
+    const bw = W - 28, bh = 26, bx = 14, by = H - bh - 12;
+    c.fillStyle = '#7d7d7d';
+    rr(c, bx, by, bw, bh, 3);
+    c.fill();
+    c.fillStyle = '#ffffff';
+    c.font = "700 17px " + FONT;
+    c.fillText(d.w + ' kg', W / 2, by + bh / 2 + 0.5);
+
+    c.restore();
+  }
+
+  /* ---------- Vista previa en vivo (idéntica al PNG) ---------- */
+  function renderBoard(){
+    const data = getData();
+    let cardsHtml;
+
+    if(data.length === 0){
+      cardsHtml = '<p class="empty-note">Todas las cantidades están en 0.</p>';
+    } else {
+      cardsHtml = '<div class="board">' + data.map(d =>
+        '<div class="card">' +
+          '<div class="qty">' + d.qty + '</div>' +
+          '<div class="tag">' + d.w + ' kg</div>' +
+        '</div>'
+      ).join('') + '</div>';
+    }
+
+    boardEl.innerHTML =
+      '<div class="sheet">' +
+        '<h2 class="sheet-title">AC Terrazas del Sol</h2>' +
+        '<p class="sheet-sub">Cantidades estimadas</p>' +
+        cardsHtml +
+        '<p class="sheet-date">Generado el ' + formatDate() + '</p>' +
+      '</div>';
+  }
+
+  /* ---------- Renderizar PNG (botón) ---------- */
+  function renderPNG(){
+    const data = getData();
+    const n = data.length;
+
+    // --- dimensiones del tablero ---
+    const padX  = 24;
+    const cardW = 200, cardH = 112, gap = 16;
+    const minW  = 500; // ancho mínimo para que el título respire
+
+    const rowW = n ? (n * cardW + (n - 1) * gap) : 0;
+    const W = Math.max(minW, rowW + padX * 2);
+
+    const headTop = 20;
+    const titleY  = headTop + 30;        // línea base del título (30 px)
+    const subY    = titleY + 27;         // línea base del subtítulo (18 px)
+    const cardsY  = subY + 26;           // inicio de las tarjetas
+    const dateY   = cardsY + cardH + 28; // línea base de la fecha
+    const H       = dateY + 16;
+
+    canvas.width  = Math.round(W * SCALE);
+    canvas.height = Math.round(H * SCALE);
+    ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // fondo blanco
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    const cx = W / 2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
+    // --- título dentro del tablero ---
+    ctx.fillStyle = '#1d1d1d';
+    ctx.font = '700 30px ' + FONT;
+    ctx.fillText('AC Terrazas del Sol', cx, titleY);
+
+    // --- subtítulo ---
+    ctx.fillStyle = '#666666';
+    ctx.font = '400 18px ' + FONT;
+    ctx.fillText('Cantidades estimadas', cx, subY);
+
+    // --- tarjetas (centradas en el ancho disponible) ---
+    if(n === 0){
+      ctx.fillStyle = '#999999';
+      ctx.font = '400 16px ' + FONT;
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Sin partidas con cantidad mayor que 0', cx, cardsY + cardH / 2);
+      ctx.textBaseline = 'alphabetic';
+    } else {
+      const startX = (W - rowW) / 2;
+      data.forEach((d, i) => drawCard(ctx, startX + i * (cardW + gap), cardsY, d));
+    }
+
+    // --- fecha actual en la base del tablero ---
+    ctx.fillStyle = '#777777';
+    ctx.font = '400 14px ' + FONT;
+    ctx.fillText('Generado el ' + formatDate(), cx, dateY);
+
+    // --- mostrar resultado ---
+    img.src = canvas.toDataURL('image/png');
+    img.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+    btnDownload.disabled = false;
+
+    img.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  /* ---------- Descargar PNG ---------- */
+  btnDownload.addEventListener('click', function(){
+    if(btnDownload.disabled) return;
+    const hoy  = new Date();
+    const iso  = hoy.getFullYear() + '-' +
+                 String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+                 String(hoy.getDate()).padStart(2, '0');
+    const a = document.createElement('a');
+    a.download = 'ac-terrazas-del-sol-' + iso + '.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+
+  /* ---------- Eventos ---------- */
+  btnRender.addEventListener('click', renderPNG);
+
+  fieldsEl.addEventListener('input', renderBoard); // vista previa en vivo
+
+  fieldsEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); renderPNG(); }
+  });
+
+  // Vista previa inicial
+  renderBoard();
+})();
+</script>
+
+</body>
+</html>
