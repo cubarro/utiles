@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    
     <style>
         :root {
             --primary: #3b82f6;
@@ -489,7 +489,7 @@ Señor, ten piedad de nosotros...</div>
         <div class="bg-watermark"><i class="fa-solid ${icon}"></i></div>
         <div class="slide-content">
             <h2 class="song-title">${song.category}</h2>
-            <div class="tone-badge">${song.tone}</div>
+            <div class="tone-badge">Tono: ${song.tone}</div>
             <div class="lyrics">${song.lyrics}</div>
             <div class="footer">${song.title} - Pág. ${i + 1}</div>
         </div>
@@ -507,27 +507,26 @@ Señor, ten piedad de nosotros...</div>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --base-lyrics-size: 16px; }
+        :root { --base-lyrics-size: 22px; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; }
-        .app-container { width: 80vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; margin: 0; }
+        .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; }
         .app-container.windowed { width: 405px; height: 720px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        @media (max-width: 768px) {
-            .app-container { width: 100vw; box-shadow: none; }
-        }
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 75px 24px 90px 24px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1; overflow: hidden; }
         .slide-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; max-width: 450px; margin: 0 auto; width: 100%; overflow: hidden; }
+        .slide:not(:first-child) .slide-content { max-width: 80%; }
         .slide.active { opacity: 1; visibility: visible; z-index: 2; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding: 0 4px; display: flex; flex-direction: column; max-height: 100%; }
         .bg-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; z-index: 0; pointer-events: none; }
         .bg-watermark i { font-size: 450px; color: #000; }
         .bg-cream { background-color: #fffaf0; } .bg-mint { background-color: #f4fff8; } .bg-sky { background-color: #f0f7ff; } .bg-rose { background-color: #fff5f7; } .bg-lavender { background-color: #f9f8ff; } .bg-peach { background-color: #fff5ea; }
         h1 { font-family: 'Poppins', sans-serif; font-size: 28px; color: #0f172a; margin-top: 10px; }
         h2.song-title { font-family: 'Poppins', sans-serif; font-size: 22px; color: #334155; text-transform: uppercase; flex-shrink: 0; margin-top: 10px; }
         .tone-badge { align-self: center; background-color: rgba(0, 0, 0, 0.06); padding: 4px 14px; border-radius: 50px; font-size: 12px; font-weight: 700; color: #475569; margin: 6px 0 12px 0; flex-shrink: 0; }
-        .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; overflow-y: auto; padding: 0 4px; flex-grow: 1; max-height: 100%; text-align: left; }
+        .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; padding: 0 4px; text-align: left; }
         .repeat { color: #94a3b8; font-style: italic; font-weight: bold; font-size: 0.9em; display: block; margin-top: 2px; }
         .footer { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 8px; flex-shrink: 0; text-align: center; }
-        .index-container { overflow-y: auto; flex-grow: 1; width: 100%; padding-right: 5px; margin-bottom: 5px; }
+        .index-container { width: 100%; padding-right: 5px; margin-bottom: 5px; }
         .index-list { list-style: none; width: 100%; text-align: left; }
         .index-list li { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: calc(var(--base-lyrics-size) * 0.7); font-weight: 700; color: #334155; }
         .index-list li:hover { background-color: rgba(0,0,0,0.03); }
@@ -545,8 +544,8 @@ Señor, ten piedad de nosotros...</div>
 <div class="app-container" id="appFrame">
     <div class="top-actions">
         <div class="action-group">
-            <button class="action-btn" onclick="changeFontSize(-1)" title="Reducir Letra"><i class="fa-solid fa-minus"></i></button>
-            <button class="action-btn" onclick="changeFontSize(1)" title="Aumentar Letra"><i class="fa-solid fa-plus"></i></button>
+            <button class="action-btn" onclick="changeFontSize(-2)" title="Reducir Letra"><i class="fa-solid fa-minus"></i></button>
+            <button class="action-btn" onclick="changeFontSize(2)" title="Aumentar Letra"><i class="fa-solid fa-plus"></i></button>
         </div>
         <div class="action-group">
             <button class="action-btn" onclick="goToSlide(1)" title="Ir al Índice"><i class="fa-solid fa-list"></i></button>
@@ -560,7 +559,7 @@ Señor, ten piedad de nosotros...</div>
         <div class="slide-content" style="justify-content: center;">
             <h1>__TITLE__</h1>
             <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">__SUBTITLE__</p>
-            <div class="footer" style="margin-top: 60px;">Usa botones</div>
+            <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
         </div>
     </div>
 
@@ -568,11 +567,13 @@ Señor, ten piedad de nosotros...</div>
     <div class="slide bg-lavender">
         <div class="bg-watermark"><i class="fa-solid fa-book"></i></div>
         <div class="slide-content">
-            <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
-            <div class="index-container">
-                <ul class="index-list">
-                    __INDEX__
-                </ul>
+            <div class="scroll-area">
+                <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
+                <div class="index-container">
+                    <ul class="index-list">
+                        __INDEX__
+                    </ul>
+                </div>
             </div>
             <div class="footer">Presiona para ir directo al canto</div>
         </div>
@@ -594,7 +595,7 @@ __INTERNAL_SCRIPT__
 
         let appScript = '<script>' + `
             let currentSlide = 0;
-            let currentFontSize = 16;
+            let currentFontSize = 22;
             const slides = document.querySelectorAll('.slide');
             const pageIndicator = document.getElementById('pageIndicator');
             const appFrame = document.getElementById('appFrame');
@@ -605,7 +606,7 @@ __INTERNAL_SCRIPT__
                     if(index === currentSlide) {
                         slide.classList.add('active');
                         slide.scrollTop = 0;
-                        const l = slide.querySelector('.lyrics'); if(l) l.scrollTop = 0;
+                        const sa = slide.querySelector('.scroll-area'); if(sa) sa.scrollTop = 0;
                     } else {
                         slide.classList.remove('active');
                     }
@@ -619,7 +620,7 @@ __INTERNAL_SCRIPT__
 
             function changeFontSize(amount) {
                 let n = currentFontSize + amount;
-                if (n >= 12 && n <= 36) { currentFontSize = n; document.documentElement.style.setProperty('--base-lyrics-size', n + 'px'); }
+                if (n >= 14 && n <= 36) { currentFontSize = n; document.documentElement.style.setProperty('--base-lyrics-size', n + 'px'); }
             }
 
             function toggleMaximize() {
@@ -653,6 +654,13 @@ __INTERNAL_SCRIPT__
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowRight') nextSlide(); if (e.key === 'ArrowLeft') prevSlide();
+            });
+
+            let ts = 0;
+            appFrame.addEventListener('touchstart', e => ts = e.changedTouches[0].screenX);
+            appFrame.addEventListener('touchend', e => {
+                let te = e.changedTouches[0].screenX;
+                if (ts - te > 60) nextSlide(); if (te - ts > 60) prevSlide();
             });
         ` + '<' + '/script>';
 

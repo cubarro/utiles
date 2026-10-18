@@ -11,25 +11,24 @@
     <style>
         :root { --base-lyrics-size: 16px; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; }
-        .app-container { width: 80vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; margin: 0; }
+        .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .app-container.windowed { width: 405px; height: 720px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        @media (max-width: 768px) {
-            .app-container { width: 100vw; box-shadow: none; }
-        }
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 75px 24px 90px 24px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1; overflow: hidden; }
         .slide-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; max-width: 450px; margin: 0 auto; width: 100%; overflow: hidden; }
+        .slide:not(:first-child) .slide-content { max-width: 80%; }
         .slide.active { opacity: 1; visibility: visible; z-index: 2; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding: 0 4px; display: flex; flex-direction: column; max-height: 100%; }
         .bg-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; z-index: 0; pointer-events: none; }
         .bg-watermark i { font-size: 450px; color: #000; }
         .bg-cream { background-color: #fffaf0; } .bg-mint { background-color: #f4fff8; } .bg-sky { background-color: #f0f7ff; } .bg-rose { background-color: #fff5f7; } .bg-lavender { background-color: #f9f8ff; } .bg-peach { background-color: #fff5ea; }
         h1 { font-family: 'Poppins', sans-serif; font-size: 28px; color: #0f172a; margin-top: 10px; }
         h2.song-title { font-family: 'Poppins', sans-serif; font-size: 22px; color: #334155; text-transform: uppercase; flex-shrink: 0; margin-top: 10px; }
         .tone-badge { align-self: center; background-color: rgba(0, 0, 0, 0.06); padding: 4px 14px; border-radius: 50px; font-size: 12px; font-weight: 700; color: #475569; margin: 6px 0 12px 0; flex-shrink: 0; }
-        .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; overflow-y: auto; padding: 0 4px; flex-grow: 1; max-height: 100%; text-align: left; }
+        .lyrics { font-size: var(--base-lyrics-size); line-height: 1.45; font-weight: 700; white-space: pre-line; color: #1e293b; margin: auto 0; transition: font-size 0.15s ease; padding: 0 4px; text-align: left; }
         .repeat { color: #94a3b8; font-style: italic; font-weight: bold; font-size: 0.9em; display: block; margin-top: 2px; }
         .footer { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 8px; flex-shrink: 0; text-align: center; }
-        .index-container { overflow-y: auto; flex-grow: 1; width: 100%; padding-right: 5px; margin-bottom: 5px; }
+        .index-container { width: 100%; padding-right: 5px; margin-bottom: 5px; }
         .index-list { list-style: none; width: 100%; text-align: left; }
         .index-list li { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: calc(var(--base-lyrics-size) * 0.7); font-weight: 700; color: #334155; }
         .index-list li:hover { background-color: rgba(0,0,0,0.03); }
@@ -70,21 +69,22 @@
     <div class="slide bg-lavender">
         <div class="bg-watermark"><i class="fa-solid fa-book"></i></div>
         <div class="slide-content">
-            <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
-            <div class="index-container">
-                <ul class="index-list">
-                    <li onclick="goToSlide(2)">1. La misa es una fiesta: Entrada <span class="tone">Do</span></li>
-<li onclick="goToSlide(3)">2. Ten piedad de mi Señor: Penitencial <span class="tone">La-</span></li>
-<li onclick="goToSlide(4)">3. Galindo: Gloria <span class="tone">Do</span></li>
-<li onclick="goToSlide(5)">4. Entre lecturas: Alelu <span class="tone">Re</span></li>
-<li onclick="goToSlide(6)">5. Ofertorio: Ante tu altar <span class="tone">Do</span></li>
-<li onclick="goToSlide(7)">6. Santo ohsanna: Santo <span class="tone">La-</span></li>
-<li onclick="goToSlide(8)">7. Cordero de Dios: Cordero <span class="tone">Sol</span></li>
-<li onclick="goToSlide(9)">8. Tu el único rey: Comunión <span class="tone">Do</span></li>
-<li onclick="goToSlide(10)">9. Alma de Cristo: Comunión <span class="tone">La-</span></li>
-<li onclick="goToSlide(11)">10. Demos gracias: Salida <span class="tone">La</span></li>
-
-                </ul>
+            <div class="scroll-area">
+                <h2 class="song-title" style="margin-bottom: 10px;">Esquema / Índice</h2>
+                <div class="index-container">
+                    <ul class="index-list">
+                        <li onclick="goToSlide(2)">1. La misa es una fiesta: Entrada <span class="tone">Do</span></li>
+                    <li onclick="goToSlide(3)">2. Ten piedad de mi Señor: Penitencial <span class="tone">La-</span></li>
+                    <li onclick="goToSlide(4)">3. Galindo: Gloria <span class="tone">Do</span></li>
+                    <li onclick="goToSlide(5)">4. Entre lecturas: Alelu <span class="tone">Re</span></li>
+                    <li onclick="goToSlide(6)">5. Ofertorio: Ante tu altar <span class="tone">Do</span></li>
+                    <li onclick="goToSlide(7)">6. Santo ohsanna: Santo <span class="tone">La-</span></li>
+                    <li onclick="goToSlide(8)">7. Cordero de Dios: Cordero <span class="tone">Sol</span></li>
+                    <li onclick="goToSlide(9)">8. Tu el único rey: Comunión <span class="tone">Do</span></li>
+                    <li onclick="goToSlide(10)">9. Alma de Cristo: Comunión <span class="tone">La-</span></li>
+                    <li onclick="goToSlide(11)">10. Demos gracias: Salida <span class="tone">La</span></li>
+                    </ul>
+                </div>
             </div>
             <div class="footer">Presiona para ir directo al canto</div>
         </div>
@@ -95,9 +95,10 @@
     <div class="slide bg-sky">
         <div class="bg-watermark"><i class="fa-solid fa-music"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">La misa es una fiesta</h2>
-            <div class="tone-badge">Do</div>
-            <div class="lyrics">La misa es una fiesta muy alegre,
+            <div class="scroll-area">
+                <h2 class="song-title">La misa es una fiesta</h2>
+                <div class="tone-badge">Do</div>
+                <div class="lyrics">La misa es una fiesta muy alegre,
 la misa es una fiesta con Jesús.
 La misa es una fiesta que nos une,
 la misa es una fiesta con Jesús.
@@ -126,15 +127,17 @@ la misa es una fiesta con Jesús.
 La misa es una fiesta que nos une,
 la misa es una fiesta con Jesús.
 La misa es una fiesta con Jesús.</div>
+            </div>
             <div class="footer">Entrada - Pág. 1</div>
         </div>
     </div>
     <div class="slide bg-rose">
         <div class="bg-watermark"><i class="fa-solid fa-guitar"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Ten piedad de mi Señor</h2>
-            <div class="tone-badge">La-</div>
-            <div class="lyrics">Ten piedad de mí Señor, ten piedad, ten piedad,
+            <div class="scroll-area">
+                <h2 class="song-title">Ten piedad de mi Señor</h2>
+                <div class="tone-badge">La-</div>
+                <div class="lyrics">Ten piedad de mí Señor, ten piedad, ten piedad,
 ten piedad de mí Señor, ten piedad de mí.
 
 Cristo, Cristo ten piedad, ten piedad, ten piedad,
@@ -142,15 +145,17 @@ Cristo, Cristo ten piedad, ten piedad de mí.
 
 Ten piedad de mí Señor, ten piedad, ten piedad,
 ten piedad de mí Señor, ten piedad de mí.</div>
+            </div>
             <div class="footer">Penitencial - Pág. 2</div>
         </div>
     </div>
     <div class="slide bg-mint">
         <div class="bg-watermark"><i class="fa-solid fa-hands-praying"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Galindo</h2>
-            <div class="tone-badge">Do</div>
-            <div class="lyrics">Gloria a Dios en el Cielo y en la tierra paz
+            <div class="scroll-area">
+                <h2 class="song-title">Galindo</h2>
+                <div class="tone-badge">Do</div>
+                <div class="lyrics">Gloria a Dios en el Cielo y en la tierra paz
 a los hombres que ama el Señor (2)
 
 | I |
@@ -182,15 +187,17 @@ solo Tú, OH Señor
 solo tu altísimo Jesucristo
 con el Espíritu Santo
 en la Gloria de Dios Padre</div>
+            </div>
             <div class="footer">Gloria - Pág. 3</div>
         </div>
     </div>
     <div class="slide bg-peach">
         <div class="bg-watermark"><i class="fa-solid fa-dove"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Entre lecturas</h2>
-            <div class="tone-badge">Re</div>
-            <div class="lyrics">Alelu, alelu, alelu, aleluya, gracias Señor.
+            <div class="scroll-area">
+                <h2 class="song-title">Entre lecturas</h2>
+                <div class="tone-badge">Re</div>
+                <div class="lyrics">Alelu, alelu, alelu, aleluya, gracias Señor.
 Alelu, alelu, alelu, aleluya, gracias Señor.
 Gracias Señor, aleluya, gracias Señor, aleluya,
 Gracias Señor, aleluya, gracias Señor.
@@ -199,15 +206,17 @@ Alelu, alelu, alelu, aleluya, gracias Señor.
 Alelu, alelu, alelu, aleluya, gracias Señor.
 Gracias Señor, aleluya, gracias Señor, aleluya,
 Gracias Señor, aleluya, gracias Señor.</div>
+            </div>
             <div class="footer">Alelu - Pág. 4</div>
         </div>
     </div>
     <div class="slide bg-lavender">
         <div class="bg-watermark"><i class="fa-solid fa-heart"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Ofertorio</h2>
-            <div class="tone-badge">Do</div>
-            <div class="lyrics">Ante tu altar
+            <div class="scroll-area">
+                <h2 class="song-title">Ofertorio</h2>
+                <div class="tone-badge">Do</div>
+                <div class="lyrics">Ante tu altar
 Hoy como hermanos
 El pan y el vino te presentamos (Bis)
 
@@ -221,15 +230,17 @@ y como trigo puro nos puedes sembrar.
 Pués el trigo que no muere solo se queda.
 Y el que muere,
 y el que muere fruto eterno dará</div>
+            </div>
             <div class="footer">Ante tu altar - Pág. 5</div>
         </div>
     </div>
     <div class="slide bg-cream">
         <div class="bg-watermark"><i class="fa-solid fa-sun"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Santo ohsanna</h2>
-            <div class="tone-badge">La-</div>
-            <div class="lyrics">Santo, santo santo
+            <div class="scroll-area">
+                <h2 class="song-title">Santo ohsanna</h2>
+                <div class="tone-badge">La-</div>
+                <div class="lyrics">Santo, santo santo
 es el Señor (bis)
 
 Dios del universo (bis)
@@ -244,15 +255,17 @@ en nombre del Señor (bis)
 
 Ohsanna, Ohsanna, Ohsanna, Ohsanna
 en lo alto del cielo (bis)</div>
+            </div>
             <div class="footer">Santo - Pág. 6</div>
         </div>
     </div>
     <div class="slide bg-sky">
         <div class="bg-watermark"><i class="fa-solid fa-music"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Cordero de Dios</h2>
-            <div class="tone-badge">Sol</div>
-            <div class="lyrics">Cordero de Dios
+            <div class="scroll-area">
+                <h2 class="song-title">Cordero de Dios</h2>
+                <div class="tone-badge">Sol</div>
+                <div class="lyrics">Cordero de Dios
 Que quitas el pecado del mundo ten piedad
 
 Cordero de Dios
@@ -262,15 +275,17 @@ Cordero de Dios
 Que quitas el pecado del mundo danos la paz
 danos la paz
 danos la paz</div>
+            </div>
             <div class="footer">Cordero - Pág. 7</div>
         </div>
     </div>
     <div class="slide bg-rose">
         <div class="bg-watermark"><i class="fa-solid fa-guitar"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Tu el único rey</h2>
-            <div class="tone-badge">Do</div>
-            <div class="lyrics">Tú él único Rey,que tiene que reinar
+            <div class="scroll-area">
+                <h2 class="song-title">Tu el único rey</h2>
+                <div class="tone-badge">Do</div>
+                <div class="lyrics">Tú él único Rey,que tiene que reinar
 El único Señor al que voy a alabar.
 Hoy levanto el corazón al que lo conquistó
 Simplemente porque tú eres Dios
@@ -289,15 +304,17 @@ Y a ti toda alabanza Todo el poder
 y el honor Toda la gloria al Señor.(x4)
 
 <span class="repeat">Tú el único Rey (2veces)</span></div>
+            </div>
             <div class="footer">Comunión - Pág. 8</div>
         </div>
     </div>
     <div class="slide bg-mint">
         <div class="bg-watermark"><i class="fa-solid fa-hands-praying"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Alma de Cristo</h2>
-            <div class="tone-badge">La-</div>
-            <div class="lyrics">Alma de Cristo Santifícame
+            <div class="scroll-area">
+                <h2 class="song-title">Alma de Cristo</h2>
+                <div class="tone-badge">La-</div>
+                <div class="lyrics">Alma de Cristo Santifícame
 Cuerpo de Cristo Sálvame
 Sangre de Cristo Embriágame
 Agua del Costado de Cristo Lávame
@@ -315,15 +332,17 @@ siglos de los siglos
 Amén
 
 <span class="repeat">y del enemigo ...</span></div>
+            </div>
             <div class="footer">Comunión - Pág. 9</div>
         </div>
     </div>
     <div class="slide bg-peach">
         <div class="bg-watermark"><i class="fa-solid fa-dove"></i></div>
         <div class="slide-content">
-            <h2 class="song-title">Demos gracias</h2>
-            <div class="tone-badge">La</div>
-            <div class="lyrics">Demos gracias al Señor, demos  gracias,
+            <div class="scroll-area">
+                <h2 class="song-title">Demos gracias</h2>
+                <div class="tone-badge">La</div>
+                <div class="lyrics">Demos gracias al Señor, demos  gracias,
 demos  gracias al Señor.
 Demos gracias al Señor, demos  gracias,
 demos  gracias al Señor.
@@ -357,6 +376,7 @@ Demos gracias al Señor, demos  gracias,
 demos  gracias al Señor.
 Demos gracias al Señor, demos  gracias,
 demos  gracias al Señor.</div>
+            </div>
             <div class="footer">Salida - Pág. 10</div>
         </div>
     </div>
@@ -381,7 +401,7 @@ demos  gracias al Señor.</div>
                     if(index === currentSlide) {
                         slide.classList.add('active');
                         slide.scrollTop = 0;
-                        const l = slide.querySelector('.lyrics'); if(l) l.scrollTop = 0;
+                        const sa = slide.querySelector('.scroll-area'); if(sa) sa.scrollTop = 0;
                     } else {
                         slide.classList.remove('active');
                     }
