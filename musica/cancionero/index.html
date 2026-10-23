@@ -509,7 +509,7 @@ Señor, ten piedad de nosotros...</div>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --base-lyrics-size: 22px; }
+        :root { --base-lyrics-size: 16px; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #0f172a; font-family: 'Quicksand', sans-serif; min-height: 100vh; min-height: 100dvh; overflow: hidden; color: #1e293b; margin: 0; }
         .app-container { width: 100vw; height: 100vh; height: 100dvh; position: relative; background-color: #fff; overflow: hidden; transition: all 0.3s ease; }
@@ -547,8 +547,8 @@ Señor, ten piedad de nosotros...</div>
 <div class="app-container" id="appFrame">
     <div class="top-actions">
         <div class="action-group">
-            <button class="action-btn" onclick="changeFontSize(-2)" title="Reducir Letra"><i class="fa-solid fa-minus"></i></button>
-            <button class="action-btn" onclick="changeFontSize(2)" title="Aumentar Letra"><i class="fa-solid fa-plus"></i></button>
+            <button class="action-btn" onclick="changeFontSize(-1)" title="Reducir Letra"><i class="fa-solid fa-minus"></i></button>
+            <button class="action-btn" onclick="changeFontSize(1)" title="Aumentar Letra"><i class="fa-solid fa-plus"></i></button>
         </div>
         <div class="action-group">
             <button class="action-btn" onclick="goToSlide(1)" title="Ir al Índice"><i class="fa-solid fa-list"></i></button>
@@ -562,7 +562,7 @@ Señor, ten piedad de nosotros...</div>
         <div class="slide-content" style="justify-content: center;">
             <h1>__TITLE__</h1>
             <p style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 700;">__SUBTITLE__</p>
-            <div class="footer" style="margin-top: 60px;">Desliza o usa botones</div>
+            <div class="footer" style="margin-top: 60px;">Usa los botones</div>
         </div>
     </div>
 
@@ -598,7 +598,7 @@ __INTERNAL_SCRIPT__
 
         let appScript = '<script>' + `
             let currentSlide = 0;
-            let currentFontSize = 22;
+            let currentFontSize = 16;
             const slides = document.querySelectorAll('.slide');
             const pageIndicator = document.getElementById('pageIndicator');
             const appFrame = document.getElementById('appFrame');
@@ -623,7 +623,7 @@ __INTERNAL_SCRIPT__
 
             function changeFontSize(amount) {
                 let n = currentFontSize + amount;
-                if (n >= 14 && n <= 36) { currentFontSize = n; document.documentElement.style.setProperty('--base-lyrics-size', n + 'px'); }
+                if (n >= 12 && n <= 36) { currentFontSize = n; document.documentElement.style.setProperty('--base-lyrics-size', n + 'px'); }
             }
 
             function toggleMaximize() {
@@ -659,12 +659,6 @@ __INTERNAL_SCRIPT__
                 if (e.key === 'ArrowRight') nextSlide(); if (e.key === 'ArrowLeft') prevSlide();
             });
 
-            let ts = 0;
-            appFrame.addEventListener('touchstart', e => ts = e.changedTouches[0].screenX);
-            appFrame.addEventListener('touchend', e => {
-                let te = e.changedTouches[0].screenX;
-                if (ts - te > 60) nextSlide(); if (te - ts > 60) prevSlide();
-            });
         ` + '<' + '/script>';
 
         let totalSlidesCalculated = songs.length + 2;
