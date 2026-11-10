@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Letrero de Cilindros de Gas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f1f5fd 0%, #e0e7ff 100%);
+    color: #0f172a;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .app {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(360px, 480px) 1fr;
+    gap: 28px;
+  }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Form panel ---------- */
+  .form-panel {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 12px 36px rgba(30, 58, 138, 0.08);
+    height: fit-content;
+    position: sticky;
+    top: 24px;
+  }
+  @media (max-width: 1100px) {
+    .form-panel { position: static; }
+  }
+  .form-panel h1 {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+  }
+  .form-panel .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 22px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .field input[type="text"],
+  .field input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #ffffff;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .section-title {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 22px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .item-row {
+    display: grid;
+    grid-template-columns: 70px 90px 1fr 32px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+  }
+  .item-row input {
+    padding: 7px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    background: #ffffff;
+    width: 100%;
+  }
+  .item-row input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
+  .item-row .cap-input { font-weight: 600; color: #6366f1; }
+  .item-row .qty-input { font-weight: 700; color: #1e3a8a; text-align: center; }
+  .item-row .remove-btn {
+    width: 32px; height: 32px;
+    border: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .item-row .remove-btn:hover { background: #fecaca; }
+  .item-row .remove-btn:disabled {
+    background: #f1f5f9;
+    color: #cbd5e1;
+    cursor: not-allowed;
+  }
+
+  .add-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border: 1.5px dashed #2563eb;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: #dbeafe; }
+
+  .actions {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #6366f1 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    transition: transform 0.1s, box-shadow 0.15s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.35);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* ---------- Preview panel ---------- */
+  .preview-panel {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 12px 36px rgba(30, 58, 138, 0.08);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .preview-panel h2 {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .preview-scaler {
+    /* The sign element is 1080px wide; scale it down to fit. */
+    transform-origin: top center;
+    flex-shrink: 0;
+  }
+
+  .status-bar {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #475569;
+    text-align: center;
+  }
+  .status-bar .total { font-weight: 700; color: #1e3a8a; }
+
+  /* ===================================================
+     THE SIGN  (1080px wide, original design)
+     =================================================== */
+  .sign {
+    width: 1080px;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 80px 90px 70px;
+    min-height: 1528px;
+  }
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 18px;
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 35%, #0ea5e9 70%, #6366f1 100%);
+  }
+  .top-bar::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, #6366f1, #0ea5e9, #2563eb, #1e3a8a);
+    opacity: 0.35;
+  }
+
+  .sign .header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 50px;
+  }
+  .sign .eyebrow {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .sign .title {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 68px;
+    font-weight: 800;
+    line-height: 1.08;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 45%, #6366f1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #1e3a8a;
+    margin-bottom: 22px;
+  }
+  .sign .subtitle-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 500;
+    color: #475569;
+    letter-spacing: 0.5px;
+  }
+  .sign .divider {
+    width: 120px;
+    height: 5px;
+    margin: 28px auto 0;
+    background: linear-gradient(90deg, #0ea5e9, #6366f1);
+    border-radius: 999px;
+  }
+
+  .sign .table-card {
+    margin-top: 20px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(30, 58, 138, 0.10), 0 4px 12px rgba(15, 23, 42, 0.04);
+  }
+  .sign .table-card-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #6366f1 100%);
+    color: #ffffff;
+    padding: 26px 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sign .table-card-header .h-title {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .sign .table-card-header .h-badge {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e7ff;
+    background: rgba(255,255,255,0.18);
+    padding: 8px 16px;
+    border-radius: 999px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .sign table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+  }
+  .sign thead th {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 22px 28px;
+    text-align: left;
+    background: #f1f5fd;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .sign thead th:first-child { width: 26%; padding-left: 44px; }
+  .sign thead th:nth-child(2) { width: 32%; text-align: center; }
+  .sign thead th:nth-child(3) { width: 42%; padding-right: 44px; text-align: right; }
+
+  .sign tbody tr {
+    border-bottom: 1px solid #eef2f9;
+  }
+  .sign tbody tr:last-child { border-bottom: none; }
+  .sign tbody td {
+    padding: 26px 28px;
+    vertical-align: middle;
+  }
+  .sign tbody td:first-child { padding-left: 44px; }
+  .sign tbody td:nth-child(2) { text-align: center; }
+  .sign tbody td:nth-child(3) { padding-right: 44px; text-align: right; }
+
+  .sign .qty {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    display: block;
+  }
+  .sign .qty-label {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 6px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .sign .capacity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+  .sign .cap-value {
+    display: block;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+  }
+  .sign .cap-unit {
+    display: block;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #475569;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .sign .desc {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #1e293b;
+    text-align: right;
+  }
+
+  .sign .total-bar {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .sign .total-chip {
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    color: #ffffff;
+    padding: 22px 50px;
+    border-radius: 999px;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.30);
+  }
+  .sign .total-chip .total-num {
+    font-size: 34px;
+    font-weight: 800;
+    margin-left: 10px;
+  }
+
+  .sign .footer {
+    margin-top: auto;
+    padding-top: 50px;
+    text-align: center;
+  }
+  .sign .footer-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #6366f1);
+    border-radius: 999px;
+    margin: 0 auto 18px;
+  }
+  .sign .footer-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 18px;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Empty-state preview */
+  .empty-state {
+    padding: 80px 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 16px;
+  }
+
+  /* Loading indicator */
+  .loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e3a8a;
+  }
+  .loading.active { display: flex; }
+  .loading::after {
+    content: '...';
+    margin-left: 4px;
+    animation: dots 1.2s steps(4, end) infinite;
+  }
+  @keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- ============== FORM PANEL ============== -->
+    <div class="form-panel">
+      <h1>Generador de Letrero</h1>
+      <p class="subtitle">Cilindros de gas · Urb. Terrazas del Sol</p>
+
+      <div class="field">
+        <label for="f-title">Título</label>
+        <input type="text" id="f-title" value="Urb. Terrazas del Sol">
+      </div>
+      <div class="field">
+        <label for="f-subtitle">Subtítulo</label>
+        <input type="text" id="f-subtitle" value="Estimación de Cilindros de Gas">
+      </div>
+      <div class="field">
+        <label for="f-eyebrow">Texto superior</label>
+        <input type="text" id="f-eyebrow" value="Urbanización">
+      </div>
+      <div class="field">
+        <label for="f-footer">Pie del letrero</label>
+        <input type="text" id="f-footer" value="Sector Campo Claro - Mérida">
+      </div>
+      <div class="field">
+        <label for="f-unit">Unidad de capacidad</label>
+        <input type="text" id="f-unit" value="kg" maxlength="4">
+      </div>
+
+      <div class="section-title">Cilindros</div>
+      <div class="items-list" id="items-list">
+        <!-- Items injected by JS -->
+      </div>
+      <button class="add-btn" id="add-btn" type="button">+ Añadir otro tamaño</button>
+
+      <div class="actions">
+        <button class="btn-primary" id="download-btn" type="button">Descargar PNG</button>
+        <div class="hint">
+          Solo se incluirán en el letrero las filas con cantidad mayor a 0.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PREVIEW PANEL ============== -->
+    <div class="preview-panel">
+      <h2>Vista previa</h2>
+      <div class="preview-scaler" id="preview-scaler">
+        <div class="sign" id="sign">
+          <div class="top-bar"></div>
+          <div class="header">
+            <div class="eyebrow" id="p-eyebrow">Urbanización</div>
+            <h1 class="title" id="p-title">Urb. Terrazas del Sol</h1>
+            <div class="subtitle-text" id="p-subtitle">Estimación de Cilindros de Gas</div>
+            <div class="divider"></div>
+          </div>
+          <div class="table-card">
+            <div class="table-card-header">
+              <div class="h-title">Resumen del Pedido</div>
+              <div class="h-badge" id="p-date-badge">—</div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Cantidad</th>
+                  <th>Capacidad</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody id="p-tbody">
+              </tbody>
+            </table>
+          </div>
+          <div class="total-bar" id="p-total-bar">
+            <div class="total-chip">
+              Total estimado<span class="total-num" id="p-total-num">0 cilindros</span>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="footer-line"></div>
+            <div class="footer-text" id="p-footer">Sector Campo Claro - Mérida</div>
+          </div>
+        </div>
+      </div>
+      <div class="status-bar">
+        Filas visibles: <span id="status-rows">0</span> ·
+        Total: <span class="total" id="status-total">0 cilindros</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">Generando PNG</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // 9 acentos en el mismo orden que el script Python original.
+  const ACCENTS = [
+    "#0ea5e9", "#6366f1", "#1e3a8a", "#0891b2", "#7c3aed",
+    "#1d4ed8", "#0d9488", "#4f46e5", "#0369a1"
+  ];
+
+  // Estado inicial: 10, 18, 27, 43 kg con cantidad 0.
+  const DEFAULT_ITEMS = [
+    { qty: 0, cap: 10, desc: "Cilindros de gas de 10 kilogramos" },
+    { qty: 0, cap: 18, desc: "Cilindros de gas de 18 kilogramos" },
+    { qty: 0, cap: 27, desc: "Cilindros de gas de 27 kilogramos" },
+    { qty: 0, cap: 43, desc: "Cilindros de gas de 43 kilogramos" },
+  ];
+
+  const MAX_ITEMS = 9;
+  const items = DEFAULT_ITEMS.map((it) => ({ qty: it.qty, cap: it.cap, desc: it.desc }));
+
+  const $ = (sel) => document.querySelector(sel);
+  const itemsList = $("#items-list");
+  const addBtn = $("#add-btn");
+  const downloadBtn = $("#download-btn");
+  const loading = $("#loading");
+
+  function autoDesc(cap, unit) {
+    const wordMap = { kg: "kilogramos", lb: "libras", lt: "litros", L: "litros" };
+    const word = wordMap[unit] || unit;
+    return `Cilindros de gas de ${cap} ${word}`;
+  }
+
+  function renderForm() {
+    itemsList.innerHTML = "";
+    items.forEach((item, idx) => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+      row.innerHTML = `
+        <input type="number" min="0" class="qty-input" value="${item.qty}" placeholder="Cant." data-idx="${idx}" data-field="qty" aria-label="Cantidad">
+        <input type="number" min="1" class="cap-input" value="${item.cap}" placeholder="Cap." data-idx="${idx}" data-field="cap" aria-label="Capacidad">
+        <input type="text" class="desc-input" value="${item.desc}" placeholder="Descripción" data-idx="${idx}" data-field="desc" aria-label="Descripción">
+        <button class="remove-btn" data-idx="${idx}" title="Quitar" aria-label="Quitar fila">×</button>
+      `;
+      itemsList.appendChild(row);
+    });
+    // Disable remove buttons if only 1 item left
+    const removes = itemsList.querySelectorAll(".remove-btn");
+    removes.forEach((b) => { b.disabled = items.length <= 1; });
+    addBtn.disabled = items.length >= MAX_ITEMS;
+    addBtn.textContent = items.length >= MAX_ITEMS
+      ? `Máximo ${MAX_ITEMS} tamaños`
+      : "+ Añadir otro tamaño";
+  }
+
+  function bindFormEvents() {
+    itemsList.addEventListener("input", (e) => {
+      const t = e.target;
+      if (!t.dataset.idx) return;
+      const idx = parseInt(t.dataset.idx, 10);
+      const field = t.dataset.field;
+      if (field === "qty" || field === "cap") {
+        const v = parseInt(t.value, 10);
+        items[idx][field] = isNaN(v) ? 0 : Math.max(0, v);
+        if (field === "cap" && items[idx].cap > 0) {
+          // Auto-update description if it matches the previous auto-fill.
+          const unit = $("#f-unit").value || "kg";
+          const newAuto = autoDesc(items[idx].cap, unit);
+          const prevAuto = autoDesc(items[idx].cap, unit); // same, but...
+          // Simple heuristic: if description was previously auto-generated,
+          // update it. We detect by checking if it ends with the unit word.
+          const cur = items[idx].desc || "";
+          if (/^Cilindros de gas de \d+ /.test(cur) || cur === "") {
+            items[idx].desc = newAuto;
+            const descInput = itemsList.querySelector(
+              `.desc-input[data-idx="${idx}"]`
+            );
+            if (descInput) descInput.value = newAuto;
+          }
+        }
+      } else if (field === "desc") {
+        items[idx].desc = t.value;
+      }
+      renderPreview();
+    });
+
+    itemsList.addEventListener("click", (e) => {
+      const b = e.target.closest(".remove-btn");
+      if (!b || b.disabled) return;
+      const idx = parseInt(b.dataset.idx, 10);
+      items.splice(idx, 1);
+      if (items.length === 0) {
+        items.push({ qty: 0, cap: 10, desc: autoDesc(10, $("#f-unit").value) });
+      }
+      renderForm();
+      renderPreview();
+    });
+
+    addBtn.addEventListener("click", () => {
+      if (items.length >= MAX_ITEMS) return;
+      const unit = $("#f-unit").value || "kg";
+      const newCap = 5;
+      items.push({ qty: 0, cap: newCap, desc: autoDesc(newCap, unit) });
+      renderForm();
+      renderPreview();
+    });
+
+    ["f-title", "f-subtitle", "f-eyebrow", "f-footer", "f-unit"].forEach((id) => {
+      $("#" + id).addEventListener("input", renderPreview);
+    });
+
+    downloadBtn.addEventListener("click", downloadPng);
+  }
+
+  function formatDateDDMMYYYY(date) {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+
+  function renderPreview() {
+    const title = $("#f-title").value || "";
+    const subtitle = $("#f-subtitle").value || "";
+    const eyebrow = $("#f-eyebrow").value || "";
+    const footer = $("#f-footer").value || "";
+    const unit = $("#f-unit").value || "";
+
+    $("#p-title").textContent = title;
+    $("#p-subtitle").textContent = subtitle;
+    $("#p-eyebrow").textContent = eyebrow;
+    $("#p-footer").textContent = footer;
+
+    // Update auto-desc for items whose description still matches the auto pattern.
+    items.forEach((it, idx) => {
+      if (/^Cilindros de gas de \d+ /.test(it.desc) || it.desc === "") {
+        it.desc = autoDesc(it.cap, unit);
+        const descInput = itemsList.querySelector(`.desc-input[data-idx="${idx}"]`);
+        if (descInput) descInput.value = it.desc;
+      }
+    });
+
+    // Filter rows with qty > 0
+    const visible = items.filter((it) => it.qty > 0 && it.cap > 0);
+    const tbody = $("#p-tbody");
+    tbody.innerHTML = "";
+
+    visible.forEach((item, idx) => {
+      const accent = ACCENTS[idx % ACCENTS.length];
+      const tr = document.createElement("tr");
+      tr.style.background = "#ffffff";
+      tr.innerHTML = `
+        <td style="border-left: 8px solid ${accent};">
+          <span class="qty" style="color: ${accent};">${item.qty}</span>
+          <span class="qty-label">cilindros</span>
+        </td>
+        <td>
+          <span class="capacity">
+            <span class="cap-value" style="color: ${accent};">${item.cap}</span>
+            <span class="cap-unit">${unit}</span>
+          </span>
+        </td>
+        <td class="desc">${escapeHtml(item.desc)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const total = visible.reduce((s, it) => s + it.qty, 0);
+    const totalBar = $("#p-total-bar");
+    if (visible.length === 0) {
+      totalBar.style.display = "none";
+    } else {
+      totalBar.style.display = "flex";
+      $("#p-total-num").textContent = `${total} cilindros`;
+    }
+
+    $("#status-rows").textContent = visible.length;
+    $("#status-total").textContent = `${total} cilindros`;
+
+    // Update the date badge (today, DD/MM/AAAA).
+    const badge = $("#p-date-badge");
+    if (badge) badge.textContent = formatDateDDMMYYYY(new Date());
+
+    fitPreview();
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
+
+  function fitPreview() {
+    const scaler = $("#preview-scaler");
+    const panel = scaler.parentElement;
+    const availW = panel.clientWidth - 48; // padding
+    const signW = 1080;
+    const scale = Math.min(1, availW / signW);
+    scaler.style.transform = `scale(${scale})`;
+    // Reserve vertical space so layout doesn't jump.
+    const sign = $("#sign");
+    // Force min-height to be the natural height.
+    const naturalH = sign.offsetHeight;
+    scaler.style.height = (naturalH * scale) + "px";
+    scaler.style.width = (signW * scale) + "px";
+    // Center horizontally.
+    scaler.style.margin = "0 auto";
+  }
+
+  // Lazy-load html2canvas only when the user actually clicks Download.
+  // This avoids loading the ~200 KB library on initial page load.
+  let html2canvasPromise = null;
+  function loadHtml2Canvas() {
+    if (html2canvasPromise) return html2canvasPromise;
+    if (typeof window.html2canvas === "function") {
+      html2canvasPromise = Promise.resolve(window.html2canvas);
+      return html2canvasPromise;
+    }
+    html2canvasPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+      s.onload = () => resolve(window.html2canvas);
+      s.onerror = () => reject(new Error("No se pudo cargar html2canvas. Revisa tu conexión a internet."));
+      document.head.appendChild(s);
+    });
+    return html2canvasPromise;
+  }
+
+  async function downloadPng() {
+    const sign = $("#sign");
+    const titleEl = $("#p-title");
+    // Temporarily reset transform on the scaler so html2canvas captures
+    // the sign at full size.
+    const scaler = $("#preview-scaler");
+    const prevTransform = scaler.style.transform;
+    scaler.style.transform = "scale(1)";
+    // Reset min-height so height adjusts to current content.
+    sign.style.minHeight = "auto";
+
+    // html2canvas often fails to honor `background-clip: text`: the title's
+    // gradient is rendered as a blue box behind the text (instead of being
+    // clipped to the glyph shapes), and the navy `color` fallback is drawn
+    // on top of that blue box — making the title almost invisible.
+    // Fix: keep the blue gradient box but force the text color to white so
+    // it stands out against the blue background.
+    const prevTitleStyle = {
+      webkitTextFillColor: titleEl.style.webkitTextFillColor,
+      color: titleEl.style.color,
+    };
+    titleEl.style.webkitTextFillColor = "#ffffff";
+    titleEl.style.color = "#ffffff";
+
+    // Wait one frame so the style change is committed before capture.
+    await new Promise((r) => requestAnimationFrame(r));
+    await new Promise((r) => setTimeout(r, 50));
+
+    loading.classList.add("active");
+    try {
+      const html2canvas = await loadHtml2Canvas();
+      const canvas = await html2canvas(sign, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        windowWidth: 1080,
+      });
+      // Generate filename
+      const titleSlug = ($("#f-title").value || "letrero")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "letrero";
+      const link = document.createElement("a");
+      link.download = `${titleSlug}_gas.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      alert("Error al generar el PNG: " + err.message);
+      console.error(err);
+    } finally {
+      // Restore title color so the on-screen preview keeps its gradient text.
+      titleEl.style.webkitTextFillColor = prevTitleStyle.webkitTextFillColor;
+      titleEl.style.color = prevTitleStyle.color;
+      loading.classList.remove("active");
+      // Restore preview state.
+      scaler.style.transform = prevTransform;
+      sign.style.minHeight = "1528px";
+      fitPreview();
+    }
+  }
+
+  // Initial render
+  renderForm();
+  renderPreview();
+  bindFormEvents();
+  window.addEventListener("resize", fitPreview);
+})();
+</script>
+</body>
+</html>
